@@ -1,0 +1,16 @@
+Changes in PA2 compared to PA1
+1. Project Plan:
+- Added section 4.1.Project Estimates
+- Added Gantt chart in section 4.2.3.Project Schedule
+- Added section 4.3.2.Risk Management
+- Updated and expanded section 4.3.3.Configuration Management
+- Updated Revision History
+
+2.Vison document (Revised)
+- Added task “Share memory” in 3.3 User Task and Environment
+- Added feature “Share Memory” in  4. Product Features
+- Added task “Location Integration” in 3.3 User Task and Environment
+- Added feature “Location Integration” in 4. Product Features
+- Updated Revision History
+
+

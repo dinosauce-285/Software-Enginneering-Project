@@ -23,8 +23,8 @@ function App() {
         <div className='getStartedButton flex flex row justify-center items-center bg-[#000000] w-[10%] h-[8%] rounded-[0.7rem] m-[1%] '>
           <a href="" className='text-[#ffffff] font-inter'>Get Started</a>
         </div>
-        <div className='underShape flex flex-row justify-center items-start bg-[#f9f9f2] w-[50%] h-[36%] rounded-[1rem] border border-black p-[2%] '>
-          <div className='flex flex-col justify-center items-start w-[50%] mr-[5.5%]'>
+        <div className='underShape flex flex-row justify-center items-center bg-[#f9f9f2] w-[50%] h-[36%] rounded-[1rem] border border-black p-[2%] '>
+          <div className='flex flex-col justify-center items-start w-[50%] mr-[3.5%]'>
             <div className='flex flex-row justify-between w-full'>
               <div>04/02/2025</div>
               <div>Ho Chi Minh City</div>
@@ -34,7 +34,7 @@ function App() {
               Today felt like a breath of calm in the middle of chaos. I wandered the streets with no destination — just me, the breeze, and the sounds of the city. Sometimes, these quiet moments say more than words ever could.
             </div>
           </div>
-          <div className='flex flex-row justify-center items-center w-[50%] ml-[5.5%]'>
+          <div className='flex flex-row justify-center items-center w-[50%] ml-[3.5%]'>
             <img src="src/assets/landingBanner.png" alt="" className='rounded-[0.5rem]' />
           </div>
         </div>

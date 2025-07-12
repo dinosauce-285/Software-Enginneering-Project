@@ -13,6 +13,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Định nghĩa các Enums để đảm bảo dữ liệu nhất quán
+enum MediaType {
+  IMAGE
+  AUDIO
+  VIDEO
+}
+
+enum AccessLevel {
+  PUBLIC
+  PRIVATE
+}
+
+enum ReminderFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  ONCE
+}
+
+
 model User {
   userID       String   @id @default(uuid())
   email        String   @unique
@@ -20,6 +40,7 @@ model User {
   avatar       String?
   auth_provider String
   created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
   memories     Memory[]
   reminders    Reminder[]
@@ -28,7 +49,7 @@ model User {
 
 model Emotion {
   emotionID String @id @default(uuid())
-  name      String
+  name      String @unique // Tên cảm xúc nên là duy nhất
   symbol    String
 
   memories  Memory[]
@@ -36,72 +57,76 @@ model Emotion {
 
 model Memory {
   memoryID    String   @id @default(uuid())
-  userID      String
-  emotionID   String
   title       String
   content     String
   created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
-  user        User     @relation(fields: [userID], references: [userID])
+  user        User     @relation(fields: [userID], references: [userID], onDelete: Cascade)
+  userID      String
+  
   emotion     Emotion  @relation(fields: [emotionID], references: [emotionID])
+  emotionID   String
+
   media       Media[]
   shareLinks  ShareLink[]
   memoryTags  MemoryTag[]
 }
 
 model Media {
-  mediaID    String   @id @default(uuid())
-  memoryID   String
+  mediaID    String    @id @default(uuid())
   url        String
-  type       String
+  type       MediaType
   caption    String?
-  upload_at  DateTime @default(now())
+  upload_at  DateTime  @default(now())
 
-  memory     Memory   @relation(fields: [memoryID], references: [memoryID])
+  memory     Memory    @relation(fields: [memoryID], references: [memoryID], onDelete: Cascade)
+  memoryID   String
 }
 
 model ShareLink {
-  shareID         String   @id @default(uuid())
-  memoryID        String
-  access_level    String   // 'public' | 'private'
+  shareID         String       @id @default(uuid())
+  url             String       @unique
+  access_level    AccessLevel
   expiration_date DateTime?
-  url             String   // tokenized unique link
 
-  memory          Memory   @relation(fields: [memoryID], references: [memoryID])
+  memory          Memory       @relation(fields: [memoryID], references: [memoryID], onDelete: Cascade)
+  memoryID        String
 }
 
 model Reminder {
-  reminderID String   @id @default(uuid())
-  userID     String
+  reminderID String            @id @default(uuid())
   message    String
-  frequency  String
+  frequency  ReminderFrequency
   time       DateTime
 
-  user       User     @relation(fields: [userID], references: [userID])
+  user       User              @relation(fields: [userID], references: [userID], onDelete: Cascade)
+  userID     String
 }
 
 model Report {
-  reportID     String   @id @default(uuid())
-  userID       String
+  reportID     String @id @default(uuid())
   month        Int
   summary_text String
 
-  user         User     @relation(fields: [userID], references: [userID])
+  user         User   @relation(fields: [userID], references: [userID], onDelete: Cascade)
+  userID       String
 }
 
 model Tag {
-  tagID      String       @id @default(uuid())
-  name       String
+  tagID      String      @id @default(uuid())
+  name       String      @unique // Tên tag nên là duy nhất
 
   memoryTags MemoryTag[]
 }
 
+// Bảng trung gian cho quan hệ nhiều-nhiều
 model MemoryTag {
+  memory   Memory @relation(fields: [memoryID], references: [memoryID], onDelete: Cascade)
   memoryID String
+  
+  tag      Tag    @relation(fields: [tagID], references: [tagID], onDelete: Cascade)
   tagID    String
-
-  memory   Memory   @relation(fields: [memoryID], references: [memoryID])
-  tag      Tag      @relation(fields: [tagID], references: [tagID])
 
   @@id([memoryID, tagID])
 }

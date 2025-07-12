@@ -32,6 +32,10 @@ enum ReminderFrequency {
   ONCE
 }
 
+enum Role {
+  USER
+  ADMIN
+}
 
 model User {
   userID       String   @id @default(uuid())
@@ -41,6 +45,7 @@ model User {
   auth_provider String
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
+  role Role    @default(USER)
 
   memories     Memory[]
   reminders    Reminder[]

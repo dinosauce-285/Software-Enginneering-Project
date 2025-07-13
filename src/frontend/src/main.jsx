@@ -1,10 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import LandingPage from './pages/landingPage.jsx'
+import LandingPage from './pages/landingPage'
+import './index.css';
+import UserManagementLayout from './pages/UserManagement';
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <LandingPage />
+    <div>
+      {/* <LandingPage/> */}
+      <UserManagementLayout/>
+    </div>
   </StrictMode>,
 )

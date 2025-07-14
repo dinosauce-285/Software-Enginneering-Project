@@ -1,19 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import LandingPage from './pages/landingPage'
-import './index.css';
-import UserManagementLayout from './pages/UserManagement';
-import ActivityLogs from './pages/ActivityLogs';
-import DeleteDialog from './pages/DeleteDialog';
-
+import './index.css'
+import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <div>
-      {/* <LandingPage/> */}
-      {/* <UserManagementLayout/> */}
-      {/* <ActivityLogs/> */}
-      <DeleteDialog/>
-    </div>
-  </StrictMode>,
+    <App />
+  </StrictMode>
 )

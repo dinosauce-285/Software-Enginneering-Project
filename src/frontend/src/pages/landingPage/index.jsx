@@ -1,4 +1,5 @@
-import '../../index.css';
+import '../../index.css'
+import { Link } from 'react-router-dom';
 function LandingPage() {
 
   return (
@@ -12,8 +13,8 @@ function LandingPage() {
             <span className="text-xl font-semibold">SoulNote</span>
           </div>
           <div className="flex gap-6">
-            <a href="#">Login</a>
-            <a href="#">Sign up</a>
+            <Link to="/login" className='font-inter'>Login</Link>
+            <Link to="/signup" className='font-inter'>Sign Up</Link>
           </div>
         </div>
 

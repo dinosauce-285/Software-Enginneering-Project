@@ -7,9 +7,11 @@ import { UsersModule } from './users/users.module';
 import { MemoriesModule } from './memories/memories.module';
 import { ReportsModule } from './reports/reports.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { FirebaseModule } from './firebase/firebase.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule, MemoriesModule, ReportsModule, RemindersModule],
+  imports: [PrismaModule, AuthModule, UsersModule, MemoriesModule, ReportsModule, RemindersModule, FirebaseModule, MailModule],
   controllers: [AppController],
   providers: [AppService],
 })

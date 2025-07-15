@@ -22,8 +22,8 @@ function SignUp() {
             <div className="w-1/2 max-h-screen overflow-y-auto flex flex-col items-center bg-[#f9f9f2]">
                 {/* Top Section */}
                 <div className="h-[20%] w-[70%] flex flex-col justify-center items-center">
-                    <img src="./src/assets/logo.png" className="h-[30%]" alt="" />
-                    <div className="text-lg font-poppins">Sign up</div>
+                    <img src="./src/assets/logo.png" className="h-[30%] mb-3" alt="" />
+                    <div className="text-lg font-poppins text-2xl">Sign up</div>
                     <div className="loginQues flex flex-row">
                         <div className="pr-[4px] font-poppins">Already have an account?</div>
                         <Link to="/login" className="font-poppins underline">
@@ -53,7 +53,7 @@ function SignUp() {
                 </div>
 
                 {/* OR Divider */}
-                <div className="h-[2%] w-[70%] flex items-center justify-center gap-4">
+                <div className="h-[2%] w-[70%] flex items-center justify-center gap-4 mt-3">
                     <hr className="flex-grow border-black opacity-30" />
                     <span className="text-black opacity-30 text-sm">OR</span>
                     <hr className="flex-grow border-black opacity-30" />

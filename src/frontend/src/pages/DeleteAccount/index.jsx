@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import NavigationBar from '../components/NavigationBar';
-import Search from '../components/Search';
+import NavigationBar from '../../components/NavigationBar';
+import Search from '../../components/Search';
 
 export default function DeleteAccount() {
     const [showConfirm, setShowConfirm] = useState(false);

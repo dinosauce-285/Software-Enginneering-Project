@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import LandingPage from './pages/DeleteAccount.jsx'
+import LandingPage from './pages/DeleteAccount/DeleteAccount.jsx'
 
 import App from './App.jsx'
 import UserManagementLayout from './pages/UserManagement/index.jsx'

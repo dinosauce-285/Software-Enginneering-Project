@@ -1,0 +1,15 @@
+Changes in PA3 compared to PA2
+1. Use-case Model:
+	- Use Case Names: Made use case names shorter and clearer to focus on user goals (e.g., Switch dark/light theme -> Change Theme).
+	- <<include>> and <<extend>> Relationships: Correctly used relationships to show required actions (<<include>>) and optional actions (<<extend>>).
+	- Removed Combined Use Cases: Separated use cases that did multiple unrelated tasks into single, focused use cases (e.g., Reminders & Theme -> Set Reminders and Change 	Theme).
+	- Restructured Account Management: Removed the general Manage Account use case. Actions like Login and Register are now separate, independent use cases.
+	- Improved Filtering Logic: Replaced Browse memories using multiple filters by using an <<extend>> relationship from Filter Memories to Browse Memories. Used 	Generalization for specific filter types.
+
+2. Use-case Specifications:
+	- Detailed Main Flow: Rewrote the main flow with clear, step-by-step interactions between the user and the system, including system responses.
+	- Added Alternative/Exception Flows: Added and clarified alternative and exception flows for each use case to handle errors and different user choices.
+	- Removed Duplicate Specifications: Combined specifications for duplicate use cases (e.g., "Browse memory" and "Browse memories using multiple filters" are now one spec 	for Browse Memories).
+	- Clarified Side Actions: Moved minor actions like Delete emotion statistic to be a result (post-condition) or a step within a main use case (Delete Memory) instead of 	being a separate use case.
+
+

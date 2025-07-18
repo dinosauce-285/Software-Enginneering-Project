@@ -42,10 +42,14 @@ model User {
   email        String   @unique
   display_name String
   avatar       String?
+  passwordHash  String?
   auth_provider String
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
   role Role    @default(USER)
+
+  passwordResetOtp      String? 
+  passwordResetExpires  DateTime?
 
   memories     Memory[]
   reminders    Reminder[]

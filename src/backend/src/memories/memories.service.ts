@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
+import { AccessLevel } from '@prisma/client'; // Import Enum từ Prisma Client
 
 @Injectable()
 export class MemoriesService {
@@ -176,5 +177,47 @@ export class MemoriesService {
     });
 
     return { message: 'Memory deleted successfully' };
+  }
+  // === HÀM MỚI ĐƯỢC THÊM VÀO / CẬP NHẬT ===
+  /**
+   * Tạo (hoặc lấy) một link chia sẻ công khai, không hết hạn cho một ký ức.
+   * Logic này hiệu quả hơn vì nó không tạo ra các link bị trùng lặp.
+   */
+  async createOrGetShareLink(userId: string, memoryId: string) {
+    // 1. Kiểm tra quyền sở hữu của người dùng đối với ký ức này
+    await this.getMemoryById(userId, memoryId);
+
+    // 2. Tìm xem đã có link PUBLIC nào tồn tại cho ký ức này chưa
+    const existingLink = await this.prisma.shareLink.findFirst({
+      where: {
+        memoryID: memoryId,
+        access_level: AccessLevel.PUBLIC, // Chỉ tìm link công khai
+      },
+    });
+
+    // 3. Nếu đã có, trả về link cũ ngay lập tức
+    if (existingLink) {
+      return existingLink;
+    }
+
+    // 4. Nếu chưa có, tạo một link mới
+    const newShareLink = await this.prisma.shareLink.create({
+      data: {
+        memoryID: memoryId,
+        access_level: AccessLevel.PUBLIC, // Luôn là PUBLIC
+        expiration_date: null, // Không bao giờ hết hạn
+        url: '', // Sẽ được cập nhật ngay sau đây
+      },
+    });
+
+    // 5. Dùng chính shareID (là một UUID) để làm URL cho bảo mật và duy nhất
+    const finalLink = await this.prisma.shareLink.update({
+      where: { shareID: newShareLink.shareID },
+      data: {
+        url: newShareLink.shareID,
+      },
+    });
+
+    return finalLink;
   }
 }

@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+// src/memories/dto/create-memory.dto.ts
+import { IsArray, IsOptional, IsString, MaxLength, IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateMemoryDto {
   @IsString()
@@ -10,9 +11,12 @@ export class CreateMemoryDto {
   @IsNotEmpty()
   content: string;
 
-  @IsUUID() // Đảm bảo emotionID là một UUID hợp lệ
+  @IsUUID()
   @IsNotEmpty()
   emotionID: string;
 
-  // Các trường khác như tags, media sẽ được xử lý riêng hoặc trong các phiên bản sau
+  @IsArray()
+  @IsString({ each: true }) // Mỗi phần tử là một chuỗi
+  @IsOptional() // Cho phép không có tag nào
+  tags?: string[]; // Ví dụ: ["du lịch", "kỷ niệm đẹp"]
 }

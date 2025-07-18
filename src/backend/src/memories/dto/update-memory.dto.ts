@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MaxLength, IsArray } from 'class-validator';
 
 export class UpdateMemoryDto {
   @IsString()
@@ -13,4 +13,9 @@ export class UpdateMemoryDto {
   @IsUUID()
   @IsOptional()
   emotionID?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
 }

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
@@ -7,34 +7,111 @@ import { UpdateMemoryDto } from './dto/update-memory.dto';
 export class MemoriesService {
   constructor(private prisma: PrismaService) {}
 
-  // 1. Tạo một kỷ niệm mới
+  /**
+   * Hàm helper để xử lý việc "tìm hoặc tạo" các tags.
+   * Nhận vào một mảng tên tag, trả về một mảng các object chứa tagID.
+   */
+  private async manageTags(tagNames: string[] | undefined) {
+    if (!tagNames || tagNames.length === 0) {
+      return [];
+    }
+
+    // Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu
+    const tags = await this.prisma.$transaction(
+      tagNames.map((name) => {
+        const tagName = name.toLowerCase().trim();
+        return this.prisma.tag.upsert({
+          where: { name: tagName },
+          update: {},
+          create: { name: tagName },
+        });
+      }),
+    );
+
+    // Trả về mảng các object để dùng trong lệnh connect của Prisma
+    return tags.map((tag) => ({
+      tag: {
+        connect: {
+          tagID: tag.tagID,
+        },
+      },
+    }));
+  }
+
+  /**
+   * 1. Tạo một kỷ niệm mới, bao gồm cả việc xử lý tags.
+   */
   async createMemory(userId: string, dto: CreateMemoryDto) {
+    const { tags: tagNames, ...memoryData } = dto;
+
+    // Xử lý các tag để lấy ra danh sách object connect
+    const tagConnections = await this.manageTags(tagNames);
+
     const memory = await this.prisma.memory.create({
       data: {
         userID: userId,
-        ...dto,
+        ...memoryData, // Gồm title, content, emotionID
+        memoryTags: {
+          create: tagConnections, // Tạo các liên kết trong bảng MemoryTag
+        },
+      },
+      // Lấy kèm thông tin chi tiết để trả về cho client
+      include: {
+        emotion: true,
+        memoryTags: {
+          include: {
+            tag: true,
+          },
+        },
       },
     });
+
     return memory;
   }
 
-  // 2. Lấy tất cả kỷ niệm của một người dùng
+  /**
+   * 2. Lấy tất cả kỷ niệm của một người dùng.
+   */
   async getMemories(userId: string) {
     return this.prisma.memory.findMany({
       where: {
         userID: userId,
       },
       orderBy: {
-        created_at: 'desc', // Sắp xếp theo ngày tạo mới nhất
+        created_at: 'desc',
+      },
+      include: {
+        emotion: true,
+        memoryTags: {
+          select: {
+            tag: {
+              select: {
+                name: true,
+                tagID: true,
+              },
+            },
+          },
+        },
       },
     });
   }
 
-  // 3. Lấy một kỷ niệm cụ thể bằng ID
+  /**
+   * 3. Lấy một kỷ niệm cụ thể bằng ID.
+   */
   async getMemoryById(userId: string, memoryId: string) {
     const memory = await this.prisma.memory.findUnique({
       where: {
         memoryID: memoryId,
+      },
+      include: {
+        emotion: true,
+        media: true,
+        memoryTags: {
+          include: {
+            tag: true,
+          },
+        },
       },
     });
 
@@ -46,49 +123,58 @@ export class MemoriesService {
     return memory;
   }
 
-  // 4. Cập nhật một kỷ niệm
-  async updateMemoryById(userId: string, memoryId: string, dto: UpdateMemoryDto) {
-    // Lấy kỷ niệm để kiểm tra quyền sở hữu
-    const memory = await this.prisma.memory.findUnique({
-      where: {
-        memoryID: memoryId,
-      },
-    });
+  /**
+   * 4. Cập nhật một kỷ niệm, bao gồm cả việc ghi đè tags.
+   */
+  async updateMemoryById(
+    userId: string,
+    memoryId: string,
+    dto: UpdateMemoryDto,
+  ) {
+    // Kiểm tra quyền sở hữu trước
+    await this.getMemoryById(userId, memoryId);
 
-    if (!memory || memory.userID !== userId) {
-      throw new ForbiddenException('Access to resource denied');
-    }
+    const { tags: tagNames, ...memoryData } = dto;
 
-    // Cập nhật kỷ niệm
+    // Xử lý các tag mới
+    const tagConnections = await this.manageTags(tagNames);
+
     return this.prisma.memory.update({
-      where: {
-        memoryID: memoryId,
-      },
+      where: { memoryID: memoryId },
       data: {
-        ...dto,
+        ...memoryData,
+        // Cập nhật tags bằng cách: xóa tất cả liên kết cũ và tạo lại các liên kết mới
+        memoryTags: {
+          deleteMany: {}, // Xóa tất cả MemoryTag liên quan đến memoryId này
+          create: tagConnections, // Tạo lại các liên kết mới
+        },
+      },
+      include: {
+        emotion: true,
+        memoryTags: {
+          include: {
+            tag: true,
+          },
+        },
       },
     });
   }
 
-  // 5. Xóa một kỷ niệm
+  /**
+   * 5. Xóa một kỷ niệm.
+   */
   async deleteMemoryById(userId: string, memoryId: string) {
-    const memory = await this.prisma.memory.findUnique({
-      where: {
-        memoryID: memoryId,
-      },
-    });
+    // Kiểm tra quyền sở hữu
+    await this.getMemoryById(userId, memoryId);
 
-    if (!memory || memory.userID !== userId) {
-      throw new ForbiddenException('Access to resource denied');
-    }
-
+    // Prisma sẽ tự động xóa các bản ghi liên quan trong MemoryTag, Media, ShareLink
+    // nhờ có `onDelete: Cascade` trong schema.
     await this.prisma.memory.delete({
       where: {
         memoryID: memoryId,
       },
     });
 
-    // Trả về một object rỗng hoặc một message thành công
     return { message: 'Memory deleted successfully' };
   }
 }

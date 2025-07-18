@@ -1,5 +1,6 @@
 import { useState } from 'react';
-
+import { FiDownload, FiUserMinus, FiUserPlus } from "react-icons/fi";
+import { FiMapPin } from 'react-icons/fi';
 const mockUsers = Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
     name: ['Nguyen Le Quang', 'Pham Quang Thinh', 'Ly Quoc Thanh', 'Huynh Van Sinh', 'Nguyen Tan Van', 'Cristiano Ronaldo', 'Kylian Mbappe', 'Lamine Yamal', 'Erling Haaland'][i] || `User ${i + 1}`,
@@ -21,9 +22,15 @@ export default function MainContent() {
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">User Management Table</h2>
                 <div className="flex gap-2">
-                    <button className="bg-gray-800 text-white px-4 py-2 rounded-md shadow">📥 Export</button>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md shadow">🗑 Delete User</button>
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md shadow">➕ New User</button>
+                    <button className="bg-gray-800 text-white px-4 py-2 rounded-md shadow flex items-center gap-2">
+                        <FiDownload /> Export
+                    </button>
+                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md shadow flex items-center gap-2">
+                        <FiUserMinus className="text-lg" /> Delete User
+                    </button>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md shadow flex items-center gap-2">
+                        <FiUserPlus /> New User
+                    </button>
                 </div>
             </div>
 
@@ -50,7 +57,10 @@ export default function MainContent() {
                                     {user.name}
                                 </td>
                                 <td className="p-3 text-blue-600 underline">{user.email}</td>
-                                <td className="p-3">📍 {user.location}</td>
+                                <td className="p-3 flex items-center gap-1 text-gray-700">
+                                    <FiMapPin className="text-gray-500" />
+                                    {user.location}
+                                </td>
                                 <td className="p-3">{user.joined}</td>
                                 <td className="p-3">
                                     <span className={`px-2 py-1 rounded text-xs font-semibold
@@ -73,8 +83,8 @@ export default function MainContent() {
                                 key={page}
                                 onClick={() => setCurrentPage(page)}
                                 className={`w-8 h-8 rounded-full text-sm font-medium ${page === currentPage
-                                        ? 'bg-orange-500 text-white'
-                                        : 'bg-gray-900 text-white'
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-gray-900 text-white'
                                     }`}
                             >
                                 {page}

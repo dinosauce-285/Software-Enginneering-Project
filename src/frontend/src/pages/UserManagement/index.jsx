@@ -3,6 +3,8 @@ import { FaUser } from "react-icons/fa";
 import '../../index.css';
 import UserMenu from './UserMenu';
 import MainContent from "./MainContent";
+import SearchFilterDropdown from "./search";
+import JoinedFilter from "./Joined";
 export default function UserManagementLayout() {
   return (
     <div className="min-h-screen w-full flex flex-col bg-gray-50">
@@ -40,15 +42,7 @@ export default function UserManagementLayout() {
 
           {/* Filter options */}
           <div className="space-y-4">
-            {/* Search */}
-            <div className="relative mb-6">
-              <input
-                type="text"
-                placeholder="Search items..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-200 text-sm rounded-full shadow-sm focus:outline-none"
-              />
-              <FiSearch className="absolute left-3 top-2.5 text-gray-600" />
-            </div>
+            <SearchFilterDropdown/>
             {/* Filter: Permission */}
             <div className="mb-6">
               <div className="bg-gray-200 rounded-full shadow-sm px-4 py-2 flex justify-between items-center">
@@ -65,27 +59,13 @@ export default function UserManagementLayout() {
                 </select>
               </div>
             </div>
-            {/* Joined filter */}
-            <div>
-              <div className="bg-gray-200 rounded-full shadow-sm px-4 py-2 flex justify-between items-center">
-                <label className="text-sm text-gray-600">
-                  Joined
-                </label>
-                <select
-                  defaultValue="Anytime"
-                  className="text-orange-500 bg-transparent text-sm focus:outline-none cursor-pointer"
-                >
-                  <option className="text-orange-500">Anytime</option>
-                  <option className="text-orange-500">Last 30 days</option>
-                  <option className="text-orange-500">This year</option>
-                </select>
-              </div>
-            </div>
+            {/* Joined filter */} 
+            <JoinedFilter/>
           </div>
         </aside>
 
         {/* Main Content */}
-        <MainContent/>
+        <MainContent />
       </div>
     </div>
   );

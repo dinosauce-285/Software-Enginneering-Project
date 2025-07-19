@@ -6,6 +6,9 @@ import ForgetPass from './pages/ForgetPass/index.jsx';
 import UserManagementLayout from './pages/UserManagement/index.jsx';
 import DeleteAccount from './pages/DeleteAccount/index.jsx';
 import Setting from './pages/Setting/index.jsx';
+
+import Dashboard from './pages/Dashboard/index.jsx';
+
 function App() {
   return (
     // <BrowserRouter>
@@ -17,7 +20,10 @@ function App() {
     //     <Route path="/user-management" element={<UserManagementLayout/>} />
     //   </Routes>
     // </BrowserRouter>
-    <Setting />
+
+
+    <Dashboard />
+
   );
 }
 

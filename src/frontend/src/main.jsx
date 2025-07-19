@@ -8,11 +8,10 @@ import UserManagementLayout from './pages/UserManagement/index.jsx'
 import DeleteDialog from './pages/DeleteDialog/index.jsx'
 import ShareDialog from './pages/SharingDialog/index.jsx'
 import ActivityLayout from './pages/ActivityLogs/index.jsx'
-
+import DeleteAccount from './pages/DeleteAccount/index.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-     <App /> 
-    
+    <App />
   </StrictMode>
 )

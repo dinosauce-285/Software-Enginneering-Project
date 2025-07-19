@@ -8,7 +8,7 @@ export default function Search() {
     return (
         <header className="flex items-center justify-between w-full h-24 px-6 md:px-8 max-w-8xl">
             {/* Thanh tìm kiếm */}
-            <div className="flex items-center border border-gray-300 rounded-lg px-4 h-14 flex-1 max-w-6xl focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500">
+            <div className="flex items-center border border-gray-300 rounded-lg px-4 h-14 w-full focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"

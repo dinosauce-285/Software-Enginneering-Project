@@ -1,12 +1,14 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
 import { AccessLevel } from '@prisma/client'; // Import Enum từ Prisma Client
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { MediaType } from '@prisma/client';
 
 @Injectable()
 export class MemoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private cloudinary: CloudinaryService,) {}
 
   /**
    * Hàm helper để xử lý việc "tìm hoặc tạo" các tags.
@@ -219,5 +221,50 @@ export class MemoriesService {
     });
 
     return finalLink;
+  }
+
+  async addMediaToMemory(userId: string, memoryId: string, file: Express.Multer.File) {
+    await this.getMemoryById(userId, memoryId); // Kiểm tra quyền sở hữu
+
+    const uploadResult = await this.cloudinary.uploadFile(file, `soulnote-memories/${userId}`);
+    
+    const mediaType = file.mimetype.startsWith('image/') ? MediaType.IMAGE
+                    : file.mimetype.startsWith('audio/') ? MediaType.AUDIO
+                    : file.mimetype.startsWith('video/') ? MediaType.VIDEO
+                    : file.mimetype.includes('pdf') || file.mimetype.includes('document') ? MediaType.DOCUMENT
+                    : null;
+
+    if (!mediaType) throw new BadRequestException('Unsupported file type.');
+
+    return this.prisma.media.create({
+      data: {
+        memoryID: memoryId,
+        url: uploadResult.secure_url,
+        publicId: uploadResult.public_id, // <-- Rất quan trọng
+        type: mediaType,
+      },
+    });
+  }
+
+  // Xóa Media khỏi Memory
+  async deleteMedia(userId: string, mediaId: string) {
+    const media = await this.prisma.media.findUnique({
+      where: { mediaID: mediaId },
+      include: { memory: true },
+    });
+
+    if (!media || media.memory.userID !== userId) {
+      throw new ForbiddenException('Access to resource denied.');
+    }
+
+    // Xóa file trên Cloudinary trước
+    await this.cloudinary.deleteFile(media.publicId);
+
+    // Sau đó xóa bản ghi trong DB
+    await this.prisma.media.delete({
+      where: { mediaID: mediaId },
+    });
+
+    return { message: 'Media deleted successfully.' };
   }
 }

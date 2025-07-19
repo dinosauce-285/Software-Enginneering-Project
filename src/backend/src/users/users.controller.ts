@@ -5,13 +5,13 @@ import { GetUser } from '../auth/decorator/get-user.decorator'; // Import decora
 import { User } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-//import { Param } from '@nestjs/common';
-//import { JwtService } from '@nestjs/jwt';
+// import { Param } from '@nestjs/common';
+// import { JwtService } from '@nestjs/jwt';
 
 @UseGuards(AuthGuard('jwt')) // <-- Áp dụng "Người Gác Cổng" cho TẤT CẢ các route trong controller này
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService/*, private readonly jwtService: JwtService,*/) {}
+  constructor(private readonly usersService: UsersService, /*private readonly jwtService: JwtService,*/) {}
 
 //   @Get('test-token/:userId')
 //   getTestToken(@Param('userId') userId: string) {

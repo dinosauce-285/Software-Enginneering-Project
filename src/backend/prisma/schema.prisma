@@ -18,6 +18,7 @@ enum MediaType {
   IMAGE
   AUDIO
   VIDEO
+  DOCUMENT
 }
 
 enum AccessLevel {
@@ -85,6 +86,7 @@ model Memory {
 model Media {
   mediaID    String    @id @default(uuid())
   url        String
+  publicId   String    @unique
   type       MediaType
   caption    String?
   upload_at  DateTime  @default(now())

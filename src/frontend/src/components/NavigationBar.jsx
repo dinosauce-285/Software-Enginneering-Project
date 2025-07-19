@@ -3,7 +3,7 @@ import React from 'react';
 
 export default function NavigationBar() {
     return (
-        <aside className="flex flex-col bg-white border-r shadow w-[9rem] min-h-screen fixed left-0 top-0 overflow-hidden">
+        <aside className="flex flex-col bg-white border-r shadow w-[9rem] min-h-screen left-0 top-0 overflow-hidden">
             {/* Logo + SoulNote */}
             <div className="mt-[5%] flex flex-col items-center shrink-0">
                 <img src="src/assets/logo.png" alt="SoulNote Logo" className="w-10 h-10 mb-2 object-contain" />

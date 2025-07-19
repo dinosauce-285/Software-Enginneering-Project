@@ -24,52 +24,59 @@ export default function DeleteAccount() {
     };
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen w-screen">
+            {/* Navbar bên trái */}
             <NavigationBar />
 
-            <div className="flex-1 flex flex-col ml-[9rem]">
-                {/* Top bar */}
-                <Search />
+            {/* Nội dung bên phải */}
+            <div className="flex flex-col flex-1 min-h-screen items-center">
+                {/* Bọc Search và Main chung một khung có max-w giống nhau */}
+                <div className="w-[95%]">
+                    {/* Thanh tìm kiếm */}
+        
+                        <Search />
+                 
 
-                {/* Main content */}
-                <main className="flex-1 mt-4 pt-8 white">
-                    <div className="max-w-5xl mx-auto bg-white rounded shadow p-8">
-                        <h1 className="text-xl font-semibold mb-4">Delete Account Permanently</h1>
-                        <p className="mb-4 text-gray-700">
-                            Let us know if you want to permanently delete your SoulNote account.
-                            Once the deletion process begins, you won’t be able to reactivate your account
-                            or retrieve any content or information you’ve added.
-                        </p>
-                        <a href="#" className="text-blue-600 hover:underline mb-4 inline-block">
-                            Learn more about deleting your account.
-                        </a>
-                        <div className="flex flex-col gap-2 mb-6">
-                            <label className="flex items-center">
-                                <input type="checkbox" className="mr-2" checked={checked1} onChange={e => setChecked1(e.target.checked)} />
-                                <span>I understand that all my memories will be permanently deleted.</span>
-                            </label>
-                            <label className="flex items-center">
-                                <input type="checkbox" className="mr-2" checked={checked2} onChange={e => setChecked2(e.target.checked)} />
-                                <span>I understand that this action cannot be undone.</span>
-                            </label>
-                            <label className="flex items-center">
-                                <input type="checkbox" className="mr-2" checked={checked3} onChange={e => setChecked3(e.target.checked)} />
-                                <span>I want to permanently delete my SoulNote account.</span>
-                            </label>
+                    {/* Nội dung chính */}
+                    <main className="mt-9 pt-8 rounded-b width-[100%]">
+                        <div className="bg-white rounded shadow p-8">
+                            <h1 className="text-xl font-semibold mb-4">Delete Account Permanently</h1>
+                            <p className="mb-4 text-gray-700">
+                                Let us know if you want to permanently delete your SoulNote account.
+                                Once the deletion process begins, you won’t be able to reactivate your account
+                                or retrieve any content or information you’ve added.
+                            </p>
+                            <a href="#" className="text-blue-600 hover:underline mb-4 inline-block">
+                                Learn more about deleting your account.
+                            </a>
+                            <div className="flex flex-col gap-2 mb-6">
+                                <label className="flex items-center">
+                                    <input type="checkbox" className="mr-2" checked={checked1} onChange={e => setChecked1(e.target.checked)} />
+                                    <span>I understand that all my memories will be permanently deleted.</span>
+                                </label>
+                                <label className="flex items-center">
+                                    <input type="checkbox" className="mr-2" checked={checked2} onChange={e => setChecked2(e.target.checked)} />
+                                    <span>I understand that this action cannot be undone.</span>
+                                </label>
+                                <label className="flex items-center">
+                                    <input type="checkbox" className="mr-2" checked={checked3} onChange={e => setChecked3(e.target.checked)} />
+                                    <span>I want to permanently delete my SoulNote account.</span>
+                                </label>
+                            </div>
+                            <p className="text-gray-600 mb-6">
+                                We're sad to see you go. Your journey, your memories, and your feelings have meant a lot to us.
+                            </p>
+                            <div className="flex gap-4 justify-end">
+                                <button onClick={handleDelete} className="bg-gray-50 text-gray-800 border border-gray-200 px-4 py-2 rounded hover:bg-gray-100">
+                                    Delete
+                                </button>
+                                <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
-                        <p className="text-gray-600 mb-6">
-                            We're sad to see you go. Your journey, your memories, and your feelings have meant a lot to us.
-                        </p>
-                        <div className="flex gap-4 justify-end">
-                            <button onClick={handleDelete} className="bg-gray-50 text-gray-800 border border-gray-200 px-4 py-2 rounded hover:bg-gray-100">
-                                Delete
-                            </button>
-                            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </main>
+                    </main>
+                </div>
             </div>
 
             {/* Modal confirm password */}

@@ -29,7 +29,7 @@ export default function DeleteAccount() {
 
             <AppLayout>
     
-                <div className="bg-white rounded-lg shadow-md p-6 md:p-8 max-w-8xl mx-auto w-full">
+                <div className="bg-white rounded-lg shadow-md p-6 md:p-8 w-full">
                     <h1 className="text-xl font-semibold mb-4">Delete Account Permanently</h1>
                     <p className="mb-4 text-gray-700">
                         Let us know if you want to permanently delete your SoulNote account.

@@ -1,10 +1,14 @@
+// src/components/Search.jsx
+
 import React from 'react';
+// Import avatar từ thư mục assets
+import avatar from '../assets/avt.avif';
 
 export default function Search() {
     return (
-        <header className="flex items-center justify-between bg-white w-full h-[6rem] pr-4 ">
+        <header className="flex items-center justify-between w-full h-24 px-6 md:px-8 max-w-8xl">
             {/* Thanh tìm kiếm */}
-            <div className="flex items-center border border-gray-300 rounded-md px-3 w-full max-w-5xl h-[3.5rem]">
+            <div className="flex items-center border border-gray-300 rounded-lg px-4 h-14 flex-1 max-w-6xl focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -26,15 +30,16 @@ export default function Search() {
                 />
             </div>
 
-            {/* Avatar và mũi tên */}
-            <div className="flex items-center ml-4">
+    
+            <div className="flex items-center ml-6 cursor-pointer">
+
                 <img
-                    src="src/assets/avt.png"
+                    src={avatar}
                     alt="Avatar"
                     className="w-10 h-10 rounded-full object-cover"
                 />
                 <svg
-                    className="w-5 h-5 ml-2"
+                    className="w-5 h-5 ml-2 text-gray-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}

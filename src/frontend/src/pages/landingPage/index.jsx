@@ -39,18 +39,21 @@ export default function LandingPage() {
               <p className="text-xl text-gray-600 mt-6 max-w-3xl mx-auto">
                 A private diary to store your photos, voice and feelings – beautifully.
               </p>
-              <Link to="/signup" className="inline-block bg-black text-white px-8 py-3 mt-8 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
+              
+    
+              <Link to="/dashboard" className="inline-block bg-black text-white px-8 py-3 mt-8 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
                 Get Started
               </Link>
+
             </section>
 
             {/* Memory Preview */}
             <section className="w-full max-w-5xl mx-auto bg-[#F9F9F2] p-8 rounded-2xl border border-gray-200 shadow-sm">
-              <div className="flex justify-between items-center gap-12">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-12">
                 
-                {/* Cột văn bản */}
-                <div className="w-1/2 flex flex-col gap-4">
-                  <div className="flex justify-between items-center gap-4 text-sm font-medium text-gray-700">
+                {/* text column */}
+                <div className="w-full md:w-1/2 flex flex-col gap-4">
+                  <div className="flex flex-wrap justify-between items-center gap-4 text-sm font-medium text-gray-700">
                     <span>04/02/2025</span>
                     <span>Ho Chi Minh City</span>
                     <span className="text-blue-600">#life #city</span>
@@ -63,7 +66,7 @@ export default function LandingPage() {
                 </div>
                 
                 {/* Cột ảnh */}
-                <div className="w-1/2">
+                <div className="w-full md:w-1/2">
                   <img 
                     src={landingBanner} 
                     alt="A black and white preview of a memory"

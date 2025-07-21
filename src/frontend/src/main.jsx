@@ -9,9 +9,11 @@ import DeleteDialog from './pages/DeleteDialog/index.jsx'
 import ShareDialog from './pages/SharingDialog/index.jsx'
 import ActivityLayout from './pages/ActivityLogs/index.jsx'
 import DeleteAccount from './pages/DeleteAccount/index.jsx'
+import CreateMemory from './pages/CreateMemory/index.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
+    {/* <CreateMemory/> */}
   </StrictMode>
 )

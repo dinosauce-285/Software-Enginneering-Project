@@ -8,6 +8,7 @@ import UserManagementLayout from './pages/UserManagement/index.jsx';
 
 import Dashboard from './pages/Dashboard/index.jsx';
 import MemoryDetail from './pages/MemoryDetail/index.jsx'; 
+import CreateMemory from './pages/CreateMemory/index.jsx';
 
 function App() {
   return (
@@ -21,7 +22,7 @@ function App() {
 
     
         <Route path="/dashboard" element={<Dashboard />} />
-
+        <Route path="/create-memory" element={<CreateMemory/>}/>
         <Route path="/memory/:memoryId" element={<MemoryDetail />} />
       </Routes>
     </BrowserRouter>

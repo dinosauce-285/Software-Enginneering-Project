@@ -1,6 +1,7 @@
 import { FiSearch } from "react-icons/fi";
 import { FaUser } from "react-icons/fa";
 import '../../index.css';
+import { Link } from "react-router-dom";
 import UserMenu from './UserMenu';
 import MainContent from "./MainContent";
 import SearchFilterDropdown from "./search";
@@ -18,7 +19,7 @@ export default function ActivityLayout() {
 
         {/* Giữa: menu */}
         <div className="flex gap-6 font-medium text-gray-700">
-          <span >User Management</span>
+          <Link to="/user-management" className='font-inter'>User Management</Link>
           <span className="font-bold">Activity</span>
         </div>
 
@@ -35,13 +36,13 @@ export default function ActivityLayout() {
           <div className="flex items-center gap-3 mb-6">
             <div>
               <p className="font-medium">Activities Log</p>
-              
+
             </div>
           </div>
 
           {/* Filter options */}
           <div className="space-y-4">
-            <SearchFilterDropdown/>
+            <SearchFilterDropdown />
             {/* Filter: Permission */}
             <div className="mb-6">
               <div className="bg-gray-200 rounded-full shadow-sm px-4 py-2 flex justify-between items-center">
@@ -58,13 +59,17 @@ export default function ActivityLayout() {
                 </select>
               </div>
             </div>
-            {/* date range filter */} 
-            <DateRangeFilter/>
+            {/* date range filter */}
+            <DateRangeFilter />
           </div>
         </aside>
 
         {/* Main Content */}
-        <MainContent />
+        <div className="w-full lg:w-10/12 px-4 sm:px-6">
+          <div className="max-w-screen-xl mx-auto">
+            <MainContent />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,14 +1,24 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../../index.css';
 import AppLayout from '../../components/AppLayout';
 import Thread from '../../components/Thread';
-import sampleMemories from '../../data/sampleMemories.js';
+import sampleMemories from '../../data/sampleMemories.js'; // ✅ Đã import lại
+import { loadMemories } from '../../data/memoryService.js';
 
 export default function Dashboard() {
+    const [memories, setMemories] = useState([]);
+
+    useEffect(() => {
+        const storedMemories = loadMemories(); // ✅ Load từ localStorage
+        const allMemories = [...sampleMemories, ...storedMemories]; // ✅ Gộp cả hai nguồn dữ liệu
+        setMemories(allMemories);
+    }, []);
+
     return (
         <AppLayout>
             <div className="columns-1 sm:columns-2 md:columns-3 gap-4">
-                {sampleMemories.map((memory) => (
+                {memories.map((memory) => (
                     <Link
                         key={memory.id}
                         to={`/memory/${memory.id}`}
@@ -16,7 +26,6 @@ export default function Dashboard() {
                     >
                         <Thread memory={memory} />
                     </Link>
-
                 ))}
             </div>
         </AppLayout>

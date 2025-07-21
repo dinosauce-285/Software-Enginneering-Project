@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import AppLayout from '../../components/AppLayout';
 import sampleMemories from '../../data/sampleMemories.js';
+import '../../index.css'
 import { 
     CalendarDaysIcon, MapPinIcon, HashtagIcon, ArrowLeftIcon, HeartIcon,
     EllipsisHorizontalIcon, PencilIcon, ShareIcon, TrashIcon

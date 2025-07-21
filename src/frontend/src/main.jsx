@@ -14,6 +14,5 @@ import CreateMemory from './pages/CreateMemory/index.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
-    {/* <CreateMemory/> */}
   </StrictMode>
 )

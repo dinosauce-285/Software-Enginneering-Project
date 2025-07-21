@@ -3,15 +3,15 @@ import { Link } from 'react-router-dom';
 import '../../index.css';
 import AppLayout from '../../components/AppLayout';
 import Thread from '../../components/Thread';
-import sampleMemories from '../../data/sampleMemories.js'; // ✅ Đã import lại
+import sampleMemories from '../../data/sampleMemories.js'; 
 import { loadMemories } from '../../data/memoryService.js';
 
 export default function Dashboard() {
     const [memories, setMemories] = useState([]);
 
     useEffect(() => {
-        const storedMemories = loadMemories(); // ✅ Load từ localStorage
-        const allMemories = [...sampleMemories, ...storedMemories]; // ✅ Gộp cả hai nguồn dữ liệu
+        const storedMemories = loadMemories(); 
+        const allMemories = [...sampleMemories, ...storedMemories]; 
         setMemories(allMemories);
     }, []);
 

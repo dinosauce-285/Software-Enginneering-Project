@@ -4,6 +4,7 @@ import { getYear, getMonth } from 'date-fns';
 import "react-datepicker/dist/react-datepicker.css";
 import './datePicker.css'
 import avatar from '../assets/avt.avif';
+import UserMenu from './UserMenu';
 // --- Icon Helpers ---
 const CalendarIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0h18" /></svg>);
 const EmotionIcon = () => ( <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9 9.75h.008v.008H9V9.75Zm6 0h.008v.008H15V9.75Z" /></svg>);
@@ -121,8 +122,9 @@ export default function Search() {
                 )}
             </div>
             <div className="flex items-center ml-6 cursor-pointer shrink-0">
-                <img src={avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover" />
-                <svg className="w-5 h-5 ml-2 text-gray-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                {/* <img src={avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover" />
+                <svg className="w-5 h-5 ml-2 text-gray-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg> */}
+                <UserMenu/>
             </div>
         </header>
     );

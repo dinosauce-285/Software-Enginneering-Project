@@ -2,7 +2,7 @@ import { FiSearch } from "react-icons/fi";
 import { FaUser } from "react-icons/fa";
 import '../../index.css';
 import { Link } from "react-router-dom";
-import UserMenu from './UserMenu';
+import UserMenu from '../../components/UserMenu';
 import MainContent from "./MainContent";
 import SearchFilterDropdown from "./search";
 import JoinedFilter from "./Joined";
@@ -24,7 +24,7 @@ export default function UserManagementLayout() {
         </div>
 
         {/* Phải: avatar user */}
-        <UserMenu />
+        <UserMenu/>
       </header>
       {/* End-Header */}
 

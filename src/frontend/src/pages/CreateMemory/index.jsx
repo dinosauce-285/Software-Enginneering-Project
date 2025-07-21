@@ -6,7 +6,7 @@ import AppLayout from '../../components/AppLayout';
 import {
     FaSmile, FaImage, FaBold, FaUnderline, FaItalic,
     FaAlignLeft, FaAlignCenter, FaAlignRight,
-    FaRedo, FaUndo, FaMapMarkerAlt, FaReply, FaHashtag,
+    FaRedo, FaUndo, FaMapMarkerAlt, FaReply, FaTag,
     FaPaperclip, FaCalendarAlt
 } from 'react-icons/fa';
 
@@ -20,7 +20,7 @@ export default function CreateMemory() {
     const [content, setContent] = useState('');
     const [image, setImage] = useState(null);
     const [emotion, setEmotion] = useState('Happy');
-    const [hashtag, setHashtag] = useState('#life');
+    const [hashtag, setHashtag] = useState('');
     const [selectedDate, setSelectedDate] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const fileInputRef = useRef(null);
@@ -40,6 +40,11 @@ export default function CreateMemory() {
     };
 
     const handleSave = () => {
+        if (!topic.trim() || !content.trim()) {
+            alert("Please fill in both topic and content before saving.");
+            return;
+        }
+
         const newMemory = {
             id: Date.now(),
             title: topic,
@@ -55,6 +60,7 @@ export default function CreateMemory() {
         console.log("Saved memory:", newMemory);
         navigate("/dashboard");
     };
+
 
 
 
@@ -87,10 +93,16 @@ export default function CreateMemory() {
                             onChange={(e) => setEmotion(e.target.value)}
                             className="bg-gray-100 focus:outline-none cursor-pointer"
                         >
-                            <option>Happy</option>
-                            <option>Sad</option>
-                            <option>Excited</option>
-                            <option>Peaceful</option>
+                            <option>Happy  😊</option>
+                            <option>Sad    😢</option>
+                            <option>Angry  😠</option>
+                            <option>Calm   😌</option>
+                            <option>Excited 🤩</option>
+                            <option>Anxious 😰</option>
+                            <option>Loved   ❤️</option>
+                            <option>Tired   😴</option>
+                            <option>Confident 😎</option>
+                            <option>Nostalgic 🕰️</option>
                         </select>
                     </div>
 
@@ -124,17 +136,14 @@ export default function CreateMemory() {
 
                     {/* Hashtag */}
                     <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded shadow">
-                        <FaHashtag className="text-gray-500" />
-                        <select
+                        <FaTag className="text-gray-500" />
+                        <input
+                            type="text"
                             value={hashtag}
                             onChange={(e) => setHashtag(e.target.value)}
-                            className="bg-gray-100 focus:outline-none cursor-pointer"
-                        >
-                            <option>#life</option>
-                            <option>#travel</option>
-                            <option>#love</option>
-                            <option>#city</option>
-                        </select>
+                            placeholder="#hashtag"
+                            className="bg-gray-100 focus:outline-none cursor-text text-sm w-32"
+                        />
                     </div>
                 </div>
 

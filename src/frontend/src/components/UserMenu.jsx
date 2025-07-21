@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FiSettings, FiHelpCircle, FiLogOut } from "react-icons/fi";
-
+import { FiChevronDown } from 'react-icons/fi';
 export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -9,7 +9,7 @@ export default function UserMenu() {
       {/* Avatar + Button */}
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
         <img src="/src/assets/avt.avif" alt="avatar" className="w-9 h-9 rounded-full object-cover" />
-        <span className="text-sm">▼</span>
+        <FiChevronDown className="text-sm text-gray-500" />
       </div>
 
       {/* Dropdown Menu */}

@@ -58,7 +58,7 @@ export default function NavigationBar() {
                 />
             </div>
             <div className="flex flex-col items-center mt-[7rem] flex-grow space-y-10">
-                <Link to="/create-memory" className="p-3 rounded-lg hover:bg-gray-100">
+                <Link to="/create" className="p-3 rounded-lg hover:bg-gray-100">
                     <svg
                         className="w-7 h-7 text-gray-600"
                         xmlns="http://www.w3.org/2000/svg"

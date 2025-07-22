@@ -5,10 +5,9 @@ import SignUp from './pages/signUp/index.jsx';
 import LogIn from './pages/logIn/index.jsx';
 import ForgetPass from './pages/ForgetPass/index.jsx';
 import UserManagementLayout from './pages/UserManagement/index.jsx';
-
-import Dashboard from './pages/Dashboard/index.jsx';
-import MemoryDetail from './pages/MemoryDetail/index.jsx'; 
 import CreateMemory from './pages/CreateMemory/index.jsx';
+import Dashboard from './pages/Dashboard/index.jsx';
+import MemoryDetail from './pages/MemoryDetail/index.jsx';
 
 function App() {
   return (
@@ -18,11 +17,9 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<LogIn />} />
         <Route path="/forgot-password" element={<ForgetPass />} />
-        <Route path="/user-management" element={<UserManagementLayout/>} />
-
-    
+        <Route path="/user-management" element={<UserManagementLayout />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create-memory" element={<CreateMemory/>}/>
+        <Route path="/create" element={<CreateMemory />} />
         <Route path="/memory/:memoryId" element={<MemoryDetail />} />
       </Routes>
     </BrowserRouter>

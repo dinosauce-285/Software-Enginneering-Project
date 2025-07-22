@@ -19,7 +19,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgetPass />} />
         <Route path="/user-management" element={<UserManagementLayout />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create" element={<CreateMemory />} />
+        <Route path="/create-memory" element={<CreateMemory />} />
         <Route path="/memory/:memoryId" element={<MemoryDetail />} />
       </Routes>
     </BrowserRouter>

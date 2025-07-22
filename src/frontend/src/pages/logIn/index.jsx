@@ -32,7 +32,7 @@ function LogIn() {
         try {
             await loginUser(formData);
             alert('Đăng nhập thành công!');
-            navigate('/memories');
+            navigate('/dashboard');
         } catch (err) {
             setError(err.message || 'Email hoặc mật khẩu không chính xác.');
         } finally {

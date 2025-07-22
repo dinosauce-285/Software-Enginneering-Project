@@ -3,51 +3,50 @@ import CustomInput from '../../components/input';
 import MediaButton from '../../components/mediaButton';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-
-// Import các hàm và dịch vụ cần thiết
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from '../../firebase';
 import { loginUser, authenticateWithFirebase } from '../../services/api';
-
-// Import ảnh
 import accountBanner from '../../assets/accountBanner.jpg';
 import logo from '../../assets/logo.png';
 import fbLogo from '../../assets/fbLogo.png';
 import ggLogo from '../../assets/ggLogo.png';
 
 function LogIn() {
-    // State và các hàm khác không thay đổi
     const [formData, setFormData] = useState({ email: '', password: '' });
+    // --- THÊM STATE MỚI ---
+    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    // --- HÀM SUBMIT EMAIL ĐÃ SỬA LẠI ---
+    // --- HÀM SUBMIT ĐÃ ĐƯỢỢC CẬP NHẬT ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
         try {
-            await loginUser(formData);
+            // Gói dữ liệu cuối cùng, bao gồm cả rememberMe
+            const finalCredentials = {
+                ...formData,
+                rememberMe: rememberMe,
+            };
+            await loginUser(finalCredentials); // Gửi đi
             alert('Đăng nhập thành công!');
             navigate('/dashboard');
         } catch (err) {
             setError(err.message || 'Email hoặc mật khẩu không chính xác.');
         } finally {
-            // Luôn luôn tắt loading dù thành công hay thất bại
             setLoading(false);
         }
     };
     
-    // Hàm social sign-in cũng đã được sửa
     const handleSocialSignIn = async (providerName) => {
         if (providerName === 'facebook') {
             alert("Chức năng Đăng nhập bằng Facebook đang chờ Meta xác minh.\nVui lòng sử dụng Đăng nhập bằng Google hoặc Email.");
             return;
         }
-
         const provider = new GoogleAuthProvider();
         setError(null);
         setLoading(true);
@@ -56,7 +55,7 @@ function LogIn() {
             const idToken = await result.user.getIdToken();
             await authenticateWithFirebase(idToken);
             alert(`Đăng nhập bằng Google thành công!`);
-            navigate('/memories');
+            navigate('/dashboard');
         } catch (err) {
             console.error(`Lỗi đăng nhập Google:`, err);
             if (err.code !== 'auth/popup-closed-by-user') {
@@ -94,7 +93,17 @@ function LogIn() {
                     {error && <p className="w-[70%] text-red-500 text-center mt-2">{error}</p>}
                     <div className='flex flex-row justify-between items-center w-[70%] mt-4 mb-10'>
                         <div className="flex items-center gap-2">
-                            <input type="checkbox" id="remember" className="w-3 h-3 accent-black" /><label htmlFor="remember" className="text-sm font-poppins text-[#000000]">Remember Me</label>
+                            {/* --- KẾT NỐI CHECKBOX VỚI STATE --- */}
+                            <input
+                                type="checkbox"
+                                id="remember"
+                                className="w-3 h-3 accent-black"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                            />
+                            <label htmlFor="remember" className="text-sm font-poppins text-[#000000]">
+                                Remember Me
+                            </label>
                         </div>
                         <div><Link to="/forgot-password" className="font-poppins underline text-sm">Forgot your password</Link></div>
                     </div>
@@ -106,4 +115,3 @@ function LogIn() {
 }
 
 export default LogIn;
-

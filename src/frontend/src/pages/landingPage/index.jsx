@@ -1,16 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../index.css';
 import logo from '../../assets/logo.png';
 import landingBanner from '../../assets/landingBanner.png';
 
 export default function LandingPage() {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Kiểm tra localStorage khi component được render
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   return (
 
     <div className="min-h-screen w-full bg-white font-poppins text-gray-800">
-      
       <div className="w-full max-w-7xl mx-auto px-8 py-6 flex flex-col">
-
         {/* Top bar (Header) */}
         <header className="flex justify-between items-center w-full py-4">
           <div className="flex items-center gap-3">
@@ -18,10 +27,21 @@ export default function LandingPage() {
             <span className="text-2xl font-semibold">SoulNote</span>
           </div>
           <nav className="flex items-center gap-6 text-base font-medium">
-            <Link to="/login" className="hover:text-black transition-colors">Login</Link>
-            <Link to="/signup" className="bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition-colors">
-              Sign Up
-            </Link>
+            {/* --- LOGIC MỚI CHO HEADER --- */}
+            {isLoggedIn ? (
+              // Nếu đã đăng nhập, hiển thị nút Dashboard
+              <Link to="/dashboard" className="bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                Go to Dashboard
+              </Link>
+            ) : (
+              // Nếu chưa đăng nhập, hiển thị Login và Sign Up
+              <>
+                <Link to="/login" className="hover:text-black transition-colors">Login</Link>
+                <Link to="/signup" className="bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                  Sign Up
+                </Link>
+              </>
+            )}
           </nav>
         </header>
 
@@ -41,7 +61,7 @@ export default function LandingPage() {
               </p>
               
     
-              <Link to="/dashboard" className="inline-block bg-black text-white px-8 py-3 mt-8 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
+              <Link to="/signup" className="inline-block bg-black text-white px-8 py-3 mt-8 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
                 Get Started
               </Link>
 

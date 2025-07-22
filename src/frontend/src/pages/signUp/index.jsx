@@ -36,13 +36,10 @@ function SignUp() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-
-        // --- VALIDATION PHÍA FRONTEND ---
         if (!gender) {
             setError('Please select your gender.');
             return;
         }
-
         setLoading(true);
         try {
             const { day, month, year } = birthDate;
@@ -58,7 +55,29 @@ function SignUp() {
         }
     };
 
-    const handleSocialSignIn = async (providerName) => { /* ... giữ nguyên ... */ };
+    const handleSocialSignIn = async (providerName) => {
+        if (providerName === 'facebook') {
+            alert("Chức năng Đăng nhập bằng Facebook đang chờ Meta xác minh.\nVui lòng sử dụng Đăng nhập bằng Google hoặc Email.");
+            return;
+        }
+        const provider = new GoogleAuthProvider();
+        setError(null);
+        setLoading(true);
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const idToken = await result.user.getIdToken();
+            await authenticateWithFirebase(idToken);
+            alert(`Đăng nhập bằng Google thành công!`);
+            navigate('/dashboard');
+        } catch (err) {
+            console.error(`Lỗi đăng nhập Google:`, err);
+            if (err.code !== 'auth/popup-closed-by-user') {
+                setError(`Đã có lỗi xảy ra khi đăng nhập bằng Google.`);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="w-screen flex bg-[#f9f9f2]">

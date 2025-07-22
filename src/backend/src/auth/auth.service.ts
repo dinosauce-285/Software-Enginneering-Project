@@ -1,9 +1,5 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+// src/auth/auth.service.ts
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { FirebaseService } from '../firebase/firebase.service';
@@ -14,18 +10,12 @@ import { FirebaseAuthDto } from './dto/firebase-auth.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as bcrypt from 'bcrypt';
-import { Gender } from '@prisma/client'; // Import enum Gender
+import { Gender } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
-    private readonly firebaseService: FirebaseService,
-    private readonly mailService: MailService,
-  ) {}
+  constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService, private readonly firebaseService: FirebaseService, private readonly mailService: MailService) {}
 
-  // Hàm signUp không thay đổi, nó đã đúng
   async signUp(dto: SignUpDto): Promise<{ accessToken: string }> {
     const existingUser = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existingUser) throw new ConflictException('Email already in use.');
@@ -40,10 +30,25 @@ export class AuthService {
         dateOfBirth: new Date(dto.dateOfBirth),
       },
     });
-    return this.generateAppJwt(user.userID, user.email);
+    // Sau khi đăng ký, cấp một token ngắn hạn mặc định
+    return this.generateAppJwt(user.userID, user.email, '1d');
   }
 
-  // --- HÀM AUTHENTICATEWITHFIREBASE ĐÃ ĐƯỢỢC CẬP NHẬT ---
+  // --- HÀM SIGNIN ĐÃ ĐƯỢỢC CẬP NHẬT ---
+  async signIn(dto: SignInDto): Promise<{ accessToken: string }> {
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (!user || user.auth_provider !== 'email' || !user.passwordHash) {
+      throw new UnauthorizedException('Invalid credentials.');
+    }
+    const isPasswordMatching = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!isPasswordMatching) {
+      throw new UnauthorizedException('Invalid credentials.');
+    }
+    // Quyết định thời hạn của token dựa trên lựa chọn của người dùng
+    const expiresIn = dto.rememberMe ? '30d' : '1d';
+    return this.generateAppJwt(user.userID, user.email, expiresIn);
+  }
+
   async authenticateWithFirebase(dto: FirebaseAuthDto): Promise<{ accessToken: string }> {
     let decodedToken;
     try {
@@ -54,11 +59,7 @@ export class AuthService {
     const { uid, email, picture, name } = decodedToken;
     const provider = decodedToken.firebase.sign_in_provider;
     let user = await this.prisma.user.findUnique({ where: { email } });
-
-    if (!user) { // Nếu là người dùng mới
-      if (!dto.display_name && !name) {
-        throw new BadRequestException('Display name is required for new user.');
-      }
+    if (!user) {
       user = await this.prisma.user.create({
         data: {
           userID: uid,
@@ -66,30 +67,17 @@ export class AuthService {
           display_name: dto.display_name || name,
           avatar: picture,
           auth_provider: provider,
-          
-          // -- PHẦN SỬA LỖI --
-          // Cung cấp giá trị mặc định cho các trường bắt buộc
-          gender: Gender.OTHER,       // Mặc định là 'OTHER'
-          dateOfBirth: new Date(),    // Mặc định là ngày hôm nay
+          gender: Gender.OTHER,
+          dateOfBirth: new Date(),
         },
       });
-    } else { // Nếu người dùng đã tồn tại
+    } else {
       if (user.auth_provider !== provider) {
         throw new ConflictException(`This email is already registered with ${user.auth_provider}. Please log in using that method.`);
       }
     }
-    return this.generateAppJwt(user.userID, user.email);
-  }
-
-  // --- CÁC HÀM CÒN LẠI KHÔNG THAY ĐỔI ---
-  async signIn(dto: SignInDto): Promise<{ accessToken: string }> {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (!user || user.auth_provider !== 'email' || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials.');
-    }
-    const isPasswordMatching = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!isPasswordMatching) throw new UnauthorizedException('Invalid credentials.');
-    return this.generateAppJwt(user.userID, user.email);
+    // Social login cũng mặc định cấp token ngắn hạn
+    return this.generateAppJwt(user.userID, user.email, '1d');
   }
   
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
@@ -131,12 +119,13 @@ export class AuthService {
     return { message: 'Password has been reset successfully.' };
   }
   
-  private async generateAppJwt(userId: string, email: string): Promise<{ accessToken: string }> {
+  // --- HÀM GENERATEAPPJWT ĐÃ ĐƯỢỢC NÂNG CẤP ---
+  private async generateAppJwt(userId: string, email: string, expiresIn: string): Promise<{ accessToken: string }> {
     const payload = { sub: userId, email };
     return {
       accessToken: await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET,
-        expiresIn: '1d',
+        expiresIn: expiresIn, // Sử dụng thời hạn động
       }),
     };
   }

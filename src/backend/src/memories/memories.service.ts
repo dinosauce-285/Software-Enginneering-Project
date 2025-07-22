@@ -85,6 +85,7 @@ export class MemoriesService {
       },
       include: {
         emotion: true,
+        media: true,
         memoryTags: {
           select: {
             tag: {

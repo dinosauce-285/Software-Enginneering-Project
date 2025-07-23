@@ -85,7 +85,18 @@ export const getMyMemories = async () => {
   }
 };
 
+// ... các hàm khác ...
 
+/**
+ * Xóa token khỏi localStorage để đăng xuất người dùng.
+ */
+export const logoutUser = () => {
+  try {
+    localStorage.removeItem('accessToken');
+  } catch (error) {
+    console.error("Error during logout:", error);
+  }
+};
 export const getEmotions = async () => {
   const token = localStorage.getItem('accessToken');
   if (!token) {

@@ -66,7 +66,22 @@ function LogIn() {
     return (
         <div className="w-screen flex bg-[#f9f9f2] ">
             <div className="w-1/2 h-screen"><img src={accountBanner} alt="Banner" className="h-full w-full object-cover" /></div>
-            <div className="w-1/2 max-h-screen overflow-y-auto flex flex-col items-center bg-[#f9f9f2] justify-center">
+            
+            {/* BƯỚC 1: Thêm class `relative` vào container của form */}
+            <div className="w-1/2 max-h-screen overflow-y-auto flex flex-col items-center bg-[#f9f9f2] justify-center relative">
+
+                {/* BƯỚC 2: Thêm nút X ở đây */}
+                <button 
+                    onClick={() => navigate('/')} 
+                    className="absolute top-4 right-4 text-gray-500 hover:text-black transition-colors"
+                    aria-label="Close"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                {/* BƯỚC 3: Giữ nguyên form, không cần thay đổi gì thêm */}
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-center justify-center">
                     <div className="h-[20%] w-[70%] flex flex-col justify-center items-center">
                         <img src={logo} className="h-[30%] mb-3" alt="Logo" />
@@ -90,7 +105,6 @@ function LogIn() {
                     {error && <p className="w-[70%] text-red-500 text-center mt-2">{error}</p>}
                     <div className='flex flex-row justify-between items-center w-[70%] mt-4 mb-10'>
                         <div className="flex items-center gap-2">
-            
                             <input
                                 type="checkbox"
                                 id="remember"

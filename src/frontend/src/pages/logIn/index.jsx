@@ -13,7 +13,6 @@ import ggLogo from '../../assets/ggLogo.png';
 
 function LogIn() {
     const [formData, setFormData] = useState({ email: '', password: '' });
-    // --- THÊM STATE MỚI ---
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -21,18 +20,16 @@ function LogIn() {
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    // --- HÀM SUBMIT ĐÃ ĐƯỢỢC CẬP NHẬT ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
         try {
-            // Gói dữ liệu cuối cùng, bao gồm cả rememberMe
             const finalCredentials = {
                 ...formData,
                 rememberMe: rememberMe,
             };
-            await loginUser(finalCredentials); // Gửi đi
+            await loginUser(finalCredentials); 
             alert('Đăng nhập thành công!');
             navigate('/dashboard');
         } catch (err) {
@@ -93,7 +90,7 @@ function LogIn() {
                     {error && <p className="w-[70%] text-red-500 text-center mt-2">{error}</p>}
                     <div className='flex flex-row justify-between items-center w-[70%] mt-4 mb-10'>
                         <div className="flex items-center gap-2">
-                            {/* --- KẾT NỐI CHECKBOX VỚI STATE --- */}
+            
                             <input
                                 type="checkbox"
                                 id="remember"

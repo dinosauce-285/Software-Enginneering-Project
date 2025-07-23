@@ -11,6 +11,7 @@ import logo from '../../assets/logo.png';
 import fbLogo from '../../assets/fbLogo.png';
 import ggLogo from '../../assets/ggLogo.png';
 
+
 function SignUp() {
     const [formData, setFormData] = useState({ display_name: '', email: '', password: '' });
     const [gender, setGender] = useState('');
@@ -82,8 +83,22 @@ function SignUp() {
     return (
         <div className="w-screen flex bg-[#f9f9f2]">
             <div className="w-1/2 h-screen"><img src={accountBanner} alt="Banner" className="h-full w-full object-cover" /></div>
-            <div className="w-1/2 max-h-screen overflow-y-auto flex flex-col items-center bg-[#f9f9f2]">
-                <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
+            
+            {/* --- BƯỚC 2: Thêm `relative` vào container bên phải để định vị nút con --- */}
+            <div className="w-1/2 max-h-screen overflow-y-auto flex flex-col items-center bg-[#f9f9f2] relative">
+                
+                {/* --- BƯỚC 3: Thêm nút X ở đây --- */}
+                <button 
+                    onClick={() => navigate('/')} 
+                    className="absolute top-4 right-4 text-gray-500 hover:text-black transition-colors"
+                    aria-label="Close" // Thêm aria-label để cải thiện accessibility
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <form onSubmit={handleSubmit} className="w-full flex flex-col items-center pt-16"> {/* Thêm padding-top để nút X không che mất nội dung */}
                     <div className="h-[20%] w-[70%] flex flex-col justify-center items-center">
                         <img src={logo} className="h-[30%] mb-3" alt="Logo" />
                         <div className="text-lg font-poppins text-2xl">Sign up</div>
@@ -100,17 +115,17 @@ function SignUp() {
                         <hr className="flex-grow border-black opacity-30" /><span className="text-black opacity-30 text-sm">OR</span><hr className="flex-grow border-black opacity-30" />
                     </div>
                     <div className="flex w-[70%] mt-4 flex-col">
-                        <CustomInput text="Username*" placeholder="Enter your username" name="display_name" value={formData.display_name} onChange={handleChange} required />
-                        <CustomInput text="Email*" placeholder="Enter your email" name="email" type="email" value={formData.email} onChange={handleChange} required />
-                        <CustomInput text="Password*" placeholder="Enter your password" name="password" type="password" value={formData.password} onChange={handleChange} required />
+                        <CustomInput text="Username" placeholder="Enter your username" name="display_name" value={formData.display_name} onChange={handleChange} required />
+                        <CustomInput text="Email" placeholder="Enter your email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+                        <CustomInput text="Password" placeholder="Enter your password" name="password" type="password" value={formData.password} onChange={handleChange} required />
                         <div className="mt-2">
-                            <label className="text-sm font-poppins block mb-1 text-[#000000]">Gender*</label>
+                            <label className="text-sm font-poppins block mb-1 text-[#000000]">Gender<span className="text-red-500 ml-1">*</span></label>
                             <div className="flex gap-6 mb-[1rem]">
                                 <label className="flex items-center gap-2 font-poppins text-sm cursor-pointer text-[#000000]"><input type="radio" name="gender" value="MALE" checked={gender === 'MALE'} onChange={() => setGender('MALE')} required className="w-4 h-4 rounded-full border-2 border-gray-500 bg-[#f9f9f2] accent-black appearance-none checked:appearance-auto" />Male</label>
                                 <label className="flex items-center gap-2 font-poppins text-sm cursor-pointer text-[#000000]"><input type="radio" name="gender" value="FEMALE" checked={gender === 'FEMALE'} onChange={() => setGender('FEMALE')} className="w-4 h-4 rounded-full border-2 border-gray-500 bg-[#f9f9f2] accent-black appearance-none checked:appearance-auto" />Female</label>
                             </div>
                         </div>
-                        <div className="text-sm font-poppins mb-1 text-[#000000]">What’s your date of birth?*</div>
+                        <div className="text-sm font-poppins mb-1 text-[#000000]">What’s your date of birth?<span className="text-red-500 ml-1">*</span></div>
                         <div className="flex gap-4">
                             <div className='basis-1/3'><label className="block text-sm font-poppins mb-1 text-[#000000]">Day</label><select name="day" value={birthDate.day} onChange={handleDateChange} className="w-full p-2 rounded border border-gray-300 font-poppins text-sm bg-[#f9f9f2] text-[#666666]" required>{Array.from({ length: daysInMonth }, (_, i) => (<option key={i + 1} value={i + 1} className="bg-white text-black">{i + 1}</option>))}</select></div>
                             <div className='basis-1/3'><label className="block text-sm font-poppins mb-1 text-[#000000]">Month</label><select name="month" value={birthDate.month} onChange={handleDateChange} className="w-full p-2 rounded border border-gray-300 font-poppins text-sm bg-[#f9f9f2] text-[#666666]" required>{['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((month, i) => (<option key={i + 1} value={i + 1} className="bg-white text-black">{month}</option>))}</select></div>
@@ -118,7 +133,7 @@ function SignUp() {
                         </div>
                     </div>
                     {error && <p className="w-[70%] text-red-500 text-center mt-4">{error}</p>}
-                    <div className="w-[70%] text-sm font-poppins text-center text-poppins flex justify-between mt-5 mb-10">By creating an account, you agree to the <span className="underline mx-1 cursor-pointer">Terms of Use</span> and <span className="underline mx-1 cursor-pointer">Privacy Policy.</span></div>
+                    <div className="w-[70%] text-sm font-poppins text-center flex justify-between mt-5 mb-10">By creating an account, you agree to the <span className="underline mx-1 cursor-pointer">Terms of Use</span> and <span className="underline mx-1 cursor-pointer">Privacy Policy.</span></div>
                     <button type="submit" disabled={loading} className="w-[70%] py-3 bg-black text-white font-poppins rounded-lg hover:bg-gray-600 transition-all duration-200 mb-10 disabled:bg-gray-400">{loading ? 'Processing...' : 'Create Account'}</button>
                 </form>
             </div>

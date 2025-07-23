@@ -142,3 +142,49 @@ export const uploadMediaForMemory = async (memoryId, file) => {
     throw error.response.data;
   }
 };
+
+/**
+ * Hàm gọi API để lấy chi tiết một kỷ niệm bằng ID của nó.
+ * @param {string} memoryId - ID của kỷ niệm cần lấy.
+ */
+export const getMemoryById = async (memoryId) => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    throw new Error('No access token found. Please log in.');
+  }
+
+  try {
+    const response = await apiClient.get(`/memories/${memoryId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+/**
+ * Hàm gọi API để xóa một kỷ niệm bằng ID của nó.
+ * @param {string} memoryId - ID của kỷ niệm cần xóa.
+ */
+export const deleteMemoryById = async (memoryId) => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) {
+    throw new Error('No access token found. Please log in.');
+  }
+
+  try {
+    // API DELETE không trả về body, chỉ cần status code
+    const response = await apiClient.delete(`/memories/${memoryId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    // Trả về status để xác nhận thành công
+    return response.status;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

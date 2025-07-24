@@ -86,9 +86,11 @@
 
 
 
+
 import React from 'react';
 
-export const Thread = ({ memory }) => {
+
+const Thread = ({ memory }) => {
   if (!memory || !memory.created_at) {
     return null;
   }
@@ -149,4 +151,5 @@ export const Thread = ({ memory }) => {
       </div>
     </div>
   );
-}
+}; 
+export default Thread;

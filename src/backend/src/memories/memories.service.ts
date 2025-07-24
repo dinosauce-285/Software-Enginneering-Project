@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
-import { AccessLevel } from '@prisma/client'; // Import Enum từ Prisma Client
+import { AccessLevel, Prisma } from '@prisma/client'; // Import Enum từ Prisma Client
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { MediaType } from '@prisma/client';
 
@@ -224,27 +224,61 @@ export class MemoriesService {
     return finalLink;
   }
 
-  async addMediaToMemory(userId: string, memoryId: string, file: Express.Multer.File) {
-    await this.getMemoryById(userId, memoryId); // Kiểm tra quyền sở hữu
-
-    const uploadResult = await this.cloudinary.uploadFile(file, `soulnote-memories/${userId}`);
+  async addMediaToMemory(
+    userId: string,
+    memoryId: string,
+    files: Array<Express.Multer.File>,
+  ) {
+    // 1. Kiểm tra quyền sở hữu memory
+    await this.getMemoryById(userId, memoryId);
     
-    const mediaType = file.mimetype.startsWith('image/') ? MediaType.IMAGE
-                    : file.mimetype.startsWith('audio/') ? MediaType.AUDIO
-                    : file.mimetype.startsWith('video/') ? MediaType.VIDEO
-                    : file.mimetype.includes('pdf') || file.mimetype.includes('document') ? MediaType.DOCUMENT
-                    : null;
+    // 2. Kiểm tra xem có file nào được gửi lên không
+    if (!files || files.length === 0) {
+      throw new BadRequestException('At least one file is required.');
+    }
 
-    if (!mediaType) throw new BadRequestException('Unsupported file type.');
+    // 3. Upload tất cả các file lên Cloudinary một cách song song
+    const uploadPromises = files.map(file => 
+      this.cloudinary.uploadFile(file, `soulnote-memories/${userId}`)
+    );
+    
+    // Đợi cho tất cả các file upload xong
+    const uploadResults = await Promise.all(uploadPromises);
 
-    return this.prisma.media.create({
-      data: {
-        memoryID: memoryId,
-        url: uploadResult.secure_url,
-        publicId: uploadResult.public_id, // <-- Rất quan trọng
-        type: mediaType,
-      },
+    // 4. Chuẩn bị dữ liệu để ghi vào database
+    const mediaDataToCreate = uploadResults.reduce((acc, result, index) => {
+      const file = files[index];
+      const mediaType = file.mimetype.startsWith('image/') ? MediaType.IMAGE
+                      : file.mimetype.startsWith('audio/') ? MediaType.AUDIO
+                      : file.mimetype.startsWith('video/') ? MediaType.VIDEO
+                      : file.mimetype.includes('pdf') || file.mimetype.includes('document') ? MediaType.DOCUMENT
+                      : null;
+      
+      // Chỉ thêm vào mảng kết quả nếu mediaType hợp lệ
+      if (mediaType) {
+        acc.push({
+          memoryID: memoryId,
+          url: result.secure_url,
+          publicId: result.public_id,
+          type: mediaType,
+        });
+      }
+
+      return acc;
+    }, [] as Prisma.MediaCreateManyInput[]); // <-- Khai báo kiểu ban đầu cho accumulator
+
+    if (mediaDataToCreate.length === 0) {
+      throw new BadRequestException('None of the uploaded files were of a supported type.');
+    }
+
+    // 5. Ghi tất cả các bản ghi media vào database
+    // Bây giờ TypeScript đã chắc chắn mediaDataToCreate không chứa null
+    await this.prisma.media.createMany({
+      data: mediaDataToCreate,
     });
+
+    // Trả về một thông báo thành công
+    return { message: `${mediaDataToCreate.length} file(s) uploaded successfully.` };
   }
 
   // Xóa Media khỏi Memory

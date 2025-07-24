@@ -12,7 +12,7 @@ import {
   HttpCode,
   HttpStatus,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
@@ -22,7 +22,7 @@ import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/get-user.decorator';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard('jwt')) // Bảo vệ tất cả các route trong controller này
 @Controller('memories')
@@ -79,21 +79,27 @@ export class MemoriesController {
 
 
   @Post(':id/media')
-    @UseInterceptors(FileInterceptor('file')) // Multer sẽ xử lý file
-    addMedia(
+  // Thay đổi ở đây: Dùng FilesInterceptor để nhận một mảng file có tên là 'files'
+  @UseInterceptors(FilesInterceptor('files', 10)) // Cho phép tối đa 10 file
+  addMedia(
     @GetUser('userID') userId: string,
     @Param('id', ParseUUIDPipe) memoryId: string,
-    @UploadedFile(
-        new ParseFilePipe({
+    // Thay đổi ở đây: Dùng @UploadedFiles và kiểu dữ liệu là một mảng
+    @UploadedFiles(
+      new ParseFilePipe({
         validators: [
-            new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 30 }), // Tăng lên 10MB
-            new FileTypeValidator({ fileType: '.(png|jpeg|jpg|mp3|mpeg|pdf|docx)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // 10 MB cho mỗi file
+          new FileTypeValidator({ 
+            // Regex mới hỗ trợ nhiều định dạng phổ biến hơn
+            fileType: '.(png|jpeg|jpg|gif|webp|mp3|mpeg|wav|ogg|mp4|webm|mov|pdf|docx)',
+          }),
         ],
-        }),
-    ) file: Express.Multer.File,
-    ) {
-    return this.memoriesService.addMediaToMemory(userId, memoryId, file);
-    }
+      }),
+    ) files: Array<Express.Multer.File>, // <-- Kiểu dữ liệu là một mảng
+  ) {
+    // Gọi đến service, truyền vào cả mảng files
+    return this.memoriesService.addMediaToMemory(userId, memoryId, files);
+  }
 
   @Delete('media/:mediaId')
   @HttpCode(HttpStatus.NO_CONTENT)

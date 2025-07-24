@@ -218,12 +218,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../../index.css';
 import AppLayout from '../../components/AppLayout';
 
-// Importer toutes les icônes nécessaires
+// Importer tất cả các biểu tượng cần thiết
 import {
-    FaSmile, FaImage, FaBold, FaUnderline, FaItalic,
-    FaAlignLeft, FaAlignCenter, FaAlignRight,
-    FaRedo, FaUndo, FaMapMarkerAlt, FaReply, FaTag,
-    FaPaperclip, FaCalendarAlt
+    FaImage, FaPaperclip, FaSmile, FaBold, FaUnderline, FaItalic,
+    FaAlignLeft, FaAlignCenter, FaAlignRight, FaRedo, FaUndo,
+    FaMapMarkerAlt, FaReply, FaTag, FaCalendarAlt
 } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import DatePicker from 'react-datepicker';
@@ -232,30 +231,27 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { createMemory, getEmotions, uploadMediaForMemory } from '../../services/api';
 
 export default function CreateMemory() {
-    // États pour les données du formulaire
+    // --- State cho dữ liệu form ---
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [selectedEmotionId, setSelectedEmotionId] = useState('');
     const [tags, setTags] = useState('');
     const [selectedDate, setSelectedDate] = useState(new Date());
 
-    // États pour le téléchargement de fichiers
-    const [mediaFile, setMediaFile] = useState(null);
-    const [mediaPreview, setMediaPreview] = useState(null);
-    const [mediaType, setMediaType] = useState(null);
+    // --- State cho upload nhiều file ---
+    const [mediaFiles, setMediaFiles] = useState([]);
+    const [mediaPreviews, setMediaPreviews] = useState([]);
 
-    // États de gestion
+    // --- State quản lý ---
     const [emotions, setEmotions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
-
-    // Deux références distinctes pour les deux boutons de téléchargement
-    const imageInputRef = useRef(null);
-    const documentInputRef = useRef(null);
+    
+    const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
-    // Obtenir la liste des émotions depuis le backend
+    // Lấy danh sách emotions
     useEffect(() => {
         const fetchEmotions = async () => {
             try {
@@ -272,22 +268,32 @@ export default function CreateMemory() {
         fetchEmotions();
     }, []);
 
-    // Gérer le changement de fichier
+    // Xử lý thay đổi file (cho nhiều file)
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setMediaFile(file);
-            if (file.type.startsWith('image/')) {
-                setMediaType('IMAGE');
-                setMediaPreview(URL.createObjectURL(file));
-            } else {
-                setMediaType('OTHER');
-                setMediaPreview(file.name);
-            }
+        const newFiles = Array.from(e.target.files);
+        if (newFiles.length > 0) {
+            setMediaFiles(prevFiles => [...prevFiles, ...newFiles]);
+            
+            const newPreviews = newFiles.map(file => ({
+                id: `${file.name}-${file.lastModified}`,
+                name: file.name,
+                url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+                type: file.type.startsWith('image/') ? 'IMAGE' : 'OTHER',
+            }));
+            setMediaPreviews(prevPreviews => [...prevPreviews, ...newPreviews]);
         }
     };
     
-    // Gérer la sauvegarde
+    // Xóa một file khỏi danh sách
+    const handleRemoveFile = (previewId) => {
+        const previewToRemove = mediaPreviews.find(p => p.id === previewId);
+        if (!previewToRemove) return;
+        
+        setMediaFiles(prevFiles => prevFiles.filter(file => file.name !== previewToRemove.name || file.lastModified !== parseInt(previewId.split('-').pop())));
+        setMediaPreviews(prevPreviews => prevPreviews.filter(p => p.id !== previewId));
+    };
+
+    // Xử lý lưu (với nhiều file)
     const handleSave = async () => {
         if (!title.trim() || !content.trim()) {
             setError("Please fill in both topic and content.");
@@ -297,16 +303,14 @@ export default function CreateMemory() {
         setError(null);
         try {
             const tagsArray = tags.split(',').map(tag => tag.trim()).filter(Boolean);
-            const memoryData = {
-                title,
-                content,
-                emotionID: selectedEmotionId,
-                tags: tagsArray,
-            };
+            const memoryData = { title, content, emotionID: selectedEmotionId, tags: tagsArray };
+            
             const newMemory = await createMemory(memoryData);
-            if (mediaFile) {
-                await uploadMediaForMemory(newMemory.memoryID, mediaFile);
+            
+            if (mediaFiles.length > 0) {
+                await uploadMediaForMemory(newMemory.memoryID, mediaFiles);
             }
+            
             navigate("/dashboard");
         } catch (err) {
             console.error("Failed to save memory:", err);
@@ -330,7 +334,7 @@ export default function CreateMemory() {
                     <p className="font-medium">Username</p>
                 </div>
                 
-                {/* Section des Tags et Options */}
+                {/* === KHÔI PHỤC SECTION OPTIONS === */}
                 <div className="flex flex-wrap gap-4 mb-4">
                     <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded shadow">
                         <select
@@ -359,35 +363,55 @@ export default function CreateMemory() {
 
                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What is today's topic?" className="w-full text-xl font-medium border-0 border-b bg-transparent focus:outline-none focus:ring-0 mb-4"/>
                 
-                {mediaPreview && (
-                    <div className="mb-4 p-4 border rounded-lg bg-gray-50">
-                        {mediaType === 'IMAGE' ? <img src={mediaPreview} alt="preview" className="max-h-96 object-contain mx-auto rounded" /> : <p className="text-gray-700">File attached: <strong>{mediaPreview}</strong></p>}
-                        <button onClick={() => { setMediaFile(null); setMediaPreview(null); setMediaType(null); }} className="text-red-500 text-sm mt-2">Remove</button>
+                {/* Hiển thị preview nhiều file */}
+                {mediaPreviews.length > 0 && (
+                    <div className="mb-4 p-4 border rounded-lg bg-gray-50 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {mediaPreviews.map(preview => (
+                            <div key={preview.id} className="relative group">
+                                {preview.type === 'IMAGE' ? (
+                                    <img src={preview.url} alt={preview.name} className="w-full h-24 object-cover rounded" />
+                                ) : (
+                                    <div className="w-full h-24 flex flex-col items-center justify-center bg-gray-200 rounded p-2 text-center">
+                                        <FaPaperclip className="text-2xl text-gray-500 mb-1" />
+                                        <p className="text-xs text-gray-700 break-all">{preview.name}</p>
+                                    </div>
+                                )}
+                                <button 
+                                    onClick={() => handleRemoveFile(preview.id)} 
+                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 )}
 
                 <textarea rows="8" value={content} onChange={(e) => setContent(e.target.value)} className="w-full text-lg border border-gray-300 rounded p-4 focus:outline-none focus:border-black" placeholder="Write your memory..."></textarea>
                 
-                {/* Barre d'outils et bouton Sauvegarder */}
+                {/* === KHÔI PHỤC THANH CÔNG CỤ ĐẦY ĐỦ === */}
                 <div className="flex items-center gap-x-6 mt-6">
                     <button onClick={handleSave} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full shadow disabled:bg-gray-400">
                         {isLoading ? 'Saving...' : 'Save'}
                     </button>
                     
-                    {/* === BARRE D'OUTILS COMPLÈTE RESTAURÉE === */}
                     <div className="flex gap-4 items-center text-gray-600 text-lg bg-white px-4 py-2 rounded shadow border">
                         <button type="button" className="hover:text-blue-500 transition"><FaUndo /></button>
                         <button type="button" className="hover:text-blue-500 transition"><FaRedo /></button>
                         <button type="button" className="hover:text-blue-500 transition"><FaMapMarkerAlt /></button>
                         
-                        <button type="button" onClick={() => documentInputRef.current?.click()} className="hover:text-blue-500 transition"><FaPaperclip /></button>
-                        <input type="file" accept=".pdf,.doc,.docx" onChange={handleFileChange} ref={documentInputRef} style={{ display: 'none' }} />
-
+                        <button type="button" onClick={() => fileInputRef.current?.click()} className="hover:text-blue-500 transition"><FaPaperclip /></button>
                         <button type="button" className="hover:text-blue-500 transition"><FaSmile /></button>
-
-                        <button type="button" onClick={() => imageInputRef.current?.click()} className="hover:text-blue-500 transition"><FaImage /></button>
-                        <input type="file" accept="image/*,video/*,audio/*" onChange={handleFileChange} ref={imageInputRef} style={{ display: 'none' }} />
-
+                        <button type="button" onClick={() => fileInputRef.current?.click()} className="hover:text-blue-500 transition"><FaImage /></button>
+                        
+                        <input 
+                            type="file" 
+                            multiple 
+                            onChange={handleFileChange} 
+                            ref={fileInputRef} 
+                            style={{ display: 'none' }} 
+                        />
+                        
                         <button type="button" className="hover:text-blue-500 transition"><FaItalic /></button>
                         <button type="button" className="hover:text-blue-500 transition"><FaBold /></button>
                         <button type="button" className="hover:text-blue-500 transition"><FaUnderline /></button>

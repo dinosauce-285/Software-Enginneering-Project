@@ -116,25 +116,30 @@ export const getEmotions = async () => {
 };
 
 /**
- * Upload một file media cho một memory đã tồn tại.
- * @param {string} memoryId - ID của memory
- * @param {File} file - File object để upload
+ * Tải lên NHIỀU file media cho một memory.
+ * @param {string} memoryId - ID của memory.
+ * @param {File[]} files - Một mảng các đối tượng File để upload.
  */
-export const uploadMediaForMemory = async (memoryId, file) => {
+export const uploadMediaForMemory = async (memoryId, files) => {
   const token = localStorage.getItem('accessToken');
-  if (!token) {
-    throw new Error('No access token found.');
-  }
+  if (!token) throw new Error('No access token found.');
+  if (!files || files.length === 0) return; // Không làm gì nếu không có file
 
-
+  // 1. Tạo một đối tượng FormData
   const formData = new FormData();
-  formData.append('file', file);
+
+  // 2. Lặp qua mảng file và thêm từng file vào FormData
+  // Tên trường 'files' phải khớp với tên trong FilesInterceptor của backend
+  files.forEach(file => {
+    formData.append('files', file);
+  });
 
   try {
+    // 3. Gửi request với FormData
     const response = await apiClient.post(`/memories/${memoryId}/media`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data', // Quan trọng cho việc upload file
       },
     });
     return response.data;

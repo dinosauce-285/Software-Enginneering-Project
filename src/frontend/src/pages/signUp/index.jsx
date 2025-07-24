@@ -11,7 +11,6 @@ import logo from '../../assets/logo.png';
 import fbLogo from '../../assets/fbLogo.png';
 import ggLogo from '../../assets/ggLogo.png';
 
-
 function SignUp() {
     const [formData, setFormData] = useState({ display_name: '', email: '', password: '' });
     const [gender, setGender] = useState('');
@@ -47,10 +46,9 @@ function SignUp() {
             const dateObject = new Date(year, month - 1, day);
             const finalUserData = { ...formData, gender, dateOfBirth: dateObject.toISOString() };
             await signUpUser(finalUserData);
-            alert('Đăng ký thành công! Vui lòng đăng nhập.');
             navigate('/login');
         } catch (err) {
-            setError(err.message || 'Đã có lỗi xảy ra.');
+            setError(err.message || 'An error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -58,7 +56,7 @@ function SignUp() {
 
     const handleSocialSignIn = async (providerName) => {
         if (providerName === 'facebook') {
-            alert("Chức năng Đăng nhập bằng Facebook đang chờ Meta xác minh.\nVui lòng sử dụng Đăng nhập bằng Google hoặc Email.");
+            alert("The Facebook login feature is awaiting verification from Meta.\nPlease use Google or Email to log in.");
             return;
         }
         const provider = new GoogleAuthProvider();
@@ -68,12 +66,11 @@ function SignUp() {
             const result = await signInWithPopup(auth, provider);
             const idToken = await result.user.getIdToken();
             await authenticateWithFirebase(idToken);
-            alert(`Đăng nhập bằng Google thành công!`);
             navigate('/dashboard');
         } catch (err) {
-            console.error(`Lỗi đăng nhập Google:`, err);
+            console.error(`Google sign-in error:`, err);
             if (err.code !== 'auth/popup-closed-by-user') {
-                setError(`Đã có lỗi xảy ra khi đăng nhập bằng Google.`);
+                setError(`An error occurred during Google sign-in.`);
             }
         } finally {
             setLoading(false);
@@ -84,21 +81,19 @@ function SignUp() {
         <div className="w-screen flex bg-[#f9f9f2]">
             <div className="w-1/2 h-screen"><img src={accountBanner} alt="Banner" className="h-full w-full object-cover" /></div>
             
-            {/* --- BƯỚC 2: Thêm `relative` vào container bên phải để định vị nút con --- */}
             <div className="w-1/2 max-h-screen overflow-y-auto flex flex-col items-center bg-[#f9f9f2] relative">
                 
-                {/* --- BƯỚC 3: Thêm nút X ở đây --- */}
                 <button 
                     onClick={() => navigate('/')} 
                     className="absolute top-4 right-4 text-gray-500 hover:text-black transition-colors"
-                    aria-label="Close" // Thêm aria-label để cải thiện accessibility
+                    aria-label="Close"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
 
-                <form onSubmit={handleSubmit} className="w-full flex flex-col items-center pt-16"> {/* Thêm padding-top để nút X không che mất nội dung */}
+                <form onSubmit={handleSubmit} className="w-full flex flex-col items-center pt-16">
                     <div className="h-[20%] w-[70%] flex flex-col justify-center items-center">
                         <img src={logo} className="h-[30%] mb-3" alt="Logo" />
                         <div className="text-lg font-poppins text-2xl">Sign up</div>

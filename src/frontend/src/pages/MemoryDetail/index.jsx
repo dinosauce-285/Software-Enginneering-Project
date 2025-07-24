@@ -109,6 +109,7 @@
 //         </AppLayout>
 //     );
 // }
+// src/pages/MemoryDetail/index.jsx
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
@@ -118,9 +119,8 @@ import { getMemoryById, deleteMemoryById } from '../../services/api';
 import { 
     CalendarDaysIcon, MapPinIcon, HashtagIcon, ArrowLeftIcon, HeartIcon,
     EllipsisHorizontalIcon, PencilIcon, ShareIcon, TrashIcon
-} from '../../components/Icons'; // Giả sử bạn có file này
+} from '../../components/Icons';
 
-// Component hiển thị khi đang tải
 const LoadingDetail = () => (
     <div className="flex items-center justify-center h-full">
         <p className="text-xl text-gray-500">Loading memory...</p>
@@ -128,7 +128,6 @@ const LoadingDetail = () => (
 );
 
 export default function MemoryDetail() {
-    // --- State & Hooks ---
     const { memoryId } = useParams();
     const navigate = useNavigate();
     
@@ -139,7 +138,6 @@ export default function MemoryDetail() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
-    // --- Logic ---
     useEffect(() => {
         const fetchMemory = async () => {
             if (!memoryId) return;
@@ -181,7 +179,6 @@ export default function MemoryDetail() {
         }
     };
 
-    // --- Render States ---
     if (isLoading) {
         return <AppLayout><LoadingDetail /></AppLayout>;
     }
@@ -192,7 +189,7 @@ export default function MemoryDetail() {
                 <div className="flex flex-col items-center justify-center h-full text-center p-8">
                     <h1 className="text-4xl font-bold">404 - Not Found</h1>
                     <p className="text-xl mt-2">This memory could not be found or you don't have permission to view it.</p>
-                    <RouterLink to="/dashboard" className="mt-6 px-5 py-2 bg-black text-white rounded-lg">
+                    <RouterLink to="/dashboard" className="mt-6 px-5 py-2 bg-black text-white rounded-lg cursor-pointer">
                         ← Back to Dashboard
                     </RouterLink>
                 </div>
@@ -207,41 +204,32 @@ export default function MemoryDetail() {
     const tagsString = Array.isArray(memory.memoryTags) ? memory.memoryTags.map(({ tag }) => tag ? `#${tag.name}` : '').join(' ') : '';
     const emotionName = memory.emotion?.name || 'N/A';
     const emotionSymbol = memory.emotion?.symbol || '';
-
-    // --- Main Render ---
+    
     return (
         <AppLayout>
-            <main className="py-6 px-4">
-                <div className="max-w-5xl mx-auto bg-[#F9F9F2] p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200">
+            <main className="py-6">
+              <div className="w-full bg-[#F9F9F2] p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200">
 
                     {/* Header Section */}
                     <div className="flex justify-between items-start mb-8">
                         <div className="flex flex-col gap-3 text-lg text-gray-800">
                             <div className="flex items-center gap-3 flex-wrap"><CalendarDaysIcon className="w-6 h-6 text-gray-600"/><span>{date}</span><span className="text-gray-400">•</span><span>{time}</span></div>
-                            {/* <div className="flex items-center gap-3"><MapPinIcon className="w-6 h-6 text-gray-600"/><span>{memory.location}</span></div> */}
-                            
-                            {/* === THAY ĐỔI Ở ĐÂY: HIỂN THỊ SYMBOL BÊN CẠNH TÊN EMOTION === */}
-                            <div className="flex items-center gap-3">
-                                <HeartIcon className="w-6 h-6 text-gray-600"/>
-                                <span>Emotion: <strong>{emotionName}</strong></span>
-                                {emotionSymbol && <span className="text-2xl ml-1">{emotionSymbol}</span>}
-                            </div>
-                            
+                            <div className="flex items-center gap-3"><MapPinIcon className="w-6 h-6 text-gray-600"/><span>{memory.location || 'Unknown Location'}</span></div>
+                            <div className="flex items-center gap-3"><HeartIcon className="w-6 h-6 text-gray-600"/><span>Emotion: <strong>{emotionName}</strong>{emotionSymbol && <span className="text-2xl ml-1">{emotionSymbol}</span>}</span></div>
                             {tagsString && <div className="flex items-center gap-3"><HashtagIcon className="w-6 h-6 text-gray-600"/><span className="text-blue-600">{tagsString}</span></div>}
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <RouterLink to="/dashboard" className="p-2 rounded-full hover:bg-gray-200 transition-colors"><ArrowLeftIcon className="w-6 h-6 text-gray-700" /></RouterLink>
+                         
                             <div className="relative" ref={menuRef}>
                                 <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-full hover:bg-gray-200 transition-colors">
                                     <EllipsisHorizontalIcon className="w-6 h-6 text-gray-700" />
                                 </button>
                                 {isMenuOpen && (
                                     <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-xl border z-10">
-                                        <a href="#" className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100"><PencilIcon className="w-5 h-5" /> Edit</a>
-                                        <a href="#" className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100"><ShareIcon className="w-5 h-5" /> Share</a>
-                                        
-                                        {/* === THAY ĐỔI Ở ĐÂY: NÚT DELETE GỌI HÀM handleDelete === */}
-                                        <button onClick={handleDelete} className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-gray-100 text-left">
+                                        <a href="#" className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer"><PencilIcon className="w-5 h-5" /> Edit</a>
+                                        <a href="#" className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer"><ShareIcon className="w-5 h-5" /> Share</a>
+                                        <button onClick={handleDelete} className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-gray-100 text-left cursor-pointer">
                                             <TrashIcon className="w-5 h-5" /> Delete
                                         </button>
                                     </div>
@@ -259,11 +247,11 @@ export default function MemoryDetail() {
                     {/* Full Content */}
                     <article className="mt-8 pt-6 border-t border-gray-300"><p className="text-base md:text-lg text-gray-800 leading-relaxed whitespace-pre-wrap">{memory.content}</p></article>
 
-                    {/* Media Gallery */}
+                    {/* Media Gallery with Masonry Layout */}
                     {memory.media && memory.media.length > 0 && (
                         <section className="mt-10 pt-6 border-t border-gray-300">
                             <h3 className="text-2xl font-bold text-gray-800 mb-6">Media Gallery</h3>
-                            <div className="columns-1 md:columns-2 gap-6">
+                            <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
                                 {memory.media.map((item) => (
                                     <div key={item.mediaID} className="w-full mb-6 break-inside-avoid">
                                         {item.type === 'IMAGE' && (<img src={item.url} alt={`Media for ${memory.title}`} className="w-full h-auto object-cover rounded-lg shadow-sm border"/>)}
@@ -278,7 +266,7 @@ export default function MemoryDetail() {
                 
                 {/* Bottom Back Link */}
                 <div className="mt-12 text-center">
-                    <RouterLink to="/dashboard" className="text-lg text-gray-600 hover:text-black hover:underline transition-colors">
+                    <RouterLink to="/dashboard" className="text-lg text-gray-600 hover:text-black hover:underline transition-colors cursor-pointer">
                         ← Back to all memories
                     </RouterLink>
                 </div>

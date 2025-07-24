@@ -30,10 +30,9 @@ function LogIn() {
                 rememberMe: rememberMe,
             };
             await loginUser(finalCredentials); 
-            alert('Đăng nhập thành công!');
             navigate('/dashboard');
         } catch (err) {
-            setError(err.message || 'Email hoặc mật khẩu không chính xác.');
+            setError('Invalid email or password.');
         } finally {
             setLoading(false);
         }
@@ -41,7 +40,7 @@ function LogIn() {
     
     const handleSocialSignIn = async (providerName) => {
         if (providerName === 'facebook') {
-            alert("Chức năng Đăng nhập bằng Facebook đang chờ Meta xác minh.\nVui lòng sử dụng Đăng nhập bằng Google hoặc Email.");
+            alert("The Facebook login feature is awaiting verification from Meta.\nPlease use Google or Email to log in.");
             return;
         }
         const provider = new GoogleAuthProvider();
@@ -51,12 +50,12 @@ function LogIn() {
             const result = await signInWithPopup(auth, provider);
             const idToken = await result.user.getIdToken();
             await authenticateWithFirebase(idToken);
-            alert(`Đăng nhập bằng Google thành công!`);
+            alert(`Successfully signed in with Google!`);
             navigate('/dashboard');
         } catch (err) {
-            console.error(`Lỗi đăng nhập Google:`, err);
+            console.error(`Google sign-in error:`, err);
             if (err.code !== 'auth/popup-closed-by-user') {
-                setError(`Đã có lỗi xảy ra khi đăng nhập bằng Google.`);
+                setError(`An error occurred during Google sign-in.`);
             }
         } finally {
             setLoading(false);
@@ -66,11 +65,7 @@ function LogIn() {
     return (
         <div className="w-screen flex bg-[#f9f9f2] ">
             <div className="w-1/2 h-screen"><img src={accountBanner} alt="Banner" className="h-full w-full object-cover" /></div>
-            
-            {/* BƯỚC 1: Thêm class `relative` vào container của form */}
             <div className="w-1/2 max-h-screen overflow-y-auto flex flex-col items-center bg-[#f9f9f2] justify-center relative">
-
-                {/* BƯỚC 2: Thêm nút X ở đây */}
                 <button 
                     onClick={() => navigate('/')} 
                     className="absolute top-4 right-4 text-gray-500 hover:text-black transition-colors"
@@ -80,8 +75,6 @@ function LogIn() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-
-                {/* BƯỚC 3: Giữ nguyên form, không cần thay đổi gì thêm */}
                 <form onSubmit={handleSubmit} className="w-full flex flex-col items-center justify-center">
                     <div className="h-[20%] w-[70%] flex flex-col justify-center items-center">
                         <img src={logo} className="h-[30%] mb-3" alt="Logo" />

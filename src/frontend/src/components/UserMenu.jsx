@@ -1,59 +1,174 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // <<< 1. Import hook để chuyển hướng
-import { FiSettings, FiHelpCircle, FiLogOut, FiChevronDown } from "react-icons/fi";
-import { logoutUser } from '../services/api'; // <<< 2. Import hàm đăng xuất
+// import { useState, useEffect, useRef } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { FiSettings, FiLogOut, FiChevronDown } from "react-icons/fi";
+// import { logoutUser } from '../services/api';
+
+// export default function UserMenu() {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const navigate = useNavigate();
+//   const menuRef = useRef(null);
+
+//   useEffect(() => {
+//     const handleClickOutside = (event) => {
+//       if (menuRef.current && !menuRef.current.contains(event.target)) {
+//         setIsOpen(false);
+//       }
+//     };
+//     document.addEventListener("mousedown", handleClickOutside);
+//     return () => {
+//       document.removeEventListener("mousedown", handleClickOutside);
+//     };
+//   }, [menuRef]);
+
+//   const handleLogout = () => {
+//     logoutUser();
+//     navigate('/login');
+//   };
+
+//   const handleNavigate = (path) => {
+//     navigate(path);
+//     setIsOpen(false);
+//   }
+
+//   return (
+//     <div className="relative" ref={menuRef}>
+//       <button
+//         className="flex items-center gap-2 cursor-pointer p-1 rounded-full transition-colors duration-200 hover:bg-gray-100"
+//         onClick={() => setIsOpen(!isOpen)}
+//       >
+//         <img
+//           src="/src/assets/avt.avif"
+//           alt="User Avatar"
+//           className="w-9 h-9 rounded-full object-cover"
+//         />
+//         <FiChevronDown
+//           className={`text-sm text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+//         />
+//       </button>
+
+//       <div
+//         className={`
+//           absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg border z-50 overflow-hidden
+//           transition-all duration-300 ease-in-out
+//           ${isOpen ? 'transform opacity-100 scale-100' : 'transform opacity-0 scale-95 pointer-events-none'}
+//         `}
+//       >
+//         <div className="px-4 py-3 border-b border-gray-200">
+//             <div className="flex items-center gap-3">
+//                 <img
+//                     src="/src/assets/avt.avif"
+//                     alt="User Avatar"
+//                     className="w-10 h-10 rounded-full object-cover"
+//                 />
+//                 <div>
+//                     <p className="font-semibold text-sm text-gray-800">John Doe</p>
+//                     <p className="text-xs text-gray-500">john.doe@example.com</p>
+//                 </div>
+//             </div>
+//         </div>
+
+//         <ul className="text-sm text-gray-700 py-1">
+//           <li
+//             onClick={() => handleNavigate('/settings')}
+//             className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-3 transition-all duration-200 hover:pl-5"
+//           >
+//             <FiSettings className="text-gray-500" /> Settings
+//           </li>
+//           <li
+//             onClick={handleLogout}
+//             className="px-4 py-2 hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-3 transition-all duration-200 hover:pl-5"
+//           >
+//             <FiLogOut /> Log Out
+//           </li>
+//         </ul>
+//       </div>
+//     </div>
+//   );
+// }
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FiSettings, FiLogOut, FiChevronDown } from "react-icons/fi";
+import { logoutUser } from '../services/api';
 
 export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate(); // <<< 3. Khởi tạo hook
+  const navigate = useNavigate();
+  const menuRef = useRef(null);
 
-  // --- 4. TẠO HÀM XỬ LÝ ĐĂNG XUẤT ---
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef]);
+
   const handleLogout = () => {
-    logoutUser(); // Xóa token khỏi localStorage
-    // Không cần alert ở đây, việc chuyển trang đã là thông báo rõ ràng
-    navigate('/login'); // Chuyển hướng người dùng về trang đăng nhập
+    logoutUser();
+    navigate('/login');
   };
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    setIsOpen(false);
+  }
+
   return (
-    <div className="relative">
-      {/* Avatar + Button */}
-      <div 
-        className="flex items-center gap-2 cursor-pointer" 
+    <div className="relative" ref={menuRef}>
+      <button
+        className="flex items-center gap-2 cursor-pointer p-1 rounded-full transition-colors duration-200 hover:bg-gray-100"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <img 
-          src="/src/assets/avt.avif" 
-          alt="avatar" 
-          className="w-9 h-9 rounded-full object-cover" 
+        <img
+          src="/src/assets/avt.avif"
+          alt="User Avatar"
+          className="w-9 h-9 rounded-full object-cover"
         />
-        <FiChevronDown className="text-sm text-gray-500" />
-      </div>
+        <FiChevronDown
+          className={`text-sm text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
 
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div 
-          className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md border z-50"
-          // Thêm onMouseLeave để menu tự đóng khi chuột rời đi (trải nghiệm tốt hơn)
-          onMouseLeave={() => setIsOpen(false)} 
-        >
-          <ul className="text-sm text-gray-700">
-            <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-              <FiSettings /> Cài đặt
-            </li>
-            <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-              <FiHelpCircle /> Trợ giúp
-            </li>
-            
-            {/* --- 5. GẮN HÀM onClick VÀO MỤC ĐĂNG XUẤT --- */}
-            <li 
-              onClick={handleLogout} 
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 flex items-center gap-2"
-            >
-              <FiLogOut /> Đăng xuất
-            </li>
-          </ul>
+      <div
+        className={`
+          absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg border z-50 overflow-hidden
+          transition-all duration-300 ease-in-out
+          ${isOpen ? 'transform opacity-100 scale-100' : 'transform opacity-0 scale-95 pointer-events-none'}
+        `}
+      >
+        <div className="px-4 py-3 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+                <img
+                    src="/src/assets/avt.avif"
+                    alt="User Avatar"
+                    className="w-10 h-10 rounded-full object-cover"
+                />
+                <div>
+                    <p className="font-semibold text-sm text-gray-800">John Doe</p>
+                    <p className="text-xs text-gray-500">john.doe@example.com</p>
+                </div>
+            </div>
         </div>
-      )}
+
+        <ul className="text-sm text-gray-700 py-1">
+          <li
+            onClick={() => handleNavigate('/settings')}
+            className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-3 transition-all duration-200 hover:pl-5"
+          >
+            <FiSettings className="text-gray-500" /> Settings
+          </li>
+          <li
+            onClick={handleLogout}
+            className="px-4 py-2 hover:bg-red-50 text-red-600 cursor-pointer flex items-center gap-3 transition-all duration-200 hover:pl-5"
+          >
+            <FiLogOut /> Log Out
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

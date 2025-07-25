@@ -1,22 +1,196 @@
-import '../../index.css';
-import CustomInput from '../../components/input';
-import MediaButton from '../../components/mediaButton';
+// import { useState, useEffect } from 'react';
+// import { Link, useNavigate } from 'react-router-dom';
+// import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+// import { auth } from '../../firebase';
+// import { loginUser, authenticateWithFirebase } from '../../services/api';
+// import '../../index.css';
+
+// // Components & Assets
+// import CustomInput from '../../components/input';
+// import MediaButton from '../../components/mediaButton';
+// import accountBanner from '../../assets/accountBanner.jpg';
+// import logo from '../../assets/logo.png';
+// import fbLogo from '../../assets/fbLogo.png';
+// import ggLogo from '../../assets/ggLogo.png';
+// import { FiX } from 'react-icons/fi';
+
+// function LogIn() {
+//     const [formData, setFormData] = useState({ email: '', password: '' });
+//     const [rememberMe, setRememberMe] = useState(false);
+//     const [error, setError] = useState(null);
+//     const [loading, setLoading] = useState(false);
+//     const [isMounted, setIsMounted] = useState(false);
+//     const navigate = useNavigate();
+
+//     // Kích hoạt animation khi component được mount
+//     useEffect(() => {
+//         const timer = setTimeout(() => setIsMounted(true), 100);
+//         return () => clearTimeout(timer);
+//     }, []);
+
+//     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+//         setError(null);
+//         setLoading(true);
+//         try {
+//             await loginUser({ ...formData, rememberMe });
+//             navigate('/dashboard');
+//         } catch (err) {
+//             setError('Invalid email or password. Please try again.');
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+    
+//     const handleSocialSignIn = async (providerName) => {
+//         if (providerName === 'facebook') {
+//             alert("The Facebook login feature is awaiting verification from Meta.\nPlease use Google or Email to log in.");
+//             return;
+//         }
+//         const provider = new GoogleAuthProvider();
+//         setError(null);
+//         setLoading(true);
+//         try {
+//             const result = await signInWithPopup(auth, provider);
+//             const idToken = await result.user.getIdToken();
+//             await authenticateWithFirebase(idToken);
+//             navigate('/dashboard');
+//         } catch (err) {
+//             console.error(`Google sign-in error:`, err);
+//             if (err.code !== 'auth/popup-closed-by-user') {
+//                 setError('An error occurred during Google sign-in.');
+//             }
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     return (
+//         <div className="w-screen h-screen flex bg-gray-50">
+//             {/* Left Panel: Image Banner */}
+//             <div className="hidden lg:block w-1/2 h-full">
+//                 <img src={accountBanner} alt="Banner" className="h-full w-full object-cover" />
+//             </div>
+
+//             {/* Right Panel: Login Form with Animation */}
+//             <div className={`w-full lg:w-1/2 h-full flex flex-col items-center justify-center p-8 bg-white relative transition-all duration-1000 ease-out
+//                 ${isMounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}
+//             >
+//                 <button 
+//                     onClick={() => navigate('/')} 
+//                     className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-full transition-all"
+//                     aria-label="Close"
+//                 >
+//                     <FiX size={24} />
+//                 </button>
+
+//                 <div className="w-full max-w-sm">
+//                     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+//                         {/* Header */}
+//                         <div className="text-center mb-4">
+//                             <img src={logo} className="h-12 mx-auto mb-4" alt="Logo" />
+//                             <h1 className="text-3xl font-bold text-gray-800 font-poppins">Welcome Back!</h1>
+//                             <p className="text-gray-500 mt-2">
+//                                 Don't have an account?{' '}
+//                                 <Link to="/signup" className="font-semibold text-blue-600 hover:underline">Sign up</Link>
+//                             </p>
+//                         </div>
+                        
+//                         {/* Social Logins */}
+//                         <div className="flex flex-col gap-3">
+//                             <MediaButton 
+//                                 onClick={() => handleSocialSignIn('google')} 
+//                                 disabled={loading}
+//                             >
+//                                 <img src={ggLogo} alt="Google" className="h-5 w-5 mr-3" /> Continue with Google
+//                             </MediaButton>
+//                             <MediaButton 
+//                                 onClick={() => handleSocialSignIn('facebook')} 
+//                                 disabled={loading}
+//                             >
+//                                 <img src={fbLogo} alt="Facebook" className="h-5 w-5 mr-3" /> Continue with Facebook
+//                             </MediaButton>
+//                         </div>
+                        
+//                         {/* Separator */}
+//                         <div className="flex items-center gap-4">
+//                             <hr className="flex-grow border-gray-200" />
+//                             <span className="text-gray-400 text-xs font-semibold">OR</span>
+//                             <hr className="flex-grow border-gray-200" />
+//                         </div>
+                        
+//                         {/* Email & Password Inputs */}
+//                         <div className="flex flex-col gap-4">
+//                             <CustomInput text="Email" placeholder="Enter your email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+//                             <CustomInput text="Password" placeholder="Enter your password" type="password" name="password" value={formData.password} onChange={handleChange} required />
+//                         </div>
+
+//                         {error && <p className="text-red-500 text-sm text-center -my-2">{error}</p>}
+                        
+//                         {/* Remember Me & Forgot Password */}
+//                         <div className='flex justify-between items-center w-full text-sm'>
+//                             <div className="flex items-center gap-2">
+//                                 <input
+//                                     type="checkbox"
+//                                     id="remember"
+//                                     className="w-4 h-4 accent-gray-800 rounded"
+//                                     checked={rememberMe}
+//                                     onChange={(e) => setRememberMe(e.target.checked)}
+//                                 />
+//                                 <label htmlFor="remember" className="text-gray-600 cursor-pointer">
+//                                     Remember Me
+//                                 </label>
+//                             </div>
+//                             <Link to="/forgot-password" className="font-semibold text-blue-600 hover:underline">Forgot password?</Link>
+//                         </div>
+                        
+//                         {/* Submit Button */}
+//                         <button 
+//                             type="submit" 
+//                             disabled={loading} 
+//                             className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-100"
+//                         >
+//                             {loading ? 'Logging in...' : 'Log In'}
+//                         </button>
+//                     </form>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
+
+// export default LogIn;
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from '../../firebase';
 import { loginUser, authenticateWithFirebase } from '../../services/api';
+import '../../index.css';
+
+// Components & Assets
+import CustomInput from '../../components/CustomInput';
+import MediaButton from '../../components/mediaButton';
 import accountBanner from '../../assets/accountBanner.jpg';
 import logo from '../../assets/logo.png';
 import fbLogo from '../../assets/fbLogo.png';
 import ggLogo from '../../assets/ggLogo.png';
+import { FiX } from 'react-icons/fi';
 
 function LogIn() {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     const navigate = useNavigate();
+
+    // Kích hoạt animation khi component được mount
+    useEffect(() => {
+        const timer = setTimeout(() => setIsMounted(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -25,14 +199,10 @@ function LogIn() {
         setError(null);
         setLoading(true);
         try {
-            const finalCredentials = {
-                ...formData,
-                rememberMe: rememberMe,
-            };
-            await loginUser(finalCredentials); 
+            await loginUser({ ...formData, rememberMe });
             navigate('/dashboard');
         } catch (err) {
-            setError('Invalid email or password.');
+            setError('Invalid email or password. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -50,12 +220,11 @@ function LogIn() {
             const result = await signInWithPopup(auth, provider);
             const idToken = await result.user.getIdToken();
             await authenticateWithFirebase(idToken);
-            alert(`Successfully signed in with Google!`);
             navigate('/dashboard');
         } catch (err) {
             console.error(`Google sign-in error:`, err);
             if (err.code !== 'auth/popup-closed-by-user') {
-                setError(`An error occurred during Google sign-in.`);
+                setError('An error occurred during Google sign-in.');
             }
         } finally {
             setLoading(false);
@@ -63,56 +232,94 @@ function LogIn() {
     };
 
     return (
-        <div className="w-screen flex bg-[#f9f9f2] ">
-            <div className="w-1/2 h-screen"><img src={accountBanner} alt="Banner" className="h-full w-full object-cover" /></div>
-            <div className="w-1/2 max-h-screen overflow-y-auto flex flex-col items-center bg-[#f9f9f2] justify-center relative">
+        <div className="w-screen h-screen flex bg-gray-50">
+            {/* Left Panel: Image Banner */}
+            <div className="hidden lg:block w-1/2 h-full">
+                <img src={accountBanner} alt="Banner" className="h-full w-full object-cover" />
+            </div>
+
+            {/* Right Panel: Login Form with Animation */}
+            <div className={`w-full lg:w-1/2 h-full flex flex-col items-center justify-center p-8 bg-white relative transition-all duration-1000 ease-out
+                ${isMounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}
+            >
                 <button 
                     onClick={() => navigate('/')} 
-                    className="absolute top-4 right-4 text-gray-500 hover:text-black transition-colors"
+                    className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-full transition-all"
                     aria-label="Close"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <FiX size={24} />
                 </button>
-                <form onSubmit={handleSubmit} className="w-full flex flex-col items-center justify-center">
-                    <div className="h-[20%] w-[70%] flex flex-col justify-center items-center">
-                        <img src={logo} className="h-[30%] mb-3" alt="Logo" />
-                        <div className="text-lg font-poppins text-2xl">Login</div>
-                        <div className="loginQues flex flex-row">
-                            <div className="pr-[4px] font-poppins">Doesn't have an account?</div>
-                            <Link to="/signup" className="font-poppins underline">Sign up</Link>
+
+                <div className="w-full max-w-sm">
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                        {/* Header */}
+                        <div className="text-center mb-4">
+                            <img src={logo} className="h-12 mx-auto mb-4" alt="Logo" />
+                            <h1 className="text-3xl font-bold text-gray-800 font-poppins">Welcome Back!</h1>
+                            <p className="text-gray-500 mt-2">
+                                Don't have an account?{' '}
+                                <Link to="/signup" className="font-semibold text-blue-600 hover:underline">Sign up</Link>
+                            </p>
                         </div>
-                    </div>
-                    <div className="h-[15%] w-[70%] flex flex-col justify-center items-center gap-2 ">
-                        <MediaButton onClick={() => handleSocialSignIn('facebook')} disabled={loading}><img src={fbLogo} alt="Facebook" className="h-5 w-5 mr-[7px]" />Continue with Facebook</MediaButton>
-                        <MediaButton onClick={() => handleSocialSignIn('google')} disabled={loading}><img src={ggLogo} alt="Google" className="h-5 w-5 mr-[7px]" />Continue with Google</MediaButton>
-                    </div>
-                    <div className="h-[2%] w-[70%] flex items-center justify-center gap-4 mt-3">
-                        <hr className="flex-grow border-black opacity-30" /><span className="text-black opacity-30 text-sm">OR</span><hr className="flex-grow border-black opacity-30" />
-                    </div>
-                    <div className="flex w-[70%] mt-4 flex-col">
-                        <CustomInput text="Email" placeholder="Enter your email" name="email" type="email" value={formData.email} onChange={handleChange} required />
-                        <CustomInput text="Password" placeholder="Enter your password" type="password" name="password" value={formData.password} onChange={handleChange} required />
-                    </div>
-                    {error && <p className="w-[70%] text-red-500 text-center mt-2">{error}</p>}
-                    <div className='flex flex-row justify-between items-center w-[70%] mt-4 mb-10'>
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="remember"
-                                className="w-3 h-3 accent-black"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
-                            />
-                            <label htmlFor="remember" className="text-sm font-poppins text-[#000000]">
-                                Remember Me
-                            </label>
+                        
+                        {/* Social Logins */}
+                        <div className="flex flex-col gap-3">
+                            <MediaButton 
+                                onClick={() => handleSocialSignIn('google')} 
+                                disabled={loading}
+                            >
+                                <img src={ggLogo} alt="Google" className="h-5 w-5 mr-3" /> Continue with Google
+                            </MediaButton>
+                            <MediaButton 
+                                onClick={() => handleSocialSignIn('facebook')} 
+                                disabled={loading}
+                            >
+                                <img src={fbLogo} alt="Facebook" className="h-5 w-5 mr-3" /> Continue with Facebook
+                            </MediaButton>
                         </div>
-                        <div><Link to="/forgot-password" className="font-poppins underline text-sm">Forgot your password</Link></div>
-                    </div>
-                    <button type="submit" disabled={loading} className="w-[70%] py-3 bg-black text-white font-poppins rounded-lg hover:bg-gray-600 transition-all duration-200 mb-10 disabled:bg-gray-400">{loading ? 'Logging in...' : 'Log in'}</button>
-                </form>
+                        
+                        {/* Separator */}
+                        <div className="flex items-center gap-4">
+                            <hr className="flex-grow border-gray-200" />
+                            <span className="text-gray-400 text-xs font-semibold">OR</span>
+                            <hr className="flex-grow border-gray-200" />
+                        </div>
+                        
+                        {/* Email & Password Inputs */}
+                        <div className="flex flex-col gap-4">
+                            <CustomInput text="Email" placeholder="Enter your email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+                            <CustomInput text="Password" placeholder="Enter your password" type="password" name="password" value={formData.password} onChange={handleChange} required />
+                        </div>
+
+                        {error && <p className="text-red-500 text-sm text-center -my-2">{error}</p>}
+                        
+                        {/* Remember Me & Forgot Password */}
+                        <div className='flex justify-between items-center w-full text-sm'>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="remember"
+                                    className="w-4 h-4 accent-gray-800 rounded"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                />
+                                <label htmlFor="remember" className="text-gray-600 cursor-pointer">
+                                    Remember Me
+                                </label>
+                            </div>
+                            <Link to="/forgot-password" className="font-semibold text-blue-600 hover:underline">Forgot password?</Link>
+                        </div>
+                        
+                        {/* Submit Button */}
+                        <button 
+                            type="submit" 
+                            disabled={loading} 
+                            className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-100"
+                        >
+                            {loading ? 'Logging in...' : 'Log In'}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );

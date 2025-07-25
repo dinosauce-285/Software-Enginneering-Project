@@ -1,5 +1,5 @@
 import '../../index.css'
-import CustomInput from '../../components/input'
+import CustomInput from '../../components/CustomInput'
 import { Link } from 'react-router-dom';
 function ForgetPass() {
     return (

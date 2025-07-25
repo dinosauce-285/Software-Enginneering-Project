@@ -3,11 +3,15 @@
 function MediaButton({ children, onClick, disabled, type = 'button' }) {
     return (
         <button
-            // Thuộc tính type='button' ngăn nút này submit form.
             type={type}
             onClick={onClick}
             disabled={disabled}
-            className="hover:bg-gray-700 transition-all duration-200 bg-black text-white h-[3rem] w-[20rem] rounded-[2rem] flex flex-row justify-center items-center mb-[2%] disabled:bg-gray-500 disabled:cursor-not-allowed"
+
+            className="w-full h-12 flex justify-center items-center bg-white text-gray-700 font-semibold border border-gray-300 rounded-lg shadow-sm
+                       transition-all duration-300
+                       hover:border-gray-400 hover:shadow-md hover:-translate-y-1
+                       active:bg-gray-100
+                       disabled:bg-gray-200 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
         >
             {children}
         </button>

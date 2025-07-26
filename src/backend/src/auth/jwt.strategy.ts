@@ -3,6 +3,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@prisma/client'; // Import Role
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -19,7 +20,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: { sub: string; email: string }) {
+  // --- HÀM VALIDATE ĐÃ ĐƯỢỢC CẬP NHẬT ---
+  // Payload giờ đây sẽ chứa thêm `role`
+  async validate(payload: { sub: string; email: string; role: Role }) {
     const user = await this.prisma.user.findUnique({
       where: { userID: payload.sub },
     });
@@ -27,11 +30,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user) {
       throw new UnauthorizedException();
     }
-
-    // Loại bỏ passwordHash một cách an toàn trước khi trả về
-    const { passwordHash, ...result } = user;
     
-    // Gán đối tượng user (không có passwordHash) vào request
-    return result;
+    // Chúng ta trả về toàn bộ object user, vì nó đã chứa role.
+    // Việc loại bỏ passwordHash sẽ được thực hiện ở controller hoặc service
+    // để đảm bảo req.user luôn đầy đủ thông tin cho các Guard.
+    return user;
   }
 }

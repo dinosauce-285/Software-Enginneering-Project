@@ -1,5 +1,9 @@
-// src/auth/auth.service.ts
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { FirebaseService } from '../firebase/firebase.service';
@@ -10,15 +14,31 @@ import { FirebaseAuthDto } from './dto/firebase-auth.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as bcrypt from 'bcrypt';
-import { Gender } from '@prisma/client';
+import { Gender, Role, User } from '@prisma/client';
+
+// Định nghĩa một kiểu dữ liệu trả về mới, chứa cả token và thông tin user
+// Kiểu Omit<User, 'passwordHash'> sẽ tạo ra một type mới từ User nhưng loại bỏ đi trường passwordHash
+type AuthResponse = {
+  accessToken: string;
+  user: Omit<User, 'passwordHash'>;
+};
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService, private readonly jwtService: JwtService, private readonly firebaseService: FirebaseService, private readonly mailService: MailService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly firebaseService: FirebaseService,
+    private readonly mailService: MailService,
+  ) {}
 
-  async signUp(dto: SignUpDto): Promise<{ accessToken: string }> {
+  /**
+   * Đăng ký người dùng mới bằng Email, trả về AuthResponse.
+   */
+  async signUp(dto: SignUpDto): Promise<AuthResponse> {
     const existingUser = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existingUser) throw new ConflictException('Email already in use.');
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
       data: {
@@ -30,12 +50,19 @@ export class AuthService {
         dateOfBirth: new Date(dto.dateOfBirth),
       },
     });
-    // Sau khi đăng ký, cấp một token ngắn hạn mặc định
-    return this.generateAppJwt(user.userID, user.email, '1d');
+
+    const accessToken = await this.generateAppJwt(user.userID, user.email, user.role, '1d');
+    
+    // Loại bỏ passwordHash khỏi object user trước khi trả về
+    const { passwordHash, ...userResult } = user;
+    
+    return { accessToken, user: userResult };
   }
 
-  // --- HÀM SIGNIN ĐÃ ĐƯỢỢC CẬP NHẬT ---
-  async signIn(dto: SignInDto): Promise<{ accessToken: string }> {
+  /**
+   * Đăng nhập người dùng bằng Email, trả về AuthResponse.
+   */
+  async signIn(dto: SignInDto): Promise<AuthResponse> {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user || user.auth_provider !== 'email' || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials.');
@@ -44,12 +71,18 @@ export class AuthService {
     if (!isPasswordMatching) {
       throw new UnauthorizedException('Invalid credentials.');
     }
-    // Quyết định thời hạn của token dựa trên lựa chọn của người dùng
     const expiresIn = dto.rememberMe ? '30d' : '1d';
-    return this.generateAppJwt(user.userID, user.email, expiresIn);
+    const accessToken = await this.generateAppJwt(user.userID, user.email, user.role, expiresIn);
+    
+    const { passwordHash, ...userResult } = user;
+    
+    return { accessToken, user: userResult };
   }
 
-  async authenticateWithFirebase(dto: FirebaseAuthDto): Promise<{ accessToken: string }> {
+  /**
+   * Xác thực qua Firebase (Google/Facebook), trả về AuthResponse.
+   */
+  async authenticateWithFirebase(dto: FirebaseAuthDto): Promise<AuthResponse> {
     let decodedToken;
     try {
       decodedToken = await this.firebaseService.verifyIdToken(dto.idToken);
@@ -59,6 +92,7 @@ export class AuthService {
     const { uid, email, picture, name } = decodedToken;
     const provider = decodedToken.firebase.sign_in_provider;
     let user = await this.prisma.user.findUnique({ where: { email } });
+
     if (!user) {
       user = await this.prisma.user.create({
         data: {
@@ -76,10 +110,16 @@ export class AuthService {
         throw new ConflictException(`This email is already registered with ${user.auth_provider}. Please log in using that method.`);
       }
     }
-    // Social login cũng mặc định cấp token ngắn hạn
-    return this.generateAppJwt(user.userID, user.email, '1d');
+    const accessToken = await this.generateAppJwt(user.userID, user.email, user.role, '1d');
+    
+    const { passwordHash, ...userResult } = user;
+    
+    return { accessToken, user: userResult };
   }
   
+  /**
+   * Gửi OTP quên mật khẩu.
+   */
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user || user.auth_provider !== 'email') {
@@ -95,6 +135,9 @@ export class AuthService {
     return { message: 'If a matching account exists, an email has been sent.' };
   }
 
+  /**
+   * Đặt lại mật khẩu mới bằng OTP.
+   */
   async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email, passwordResetOtp: dto.otp },
@@ -119,17 +162,20 @@ export class AuthService {
     return { message: 'Password has been reset successfully.' };
   }
   
-  // --- HÀM GENERATEAPPJWT ĐÃ ĐƯỢỢC NÂNG CẤP ---
-  private async generateAppJwt(userId: string, email: string, expiresIn: string): Promise<{ accessToken: string }> {
-    const payload = { sub: userId, email };
-    return {
-      accessToken: await this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_SECRET,
-        expiresIn: expiresIn, // Sử dụng thời hạn động
-      }),
-    };
+  /**
+   * Tạo JWT Token của ứng dụng, bao gồm cả vai trò (role).
+   */
+  private async generateAppJwt(userId: string, email: string, role: Role, expiresIn: string): Promise<string> {
+    const payload = { sub: userId, email, role };
+    return this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: expiresIn,
+    });
   }
 
+  /**
+   * Tạo mã OTP 6 số.
+   */
   private generateOtp(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }

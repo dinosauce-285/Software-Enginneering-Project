@@ -299,6 +299,9 @@ export default function CreateMemory() {
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
+    const fileImageRef = useRef(null);
+    const fileOtherRef = useRef(null);
+
     const years = Array.from({ length: getYear(new Date()) - 1989 }, (_, i) => 1990 + i).reverse();
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -352,18 +355,40 @@ export default function CreateMemory() {
             setError("Please fill in both topic and content.");
             return;
         }
+
+        // Kiểm tra độ dài tiêu đề
+        if (title.length > 255) {
+            setError("Title too long.");
+            return;
+        }
+
+        const rawTags = tags.split(',').map(tag => tag.trim()).filter(Boolean);
+
+        // Kiểm tra số lượng tag
+        if (rawTags.length > 10) {
+            setError("Maximum 10 tags allowed.");
+            return;
+        }
+
+        const invalidTags = rawTags.filter(tag => /\s/.test(tag.replace(/^#/, '')));
+        if (invalidTags.length > 0) {
+            setError(`Invalid hashtag(s): ${invalidTags.join(', ')}. Hashtags must not contain spaces.`);
+            return;
+        }
+
+        const tagsArray = rawTags.map(tag => tag.replace(/^#/, ''));
+
+        // === KIỂM TRA DUNG LƯỢNG FILE TRƯỚC KHI GỬI ===
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const oversizedFiles = mediaFiles.filter(file => file.size > maxFileSize);
+        if (oversizedFiles.length > 0) {
+            setError(`File "${oversizedFiles[0].name}" is too large. Maximum size allowed is 10MB.`);
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
         try {
-            const rawTags = tags.split(',').map(tag => tag.trim()).filter(Boolean);
-            const invalidTags = rawTags.filter(tag => /\s/.test(tag.replace(/^#/, '')));
-            if (invalidTags.length > 0) {
-                setError(`Invalid hashtag(s): ${invalidTags.join(', ')}. Hashtags must not contain spaces.`);
-                return;
-            }
-            const tagsArray = rawTags.map(tag => tag.replace(/^#/, ''));
-
-
             const memoryData = { title, content, emotionID: selectedEmotionId, tags: tagsArray, createdAt: selectedDate.toISOString() };
             const newMemory = await createMemory(memoryData);
             if (mediaFiles.length > 0) {
@@ -377,7 +402,6 @@ export default function CreateMemory() {
             setIsLoading(false);
         }
     };
-
     const selectedEmotion = emotions.find(e => e.emotionID === selectedEmotionId);
 
     return (
@@ -480,20 +504,85 @@ export default function CreateMemory() {
                 <textarea rows="8" value={content} onChange={(e) => setContent(e.target.value)} className="w-full text-lg border border-gray-300 rounded p-4 focus:outline-none focus:border-black" placeholder="Write your memory..."></textarea>
 
                 <div className="flex items-center gap-x-6 mt-6">
-                    <button onClick={handleSave} disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full shadow disabled:bg-gray-400 transition-transform hover:scale-105">
+                    {/* Nút Save */}
+                    <button
+                        onClick={handleSave}
+                        disabled={isLoading}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full shadow disabled:bg-gray-400 transition-transform hover:scale-105"
+                    >
                         {isLoading ? 'Saving...' : 'Save'}
                     </button>
 
+                    {/* Thanh công cụ */}
                     <div className="flex gap-4 items-center text-gray-600 text-lg bg-white px-4 py-2 rounded-lg shadow border">
-                        {[FaUndo, FaRedo, FaMapMarkerAlt, FaPaperclip, FaSmile, FaImage, FaItalic, FaBold, FaUnderline, FaAlignLeft, FaAlignCenter, FaAlignRight].map((Icon, index) => (
-                            <button key={index} type="button" onClick={Icon === FaImage || Icon === FaPaperclip ? () => fileInputRef.current?.click() : undefined} className="hover:text-blue-500 transition-transform transform hover:scale-110">
-                                <Icon />
-                            </button>
-                        ))}
-                        <input type="file" multiple onChange={handleFileChange} ref={fileInputRef} style={{ display: 'none' }} />
+                        {/* Các nút khác */}
+                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                            <FaUndo />
+                        </button>
+                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                            <FaRedo />
+                        </button>
+                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                            <FaMapMarkerAlt />
+                        </button>
+
+                        {/* Nút chọn file bất kỳ */}
+                        <button
+                            type="button"
+                            onClick={() => fileOtherRef.current?.click()}
+                            className="hover:text-blue-500 transition-transform transform hover:scale-110"
+                        >
+                            <FaPaperclip />
+                        </button>
+
+                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                            <FaSmile />
+                        </button>
+
+                        {/* Nút chọn ảnh */}
+                        <button
+                            type="button"
+                            onClick={() => fileImageRef.current?.click()}
+                            className="hover:text-blue-500 transition-transform transform hover:scale-110"
+                        >
+                            <FaImage />
+                        </button>
+
+                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                            <FaItalic />
+                        </button>
+                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                            <FaBold />
+                        </button>
+                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                            <FaUnderline />
+                        </button>
+                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                            <FaAlignCenter />
+                        </button>
                     </div>
+
+                    {/* Inputs ẩn */}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileChange}
+                        ref={fileImageRef}
+                        style={{ display: 'none' }}
+                    />
+                    <input
+                        type="file"
+                        multiple
+                        onChange={handleFileChange}
+                        ref={fileOtherRef}
+                        style={{ display: 'none' }}
+                    />
                 </div>
+
+                {/* Hiển thị lỗi */}
                 {error && <p className="text-red-500 mt-4">{error}</p>}
+
             </div>
         </AppLayout>
     );

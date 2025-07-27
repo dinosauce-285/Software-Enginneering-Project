@@ -65,6 +65,10 @@ model User {
   memories     Memory[]
   reminders    Reminder[]
   reports      Report[]
+
+  failedLoginAttempts Int      @default(0)
+  lockUntil     DateTime?
+
 }
 
 model Emotion {

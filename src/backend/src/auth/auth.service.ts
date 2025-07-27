@@ -16,8 +16,6 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import * as bcrypt from 'bcrypt';
 import { Gender, Role, User } from '@prisma/client';
 
-// Định nghĩa một kiểu dữ liệu trả về mới, chứa cả token và thông tin user
-// Kiểu Omit<User, 'passwordHash'> sẽ tạo ra một type mới từ User nhưng loại bỏ đi trường passwordHash
 type AuthResponse = {
   accessToken: string;
   user: Omit<User, 'passwordHash'>;
@@ -30,7 +28,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly firebaseService: FirebaseService,
     private readonly mailService: MailService,
-  ) {}
+  ) { }
 
   /**
    * Đăng ký người dùng mới bằng Email, trả về AuthResponse.
@@ -52,10 +50,10 @@ export class AuthService {
     });
 
     const accessToken = await this.generateAppJwt(user.userID, user.email, user.role, '1d');
-    
+
     // Loại bỏ passwordHash khỏi object user trước khi trả về
     const { passwordHash, ...userResult } = user;
-    
+
     return { accessToken, user: userResult };
   }
 
@@ -64,18 +62,59 @@ export class AuthService {
    */
   async signIn(dto: SignInDto): Promise<AuthResponse> {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+
     if (!user || user.auth_provider !== 'email' || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials.');
     }
-    const isPasswordMatching = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!isPasswordMatching) {
-      throw new UnauthorizedException('Invalid credentials.');
+
+    // Check if account is currently locked
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      const remainingMs = user.lockUntil.getTime() - Date.now();
+      const remainingSeconds = Math.ceil(remainingMs / 1000);
+      const remainingMinutes = Math.ceil(remainingSeconds / 60);
+
+      throw new UnauthorizedException(
+        `Account is temporarily locked. Please try again after ${remainingMinutes} minute(s) (${remainingSeconds} seconds).`
+      );
     }
+
+    // Check password
+    const isPasswordMatching = await bcrypt.compare(dto.password, user.passwordHash);
+
+    if (!isPasswordMatching) {
+      const failedAttempts = (user.failedLoginAttempts ?? 0) + 1;
+
+      if (failedAttempts >= 5) {
+        const lockUntil = new Date(Date.now() + 10 * 60 * 1000); // lock for 10 minutes
+        await this.prisma.user.update({
+          where: { userID: user.userID },
+          data: {
+            failedLoginAttempts: failedAttempts,
+            lockUntil: lockUntil,
+          },
+        });
+        throw new UnauthorizedException('Too many failed login attempts. Account is locked for 10 minutes.');
+      } else {
+        await this.prisma.user.update({
+          where: { userID: user.userID },
+          data: { failedLoginAttempts: failedAttempts },
+        });
+        throw new UnauthorizedException('Invalid credentials.');
+      }
+    }
+
+    // Successful login: reset failedLoginAttempts & lockUntil
+    await this.prisma.user.update({
+      where: { userID: user.userID },
+      data: { failedLoginAttempts: 0, lockUntil: null },
+    });
+
     const expiresIn = dto.rememberMe ? '30d' : '1d';
     const accessToken = await this.generateAppJwt(user.userID, user.email, user.role, expiresIn);
-    
+
+    // Exclude passwordHash before returning
     const { passwordHash, ...userResult } = user;
-    
+
     return { accessToken, user: userResult };
   }
 
@@ -111,12 +150,12 @@ export class AuthService {
       }
     }
     const accessToken = await this.generateAppJwt(user.userID, user.email, user.role, '1d');
-    
+
     const { passwordHash, ...userResult } = user;
-    
+
     return { accessToken, user: userResult };
   }
-  
+
   /**
    * Gửi OTP quên mật khẩu.
    */
@@ -161,7 +200,7 @@ export class AuthService {
     });
     return { message: 'Password has been reset successfully.' };
   }
-  
+
   /**
    * Tạo JWT Token của ứng dụng, bao gồm cả vai trò (role).
    */

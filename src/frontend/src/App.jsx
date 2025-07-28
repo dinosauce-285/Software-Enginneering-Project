@@ -44,6 +44,9 @@
 
 // src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import DeleteAccount from './pages/DeleteAccount';
 import LandingPage from './pages/landingPage/index.jsx';
 import SignUp from './pages/signUp/index.jsx';
@@ -56,11 +59,12 @@ import MemoryDetail from './pages/MemoryDetail/index.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import SettingLayout from './pages/Setting/index.jsx';
-import AdminRoute from './components/AdminRoute'; // <<< Import AdminRoute
+import AdminRoute from './components/AdminRoute';
 
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer position="top-center" autoClose={2000} />
       <Routes>
         <Route element={<RedirectIfAuthenticated />}>
           <Route path="/" element={<LandingPage />} />
@@ -81,7 +85,6 @@ function App() {
         {/* Route chỉ dành cho ADMIN */}
         <Route element={<AdminRoute />}>
           <Route path="/user-management" element={<UserManagementLayout />} />
-          {/* Thêm các trang admin khác ở đây nếu có */}
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />

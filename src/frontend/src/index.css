@@ -29,3 +29,30 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+
+
+.tiptap-rendered-content p {
+  margin-bottom: 0.5rem; 
+}
+
+.tiptap-rendered-content strong {
+  font-weight: 700; 
+}
+
+.tiptap-rendered-content em {
+  font-style: italic
+}
+
+.tiptap-rendered-content u {
+  text-decoration: underline; 
+}
+
+
+.tiptap-rendered-content [style*="text-align: center"] {
+  text-align: center;
+}
+
+.tiptap-rendered-content [style*="text-align: right"] {
+  text-align: right;
+}

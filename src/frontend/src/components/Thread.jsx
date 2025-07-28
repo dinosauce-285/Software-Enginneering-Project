@@ -87,8 +87,7 @@
 
 
 
-import React from 'react';
-
+import DOMPurify from 'dompurify';
 
 const Thread = ({ memory }) => {
   if (!memory || !memory.created_at) {
@@ -116,6 +115,9 @@ const Thread = ({ memory }) => {
 
   const emotionName = memory.emotion?.name || 'No Emotion';
   
+
+  const cleanContentHTML = DOMPurify.sanitize(memory.content);
+
   return (
     <div className="flex flex-col gap-3 bg-[#F9F9F2] rounded-2xl p-4 shadow-sm">
       <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-sm font-medium text-gray-700">
@@ -141,7 +143,11 @@ const Thread = ({ memory }) => {
 
       {memory.content && (
         <div className="relative max-h-24 overflow-hidden">
-          <p className="text-gray-700 text-base">{memory.content}</p>
+
+          <div 
+            className="text-gray-700 text-base tiptap-rendered-content"
+            dangerouslySetInnerHTML={{ __html: cleanContentHTML }} 
+          />
           <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#F9F9F2] to-transparent pointer-events-none" />
         </div>
       )}

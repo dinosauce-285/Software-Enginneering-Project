@@ -172,6 +172,7 @@ import {
 } from '../../components/Icons';
 import ShareDialog from '../SharingDialog';
 import DeleteDialog from '../DeleteDialog';
+import DOMPurify from 'dompurify';
 
 const LoadingDetail = () => (
   <div className="flex items-center justify-center h-full">
@@ -253,6 +254,7 @@ export default function MemoryDetail() {
   const tagsString = Array.isArray(memory.memoryTags) ? memory.memoryTags.map(({ tag }) => tag ? `#${tag.name}` : '').join(' ') : '';
   const emotionName = memory.emotion?.name || 'N/A';
   const emotionSymbol = memory.emotion?.symbol || '';
+  const cleanContent = DOMPurify.sanitize(memory.content);
 
   return (
     <AppLayout>
@@ -318,8 +320,11 @@ export default function MemoryDetail() {
           </div>
 
           {/* Content */}
-          <article className="mt-8 pt-6 border-t border-gray-300">
-            <p className="text-base md:text-lg text-gray-800 leading-relaxed whitespace-pre-wrap">{memory.content}</p>
+          <article className="mt-8 pt-6 border-t border-gray-300 tiptap-rendered-content">
+            <div 
+                className="text-base md:text-lg text-gray-800 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: cleanContent }}
+            />
           </article>
 
           {/* Gallery */}
@@ -328,10 +333,13 @@ export default function MemoryDetail() {
               <h3 className="text-2xl font-bold text-gray-800 mb-6">Media Gallery</h3>
               <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
                 {memory.media.map((item) => (
-                  <div key={item.mediaID} className="w-full mb-6 break-inside-avoid">
+                  <div 
+                    key={item.mediaID} 
+                    className="w-full mb-6 break-inside-avoid cursor-pointer transition-all duration-500 ease-in-out hover:shadow-xl hover:-translate-y-2 hover:scale-105"
+                  >
                     {item.type === 'IMAGE' && (<img src={item.url} alt={`Media for ${memory.title}`} className="w-full h-auto object-cover rounded-lg shadow-sm border" />)}
                     {item.type === 'VIDEO' && (<video controls src={item.url} className="w-full h-auto rounded-lg shadow-sm border">Your browser does not support the video tag.</video>)}
-                    {item.type === 'AUDIO' && (<div className="p-4 bg-white rounded-lg border"><audio controls src={item.url} className="w-full">Your browser does not support the audio element.</audio></div>)}
+                    {item.type === 'AUDIO' && (<div className="p-4 bg-white rounded-lg border shadow-sm"><audio controls src={item.url} className="w-full">Your browser does not support the audio element.</audio></div>)}
                   </div>
                 ))}
               </div>

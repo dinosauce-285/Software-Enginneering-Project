@@ -255,15 +255,22 @@ import AppLayout from '../../components/AppLayout';
 
 import {
     FaImage, FaPaperclip, FaSmile, FaBold, FaUnderline, FaItalic,
-    FaAlignLeft, FaAlignCenter, FaAlignRight, FaRedo, FaUndo,
-    FaMapMarkerAlt, FaTag, FaCalendarAlt
+    FaAlignCenter, FaMapMarkerAlt, FaTag, FaCalendarAlt
 } from 'react-icons/fa';
 import { FiChevronDown, FiX } from 'react-icons/fi';
+
 import DatePicker from 'react-datepicker';
 import { getYear, getMonth } from 'date-fns';
+import Picker from 'emoji-picker-react';
+
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
 
 import "react-datepicker/dist/react-datepicker.css";
 import '../../components/datePicker.css';
+import '../../components/tiptap.css';
 
 import { createMemory, getEmotions, uploadMediaForMemory } from '../../services/api';
 
@@ -280,27 +287,37 @@ const CustomDateInput = forwardRef(({ value, onClick, isOpen }, ref) => (
 
 export default function CreateMemory() {
     const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
     const [selectedEmotionId, setSelectedEmotionId] = useState('');
     const [tags, setTags] = useState('');
     const [selectedDate, setSelectedDate] = useState(new Date());
-
     const [mediaFiles, setMediaFiles] = useState([]);
     const [mediaPreviews, setMediaPreviews] = useState([]);
-
     const [emotions, setEmotions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-
     const [isEmotionDropdownOpen, setIsEmotionDropdownOpen] = useState(false);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
     const emotionDropdownRef = useRef(null);
-    const fileInputRef = useRef(null);
     const navigate = useNavigate();
-
     const fileImageRef = useRef(null);
     const fileOtherRef = useRef(null);
+    const emojiPickerRef = useRef(null);
+
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Underline,
+            TextAlign.configure({ types: ['heading', 'paragraph'] }),
+        ],
+        editorProps: {
+            attributes: {
+                class: 'min-h-[200px] w-full border border-gray-300 rounded p-4 focus:outline-none focus:border-black text-lg tiptap-editor',
+            },
+        },
+        content: '',
+    });
 
     const years = Array.from({ length: getYear(new Date()) - 1989 }, (_, i) => 1990 + i).reverse();
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -324,10 +341,18 @@ export default function CreateMemory() {
             if (emotionDropdownRef.current && !emotionDropdownRef.current.contains(event.target)) {
                 setIsEmotionDropdownOpen(false);
             }
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+                setIsEmojiPickerOpen(false);
+            }
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            mediaPreviews.forEach(preview => {
+                if (preview.url) URL.revokeObjectURL(preview.url);
+            });
+        };
+    }, [mediaPreviews]);
 
     const handleFileChange = (e) => {
         const newFiles = Array.from(e.target.files);
@@ -346,46 +371,47 @@ export default function CreateMemory() {
     const handleRemoveFile = (previewId) => {
         const previewToRemove = mediaPreviews.find(p => p.id === previewId);
         if (!previewToRemove) return;
+        if (previewToRemove.url) URL.revokeObjectURL(previewToRemove.url);
         setMediaFiles(prevFiles => prevFiles.filter(file => file.name !== previewToRemove.name || file.lastModified !== parseInt(previewId.split('-').pop())));
         setMediaPreviews(prevPreviews => prevPreviews.filter(p => p.id !== previewId));
     };
+    
+    const onEmojiClick = (emojiObject) => {
+        if (editor) {
+            editor.chain().focus().insertContent(emojiObject.emoji).run();
+        }
+        setIsEmojiPickerOpen(false);
+    };
 
     const handleSave = async () => {
-        if (!title.trim() || !content.trim()) {
+        if (!editor) return;
+        const content = editor.getHTML();
+        
+        if (!title.trim() || editor.isEmpty) {
             setError("Please fill in both topic and content.");
             return;
         }
-
-        // Kiểm tra độ dài tiêu đề
         if (title.length > 255) {
             setError("Title too long.");
             return;
         }
-
         const rawTags = tags.split(',').map(tag => tag.trim()).filter(Boolean);
-
-        // Kiểm tra số lượng tag
         if (rawTags.length > 10) {
             setError("Maximum 10 tags allowed.");
             return;
         }
-
         const invalidTags = rawTags.filter(tag => /\s/.test(tag.replace(/^#/, '')));
         if (invalidTags.length > 0) {
             setError(`Invalid hashtag(s): ${invalidTags.join(', ')}. Hashtags must not contain spaces.`);
             return;
         }
-
         const tagsArray = rawTags.map(tag => tag.replace(/^#/, ''));
-
-        // === KIỂM TRA DUNG LƯỢNG FILE TRƯỚC KHI GỬI ===
-        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const maxFileSize = 10 * 1024 * 1024;
         const oversizedFiles = mediaFiles.filter(file => file.size > maxFileSize);
         if (oversizedFiles.length > 0) {
             setError(`File "${oversizedFiles[0].name}" is too large. Maximum size allowed is 10MB.`);
             return;
         }
-
         setIsLoading(true);
         setError(null);
         try {
@@ -402,7 +428,22 @@ export default function CreateMemory() {
             setIsLoading(false);
         }
     };
+
+    const toggleAlignCenter = () => {
+        if (!editor) return;
+        if (editor.isActive({ textAlign: 'center' })) {
+            editor.chain().focus().unsetTextAlign().run();
+        } else {
+            editor.chain().focus().setTextAlign('center').run();
+        }
+    };
+
     const selectedEmotion = emotions.find(e => e.emotionID === selectedEmotionId);
+    const iconButtonClass = "w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-200 text-gray-600";
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <AppLayout>
@@ -412,6 +453,7 @@ export default function CreateMemory() {
                 </Link>
 
                 <h2 className="text-2xl font-bold text-center mb-6 pt-4">Create Memory</h2>
+                
                 <div className="flex items-center gap-3 mb-4">
                     <img src="/src/assets/avt.avif" className="w-10 h-10 rounded-full object-cover" alt="avatar" />
                     <p className="font-medium">Username</p>
@@ -500,11 +542,10 @@ export default function CreateMemory() {
                         ))}
                     </div>
                 )}
-
-                <textarea rows="8" value={content} onChange={(e) => setContent(e.target.value)} className="w-full text-lg border border-gray-300 rounded p-4 focus:outline-none focus:border-black" placeholder="Write your memory..."></textarea>
-
+                
+                <EditorContent editor={editor} />
+                
                 <div className="flex items-center gap-x-6 mt-6">
-                    {/* Nút Save */}
                     <button
                         onClick={handleSave}
                         disabled={isLoading}
@@ -513,76 +554,43 @@ export default function CreateMemory() {
                         {isLoading ? 'Saving...' : 'Save'}
                     </button>
 
-                    {/* Thanh công cụ */}
-                    <div className="flex gap-4 items-center text-gray-600 text-lg bg-white px-4 py-2 rounded-lg shadow border">
-                        {/* Các nút khác */}
-                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
-                            <FaUndo />
-                        </button>
-                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
-                            <FaRedo />
-                        </button>
-                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
-                            <FaMapMarkerAlt />
-                        </button>
+                    <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-full shadow border">
+                        <button type="button" className={`${iconButtonClass} hover:text-blue-500`}><FaMapMarkerAlt /></button>
+                        <button type="button" onClick={() => fileOtherRef.current?.click()} className={`${iconButtonClass} hover:text-blue-500`}><FaPaperclip /></button>
+                        
+                        <div className="relative" ref={emojiPickerRef}>
+                            <button type="button" onClick={() => setIsEmojiPickerOpen(!isEmojiPickerOpen)} className={`${iconButtonClass} hover:text-blue-500`}>
+                                <FaSmile />
+                            </button>
+                            {isEmojiPickerOpen && (
+                                <div className="absolute z-30 bottom-full mb-2">
+                                    <Picker onEmojiClick={onEmojiClick} />
+                                </div>
+                            )}
+                        </div>
 
-                        {/* Nút chọn file bất kỳ */}
-                        <button
-                            type="button"
-                            onClick={() => fileOtherRef.current?.click()}
-                            className="hover:text-blue-500 transition-transform transform hover:scale-110"
-                        >
-                            <FaPaperclip />
-                        </button>
+                        <button type="button" onClick={() => fileImageRef.current?.click()} className={`${iconButtonClass} hover:text-blue-500`}><FaImage /></button>
+                        <div className="w-px h-5 bg-gray-200 mx-1"></div>
 
-                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
-                            <FaSmile />
-                        </button>
-
-                        {/* Nút chọn ảnh */}
-                        <button
-                            type="button"
-                            onClick={() => fileImageRef.current?.click()}
-                            className="hover:text-blue-500 transition-transform transform hover:scale-110"
-                        >
-                            <FaImage />
-                        </button>
-
-                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
-                            <FaItalic />
-                        </button>
-                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                        <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`${iconButtonClass} ${editor.isActive('bold') ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}>
                             <FaBold />
                         </button>
-                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                        <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={`${iconButtonClass} ${editor.isActive('italic') ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}>
+                            <FaItalic />
+                        </button>
+                        <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={`${iconButtonClass} ${editor.isActive('underline') ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}>
                             <FaUnderline />
                         </button>
-                        <button type="button" className="hover:text-blue-500 transition-transform transform hover:scale-110">
+                        <button type="button" onClick={toggleAlignCenter} className={`${iconButtonClass} ${editor.isActive({ textAlign: 'center' }) ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'}`}>
                             <FaAlignCenter />
                         </button>
                     </div>
 
-                    {/* Inputs ẩn */}
-                    <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleFileChange}
-                        ref={fileImageRef}
-                        style={{ display: 'none' }}
-                    />
-                    <input
-                        type="file"
-                        multiple
-                        onChange={handleFileChange}
-                        ref={fileOtherRef}
-                        style={{ display: 'none' }}
-                    />
+                    <input type="file" accept="image/*" multiple onChange={handleFileChange} ref={fileImageRef} style={{ display: 'none' }} />
+                    <input type="file" multiple onChange={handleFileChange} ref={fileOtherRef} style={{ display: 'none' }} />
                 </div>
 
-                {/* Hiển thị lỗi */}
                 {error && <p className="text-red-500 mt-4">{error}</p>}
-
             </div>
         </AppLayout>
     );

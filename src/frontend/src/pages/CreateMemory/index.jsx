@@ -248,6 +248,7 @@
 //         </AppLayout>
 //     );
 // }
+
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/AppLayout';
@@ -275,6 +276,9 @@ import './CreateMemory.css';
 import { createMemory, getEmotions, uploadMediaForMemory } from '../../services/api';
 import { LocationSearchInput } from '../../components/LocationSearchInput';
 
+// 1. IMPORT HOOK `useAuth`
+import { useAuth } from '../../contexts/AuthContext';
+
 // --- HELPER COMPONENTS ---
 
 const PrevIcon = () => (<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>);
@@ -299,6 +303,9 @@ const InputChip = ({ icon, children }) => (
 
 
 export default function CreateMemory() {
+    // 2. GỌI HOOK `useAuth` ĐỂ LẤY THÔNG TIN USER
+    const { user } = useAuth();
+
     const [title, setTitle] = useState('');
     const [selectedEmotionId, setSelectedEmotionId] = useState('');
     const [tags, setTags] = useState('');
@@ -412,15 +419,12 @@ export default function CreateMemory() {
         }
     };
     
-    // SỬA LỖI: Thêm hàm toggle cho Align Center
     const toggleAlignCenter = () => {
         if (!editor) return;
         
         if (editor.isActive({ textAlign: 'center' })) {
-            // Nếu đã căn giữa, thì bỏ căn lề (trở về mặc định là trái)
             editor.chain().focus().unsetTextAlign().run();
         } else {
-            // Nếu chưa, thì đặt căn giữa
             editor.chain().focus().setTextAlign('center').run();
         }
     };
@@ -433,7 +437,7 @@ export default function CreateMemory() {
 
     return (
         <AppLayout>
-            <div className="relative w-full mx-auto bg-white p-8 rounded-lg mt-8">
+            <div className="relative max-w-3xl mx-auto bg-white p-8 rounded-lg mt-8">
                 <header className="flex justify-between items-center pb-4 border-b border-gray-200">
                     <h1 className="text-xl font-bold text-gray-800">New Memory</h1>
                     <div className="flex items-center gap-4">
@@ -450,8 +454,15 @@ export default function CreateMemory() {
 
                 <div className="mt-6">
                      <div className="flex items-center gap-3 mb-6">
-                        <img src="/src/assets/avt.avif" className="w-10 h-10 rounded-full object-cover" alt="avatar" />
-                        <p className="font-semibold text-gray-800">Username</p>
+                        <img 
+                            src={user?.avatarUrl || "/src/assets/avt.avif"}
+                            className="w-10 h-10 rounded-full object-cover" 
+                            alt="avatar" 
+                        />
+                        {/* 3. HIỂN THỊ USERNAME ĐỘNG */}
+                        <p className="font-semibold text-gray-800">
+                            {user ? user.display_name : 'Loading...'}
+                        </p>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -565,7 +576,6 @@ export default function CreateMemory() {
                             <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={iconButtonClass(editor.isActive('bold'))}><FaBold/></button>
                             <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={iconButtonClass(editor.isActive('italic'))}><FaItalic/></button>
                             <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={iconButtonClass(editor.isActive('underline'))}><FaUnderline/></button>
-                            {/* SỬA LỖI: Gọi hàm toggleAlignCenter thay vì lệnh set một chiều */}
                             <button type="button" onClick={toggleAlignCenter} className={iconButtonClass(editor.isActive({ textAlign: 'center' }))}><FaAlignCenter/></button>
                         </div>
                     </div>

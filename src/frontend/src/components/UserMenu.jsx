@@ -90,7 +90,13 @@ import { useNavigate } from 'react-router-dom';
 import { FiSettings, FiLogOut, FiChevronDown } from "react-icons/fi";
 import { logoutUser } from '../services/api';
 
+// 1. IMPORT `useAuth` TỪ CONTEXT
+import { useAuth } from '../contexts/AuthContext';
+
 export default function UserMenu() {
+  // 2. GỌI HOOK ĐỂ LẤY THÔNG TIN USER
+  const { user } = useAuth();
+
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const menuRef = useRef(null);
@@ -110,11 +116,18 @@ export default function UserMenu() {
   const handleLogout = () => {
     logoutUser();
     navigate('/login');
+    // Cân nhắc reload trang để đảm bảo mọi state được reset
+    // window.location.reload(); 
   };
 
   const handleNavigate = (path) => {
     navigate(path);
     setIsOpen(false);
+  }
+
+  // Nếu chưa có thông tin user (đang tải hoặc chưa đăng nhập), có thể không render gì cả
+  if (!user) {
+    return null; // Hoặc một skeleton loader
   }
 
   return (
@@ -123,10 +136,11 @@ export default function UserMenu() {
         className="flex items-center gap-2 cursor-pointer p-1 rounded-full transition-colors duration-200 hover:bg-gray-100"
         onClick={() => setIsOpen(!isOpen)}
       >
+        {/* 3. SỬ DỤNG AVATAR CỦA USER */}
         <img
-          src="/src/assets/avt.avif"
+          src={user.avatar || "/src/assets/avt.avif"} // Dùng avatar của user, nếu không có thì dùng ảnh mặc định
           alt="User Avatar"
-          className="w-9 h-9 rounded-full object-cover"
+          className="w-9 h-9 rounded-full object-cover bg-gray-200" // Thêm bg để có placeholder đẹp
         />
         <FiChevronDown
           className={`text-sm text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
@@ -143,13 +157,18 @@ export default function UserMenu() {
         <div className="px-4 py-3 border-b border-gray-200">
             <div className="flex items-center gap-3">
                 <img
-                    src="/src/assets/avt.avif"
+                    src={user.avatar || "/src/assets/avt.avif"} // Hiển thị avatar cả trong menu
                     alt="User Avatar"
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-10 h-10 rounded-full object-cover bg-gray-200"
                 />
                 <div>
-                    <p className="font-semibold text-sm text-gray-800">John Doe</p>
-                    <p className="text-xs text-gray-500">john.doe@example.com</p>
+                    {/* 4. HIỂN THỊ TÊN VÀ EMAIL ĐỘNG */}
+                    <p className="font-semibold text-sm text-gray-800 truncate" title={user.display_name}>
+                        {user.display_name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate" title={user.email}>
+                        {user.email}
+                    </p>
                 </div>
             </div>
         </div>

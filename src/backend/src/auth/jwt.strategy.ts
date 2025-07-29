@@ -20,8 +20,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  // --- HÀM VALIDATE ĐÃ ĐƯỢỢC CẬP NHẬT ---
-  // Payload giờ đây sẽ chứa thêm `role`
   async validate(payload: { sub: string; email: string; role: Role }) {
     const user = await this.prisma.user.findUnique({
       where: { userID: payload.sub },
@@ -31,9 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException();
     }
     
-    // Chúng ta trả về toàn bộ object user, vì nó đã chứa role.
-    // Việc loại bỏ passwordHash sẽ được thực hiện ở controller hoặc service
-    // để đảm bảo req.user luôn đầy đủ thông tin cho các Guard.
+
     return user;
   }
 }

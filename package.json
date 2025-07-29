@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@nestjs/config": "^4.0.2",
     "@tiptap/extension-placeholder": "^3.0.7",
     "dompurify": "^3.2.6"
   },

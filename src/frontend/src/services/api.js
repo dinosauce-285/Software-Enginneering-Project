@@ -194,31 +194,17 @@
 //   }
 // };
 
-
-
 import axios from 'axios';
 
-/**
- * ===================================================================
- * BƯỚC 1: CẤU HÌNH API CLIENT TRUNG TÂM
- * ===================================================================
- * Tạo một instance của axios với các cài đặt mặc định.
- * Nếu backend đổi địa chỉ, chỉ cần sửa ở một nơi duy nhất.
- */
+// Cấu hình một instance của axios với các cài đặt mặc định
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000', // Địa chỉ của server NestJS
+  baseURL: 'http://localhost:3000', // Địa chỉ của server backend
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-/**
- * ===================================================================
- * BƯỚC 2: THIẾT LẬP INTERCEPTOR TỰ ĐỘNG GỬI TOKEN
- * ===================================================================
- * Interceptor sẽ "chặn" mọi request gửi đi để kiểm tra và sửa đổi.
- * Nó sẽ tự động lấy token từ localStorage và gắn vào header Authorization.
- */
+// Interceptor tự động gắn token vào mọi request gửi đi
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -232,16 +218,13 @@ apiClient.interceptors.request.use(
   }
 );
 
-/**
- * ===================================================================
- * BƯỚC 3: ĐỊNH NGHĨA CÁC HÀM GỌI API
- * ===================================================================
- */
 
-// --- AUTHENTICATION ---
+// ========================================================
+//                 AUTHENTICATION SERVICES
+// ========================================================
 
 /**
- * Đăng ký tài khoản mới bằng email.
+ * Đăng ký tài khoản mới.
  */
 export const signUpUser = async (userData) => {
   try {
@@ -253,8 +236,7 @@ export const signUpUser = async (userData) => {
 };
 
 /**
- * Đăng nhập bằng email.
- * Lưu accessToken và thông tin user vào localStorage.
+ * Đăng nhập và lưu thông tin vào localStorage.
  */
 export const loginUser = async (credentials) => {
   try {
@@ -263,15 +245,14 @@ export const loginUser = async (credentials) => {
       localStorage.setItem('accessToken', response.data.accessToken);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
-    return response.data; // Trả về { accessToken, user }
+    return response.data;
   } catch (error) {
     throw error.response.data;
   }
 };
 
 /**
- * Xác thực qua Firebase (Google/Facebook).
- * Lưu accessToken và thông tin user vào localStorage.
+ * Đăng nhập bằng Firebase và lưu thông tin.
  */
 export const authenticateWithFirebase = async (idToken) => {
   try {
@@ -287,7 +268,21 @@ export const authenticateWithFirebase = async (idToken) => {
 };
 
 /**
- * Đăng xuất người dùng bằng cách xóa dữ liệu khỏi localStorage.
+ * Lấy thông tin cá nhân của người dùng đã đăng nhập.
+ * Hàm này rất quan trọng cho AuthContext.
+ */
+export const getProfile = async () => {
+    try {
+        // Endpoint này cần được backend hỗ trợ: nhận token và trả về thông tin user.
+        const response = await apiClient.get('/auth/profile');
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+/**
+ * Đăng xuất bằng cách xóa dữ liệu khỏi localStorage.
  */
 export const logoutUser = () => {
   try {
@@ -299,11 +294,12 @@ export const logoutUser = () => {
 };
 
 
-// --- MEMORIES ---
+// ========================================================
+//                    MEMORY SERVICES
+// ========================================================
 
 /**
- * Lấy danh sách Ký ức của người dùng đã đăng nhập.
- * Interceptor sẽ tự động lo việc đính kèm token.
+ * Lấy danh sách Ký ức của người dùng.
  */
 export const getMyMemories = async () => {
   try {
@@ -327,7 +323,7 @@ export const createMemory = async (memoryData) => {
 };
 
 /**
- * Lấy chi tiết một Ký ức bằng ID.
+ * Lấy chi tiết một Ký ức.
  */
 export const getMemoryById = async (memoryId) => {
   try {
@@ -339,7 +335,7 @@ export const getMemoryById = async (memoryId) => {
 };
 
 /**
- * Xóa một Ký ức bằng ID.
+ * Xóa một Ký ức.
  */
 export const deleteMemoryById = async (memoryId) => {
   try {
@@ -350,25 +346,24 @@ export const deleteMemoryById = async (memoryId) => {
   }
 };
 
-
-// --- MEDIA ---
+// ========================================================
+//                     MEDIA SERVICES
+// ========================================================
 
 /**
- * Tải lên một hoặc nhiều file media cho một Ký ức.
+ * Tải lên media cho một Ký ức.
  */
 export const uploadMediaForMemory = async (memoryId, files) => {
   if (!files || files.length === 0) return;
 
   const formData = new FormData();
   files.forEach(file => {
-    formData.append('files', file); // Tên 'files' phải khớp với Interceptor ở backend
+    formData.append('files', file);
   });
 
   try {
     const response = await apiClient.post(`/memories/${memoryId}/media`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data', // Cần thiết cho việc upload file
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   } catch (error) {
@@ -376,7 +371,10 @@ export const uploadMediaForMemory = async (memoryId, files) => {
   }
 };
 
-// --- EMOTIONS ---
+
+// ========================================================
+//                   EMOTION SERVICES
+// ========================================================
 
 /**
  * Lấy danh sách tất cả các cảm xúc.

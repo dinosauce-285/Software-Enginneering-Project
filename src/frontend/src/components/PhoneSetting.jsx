@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import SettingRow from './SettingRow';
-import { FaEnvelope, FaPhone } from 'react-icons/fa'; // thêm ở đầu file
+import { FaEnvelope, FaPhone } from 'react-icons/fa'; 
 
 
 export default function PhoneSetting() {
     const [phone, setPhone] = useState("0325609027");
     const [showModal, setShowModal] = useState(false);
-    const [step, setStep] = useState("inputPhone"); // "inputPhone" | "chooseMethod" | "inputOtp"
+    const [step, setStep] = useState("inputPhone"); 
     const [newPhone, setNewPhone] = useState("");
     const [error, setError] = useState("");
-    const [selectedMethod, setSelectedMethod] = useState(""); // "email" | "oldPhone"
+    const [selectedMethod, setSelectedMethod] = useState(""); 
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [failCount, setFailCount] = useState(0);
@@ -31,7 +31,7 @@ export default function PhoneSetting() {
         setLoading(true);
         setError("");
         try {
-            // Gọi API gửi OTP (demo)
+
             await fetch("/api/send-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -57,7 +57,6 @@ export default function PhoneSetting() {
         setLoading(true);
         setError("");
         try {
-            // Gọi API xác thực OTP và thay đổi phone
             const res = await fetch("/api/replace-phone", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

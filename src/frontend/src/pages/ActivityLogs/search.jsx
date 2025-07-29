@@ -12,7 +12,7 @@ function SearchDropdown() {
   };
 
   return (
-    <div className="mb-6 w-full max-w-[220px] relative"> {/* giới hạn độ rộng tối đa */}
+    <div className="mb-6 w-full max-w-[220px] relative">
       <div className="bg-gray-200 rounded-full shadow-sm px-4 py-2 flex justify-between items-center">
         <div className="flex items-center gap-2 w-full">
           <FiSearch className="text-gray-400 shrink-0" />
@@ -32,7 +32,7 @@ function SearchDropdown() {
         </button>
       </div>
 
-      {/* Dropdown content */}
+
       {showDropdown && (
         <div className="absolute z-10 mt-1 right-0 bg-white rounded shadow border w-40">
           <button

@@ -1,46 +1,41 @@
-// src/frontend/components/CreateMemoryForm.jsx
+
 import React, { useState, useEffect } from 'react';
 import { createMemory, getEmotions } from '../services/api';
 
 const CreateMemoryForm = ({ onMemoryCreated }) => {
-  // State cho các trường input của form
+
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
   const [emotionID, setEmotionID] = useState('');
 
-  // State để quản lý danh sách emotions từ API
+
   const [emotions, setEmotions] = useState([]);
   
-  // State để quản lý trạng thái của form
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Sử dụng useEffect để gọi API lấy danh sách emotions khi component được render lần đầu
+
   useEffect(() => {
     const fetchEmotions = async () => {
       try {
         const data = await getEmotions();
         setEmotions(data);
-        // Tự động chọn emotion đầu tiên trong danh sách làm giá trị mặc định
         if (data && data.length > 0) {
           setEmotionID(data[0].emotionID);
         }
       } catch (err) {
         console.error('Failed to fetch emotions:', err);
-        // Hiển thị lỗi cho người dùng nếu không thể tải danh sách cảm xúc
         setError('Could not load emotions. Please try refreshing the page.');
       }
     };
 
     fetchEmotions();
-  }, []); // Mảng rỗng [] đảm bảo useEffect chỉ chạy 1 lần duy nhất
+  }, []);
 
-  // Hàm xử lý khi người dùng submit form
   const handleSubmit = async (event) => {
     event.preventDefault();
     
-    // Kiểm tra emotionID đã được chọn chưa
     if (!emotionID) {
       setError('Please select an emotion.');
       return;
@@ -49,7 +44,6 @@ const CreateMemoryForm = ({ onMemoryCreated }) => {
     setError(null);
     setIsLoading(true);
 
-    // Chuyển chuỗi tags thành mảng, loại bỏ khoảng trắng và các tag rỗng
     const tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
 
     const memoryData = {
@@ -63,20 +57,16 @@ const CreateMemoryForm = ({ onMemoryCreated }) => {
       const newMemory = await createMemory(memoryData);
       console.log('Memory created successfully:', newMemory);
       
-      // Thông báo cho component cha rằng đã tạo memory thành công
       if (onMemoryCreated) {
         onMemoryCreated(newMemory);
       }
       
-      // Reset các trường của form sau khi tạo thành công
       setTitle('');
       setContent('');
       setTags('');
-      // Giữ lại emotion đã chọn cho lần tạo tiếp theo nếu muốn
 
     } catch (err) {
       console.error('Failed to create memory:', err);
-      // Hiển thị thông báo lỗi từ backend hoặc một thông báo chung
       setError(err.message || 'An unexpected error occurred while saving.');
     } finally {
       setIsLoading(false);
@@ -119,7 +109,7 @@ const CreateMemoryForm = ({ onMemoryCreated }) => {
           onChange={(e) => setEmotionID(e.target.value)}
           required
           style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-          disabled={emotions.length === 0} // Vô hiệu hóa nếu chưa tải xong
+          disabled={emotions.length === 0} 
         >
           {emotions.length === 0 && <option>Loading emotions...</option>}
           {emotions.map(emotion => (

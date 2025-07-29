@@ -340,7 +340,7 @@ function SignUp() {
                                     {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => (<option key={i + 1} value={i + 1}>{month}</option>))}
                                 </CustomSelect>
                                 <CustomSelect label="Year" name="year" value={birthDate.year} onChange={handleDateChange} required>
-                                    {Array.from({ length: 80 }, (_, i) => { const year = new Date().getFullYear() - 18 - i; return (<option key={year} value={year}>{year}</option>); })}
+                                    {Array.from({ length: 80 }, (_, i) => { const year = new Date().getFullYear() - i; return (<option key={year} value={year}>{year}</option>); })}
                                 </CustomSelect>
                             </div>
                         </div>

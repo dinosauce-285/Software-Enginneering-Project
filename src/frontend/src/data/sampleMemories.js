@@ -7,8 +7,6 @@ import sampleImage6 from '../assets/sampleImage6.jpg';
 import sampleVideo1 from '../assets/sampleVideo1.mp4';
 import sampleAudio1 from '../assets/sampleAudio1.mp3';
 
-// This is an updated version of the sample data.
-// Most memories now have multiple media items to better test the gallery feature.
 
 const sampleMemories = [
     {

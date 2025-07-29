@@ -9,30 +9,28 @@ import DateRangeFilter from "./DateRange";
 export default function ActivityLayout() {
   return (
     <div className="min-h-screen w-full flex flex-col bg-gray-50">
-      {/* Start-Header */}
+
       <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
-        {/* Trái: logo + tên */}
         <div className="flex flex-col items-center justify-center">
           <img src="/src/assets/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
           <span className="text-sm font-medium text-back-400">SoulNote</span>
         </div>
 
-        {/* Giữa: menu */}
         <div className="flex gap-6 font-medium text-gray-700">
           <Link to="/user-management" className='font-inter'>User Management</Link>
           <span className="font-bold">Activity</span>
         </div>
 
-        {/* Phải: avatar user */}
-        <UserMenu/>
-      </header>
-      {/* End-Header */}
 
-      {/*Start-Content */}
+        <UserMenu />
+      </header>
+
+
+
       <div className="flex flex-1">
-        {/*Start-Sidebar */}
+
         <aside className="w-2/12 bg-white border-r p-4">
-          {/* Avatar + Username */}
+
           <div className="flex items-center gap-3 mb-6">
             <div>
               <p className="font-medium">Activities Log</p>
@@ -40,10 +38,10 @@ export default function ActivityLayout() {
             </div>
           </div>
 
-          {/* Filter options */}
+
           <div className="space-y-4">
             <SearchFilterDropdown />
-            {/* Filter: Permission */}
+
             <div className="mb-6">
               <div className="bg-gray-200 rounded-full shadow-sm px-4 py-2 flex justify-between items-center">
                 <label className="text-sm text-gray-600">
@@ -59,12 +57,11 @@ export default function ActivityLayout() {
                 </select>
               </div>
             </div>
-            {/* date range filter */}
             <DateRangeFilter />
           </div>
         </aside>
 
-        {/* Main Content */}
+
         <div className="w-full lg:w-10/12 px-4 sm:px-6">
           <div className="max-w-screen-xl mx-auto">
             <MainContent />

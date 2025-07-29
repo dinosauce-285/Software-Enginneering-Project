@@ -85,9 +85,8 @@
 // }
 
 
-
-
 import DOMPurify from 'dompurify';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 
 const Thread = ({ memory }) => {
   if (!memory || !memory.created_at) {
@@ -115,15 +114,23 @@ const Thread = ({ memory }) => {
 
   const emotionName = memory.emotion?.name || 'No Emotion';
   
+  const location = memory.location;
 
   const cleanContentHTML = DOMPurify.sanitize(memory.content);
 
   return (
     <div className="flex flex-col gap-3 bg-[#F9F9F2] rounded-2xl p-4 shadow-sm">
+
       <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-sm font-medium text-gray-700">
         <span>{date}</span>
-        {tagsString && <span className="text-gray-400">•</span>}
-        {tagsString && <span className="text-blue-600">{tagsString}</span>}
+
+        {tagsString && (
+            <>
+                <span className="text-gray-400">•</span>
+                <span className="text-blue-600">{tagsString}</span>
+            </>
+        )}
+
         <span className="ml-auto">{emotionName}</span>
       </div>
 
@@ -143,7 +150,6 @@ const Thread = ({ memory }) => {
 
       {memory.content && (
         <div className="relative max-h-24 overflow-hidden">
-
           <div 
             className="text-gray-700 text-base tiptap-rendered-content"
             dangerouslySetInnerHTML={{ __html: cleanContentHTML }} 
@@ -152,7 +158,19 @@ const Thread = ({ memory }) => {
         </div>
       )}
 
-      <div className="text-right text-xs text-gray-500 mt-1">
+
+      <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+  
+        <div className="flex items-center gap-1">
+            {location && (
+                <>
+                    <FaMapMarkerAlt size={11} />
+                    <span className="truncate max-w-[150px]">{location}</span>
+                </>
+            )}
+        </div>
+
+     
         <span>{time}</span>
       </div>
     </div>

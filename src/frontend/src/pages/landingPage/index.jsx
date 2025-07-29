@@ -78,10 +78,7 @@ export default function LandingPage() {
         >
           <div className="flex flex-col lg:flex-row justify-between items-center gap-12">
             <div className="w-full lg:w-1/2 flex flex-col gap-6">
-              {/* --- SỬA LỖI Ở ĐÂY --- */}
               <div className="flex flex-wrap items-center justify-start sm:justify-between gap-x-6 gap-y-4 text-sm text-slate-600">
-                
-                {/* Mỗi mục được thêm 'whitespace-nowrap' để không bị xuống dòng */}
                 <span className="flex items-center gap-2 whitespace-nowrap">
                   <FiCalendar /> 04 Feb 2025
                 </span>
@@ -89,8 +86,6 @@ export default function LandingPage() {
                 <span className="flex items-center gap-2 whitespace-nowrap">
                   <FiMapPin /> Ho Chi Minh City
                 </span>
-                
-                {/* Cấu trúc lại phần tags để xếp chồng lên nhau */}
                 <span className="flex items-start gap-2 text-blue-600">
                   <FiTag className="mt-0.5" />
                   <div>

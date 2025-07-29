@@ -1,22 +1,23 @@
 /* src/components/tiptap.css */
-
-/* Placeholder styling */
 .tiptap-editor p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  float: left;
-  color: #adb5bd;
-  pointer-events: none;
-  height: 0;
+    content: attr(data-placeholder);
+    float: left;
+    color: #adb5bd;
+    pointer-events: none;
+    height: 0;
 }
 
-/* Các style tùy chỉnh khác cho editor nếu cần */
+
 .tiptap-editor {
-    /* Ví dụ: style cho danh sách */
-    ul, ol {
+
+    ul,
+    ol {
         padding-left: 1.5rem;
     }
 }
 
-.tiptap-editor h1, .tiptap-editor h2, .tiptap-editor h3 {
+.tiptap-editor h1,
+.tiptap-editor h2,
+.tiptap-editor h3 {
     line-height: 1.1;
 }

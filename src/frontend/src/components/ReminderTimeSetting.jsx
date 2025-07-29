@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import SettingRow from './SettingRow';
 
 export default function ReminderTimeSetting() {
-    const [reminderTime, setReminderTime] = useState("00:00"); // 8:00 PM mặc định
+    const [reminderTime, setReminderTime] = useState("00:00"); 
     const [showModal, setShowModal] = useState(false);
     const [newTime, setNewTime] = useState(reminderTime);
     const [error, setError] = useState("");
 
     const handleOpenModal = () => {
-        setNewTime(reminderTime); // reset lại giá trị khi mở
+        setNewTime(reminderTime); 
         setError("");
         setShowModal(true);
     };
@@ -25,7 +25,7 @@ export default function ReminderTimeSetting() {
     const formatTime = (time24) => {
         if (!time24) return "";
         const [hour, minute] = time24.split(":");
-        return `${hour}:${minute}`; // giữ nguyên định dạng 24h
+        return `${hour}:${minute}`; 
     };
 
     return (

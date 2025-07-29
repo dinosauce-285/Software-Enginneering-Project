@@ -8,7 +8,6 @@ export default function UsernameSetting() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // Demo: thời điểm đổi username lần cuối (ví dụ: 20 ngày trước)
     const [lastChangedAt, setLastChangedAt] = useState(Date.now() - 20 * 24 * 60 * 60 * 1000);
 
     const isValidUsername = (name) => /^[a-z0-9_]{3,30}$/.test(name);
@@ -22,8 +21,6 @@ export default function UsernameSetting() {
             setError("Username must be 3–30 characters, only a–z, 0–9, and underscore.");
             return;
         }
-
-        // Check nếu chưa đủ 30 ngày (30 * 24 * 60 * 60 * 1000 ms)
         const now = Date.now();
         if (now - lastChangedAt < 30 * 24 * 60 * 60 * 1000) {
             setError("You can only change your username once every 30 days.");
@@ -34,7 +31,7 @@ export default function UsernameSetting() {
         setError("");
 
         try {
-            // 🧪 Giả lập gọi API
+
             const res = await fetch('/api/replace-username', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -44,7 +41,7 @@ export default function UsernameSetting() {
 
             if (res.ok) {
                 setUsername(newUsername.trim());
-                setLastChangedAt(now); // cập nhật ngày đổi mới
+                setLastChangedAt(now); 
                 setShowModal(false);
                 setNewUsername("");
                 alert("Username changed successfully!");

@@ -8,9 +8,6 @@ export default function ThemeSetting() {
     const toggleTheme = () => {
         const nextTheme = theme === "Light" ? "Dark" : "Light";
         setTheme(nextTheme);
-
-        // 🧪 Có thể gọi API ở đây để lưu theme mới
-        // fetch('/api/update-theme', { method: 'POST', body: JSON.stringify({ theme: nextTheme }) })
     };
 
     return (

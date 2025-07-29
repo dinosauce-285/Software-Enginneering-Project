@@ -42,7 +42,7 @@ export default function ChangePasswordSetting() {
         setError("");
 
         try {
-            // 🧪 Giả lập backend: mật khẩu cũ đúng là "oldpassword"
+    
             if (oldPassword === "123456789") {
                 alert("Password changed successfully!");
                 handleCloseModal();

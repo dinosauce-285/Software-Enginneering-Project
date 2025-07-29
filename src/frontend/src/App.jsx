@@ -73,7 +73,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgetPass />} />
         </Route>
 
-        {/* Route cho user thường */}
+       
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/create-memory" element={<CreateMemory />} />
@@ -82,7 +82,7 @@ function App() {
           <Route path="/delete-account" element={<DeleteAccount />} />
         </Route>
 
-        {/* Route chỉ dành cho ADMIN */}
+ 
         <Route element={<AdminRoute />}>
           <Route path="/user-management" element={<UserManagementLayout />} />
         </Route>

@@ -273,6 +273,7 @@ import '../../components/datePicker.css';
 import '../../components/tiptap.css';
 
 import { createMemory, getEmotions, uploadMediaForMemory } from '../../services/api';
+import { LocationSearchInput } from '../../components/LocationSearchInput';
 
 const PrevIcon = () => (<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>);
 const NextIcon = () => (<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>);
@@ -321,6 +322,7 @@ export default function CreateMemory() {
 
     const years = Array.from({ length: getYear(new Date()) - 1989 }, (_, i) => 1990 + i).reverse();
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const [location, setLocation] = useState('');
 
     useEffect(() => {
         const fetchEmotions = async () => {
@@ -415,7 +417,7 @@ export default function CreateMemory() {
         setIsLoading(true);
         setError(null);
         try {
-            const memoryData = { title, content, emotionID: selectedEmotionId, tags: tagsArray, createdAt: selectedDate.toISOString() };
+            const memoryData = { title, content, emotionID: selectedEmotionId, tags: tagsArray, createdAt: selectedDate.toISOString(), location, };
             const newMemory = await createMemory(memoryData);
             if (mediaFiles.length > 0) {
                 await uploadMediaForMemory(newMemory.memoryID, mediaFiles);
@@ -518,6 +520,10 @@ export default function CreateMemory() {
                     <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-sm">
                         <FaTag className="text-gray-500" />
                         <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="#love, #family" className="bg-transparent focus:outline-none text-sm w-32" />
+                    </div>
+
+                    <div className="flex-grow">
+                        <LocationSearchInput onLocationSelect={(selectedLocation) => setLocation(selectedLocation)} />
                     </div>
                 </div>
 

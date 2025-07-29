@@ -19,4 +19,8 @@ export class CreateMemoryDto {
   @IsString({ each: true }) // Mỗi phần tử là một chuỗi
   @IsOptional() // Cho phép không có tag nào
   tags?: string[]; // Ví dụ: ["du lịch", "kỷ niệm đẹp"]
+
+  @IsString()
+  @IsOptional()
+  location?: string;
 }

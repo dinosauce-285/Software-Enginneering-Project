@@ -96,6 +96,7 @@ model Memory {
   media       Media[]
   shareLinks  ShareLink[]
   memoryTags  MemoryTag[]
+  location    String?
 }
 
 model Media {

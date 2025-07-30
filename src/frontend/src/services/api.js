@@ -428,3 +428,20 @@ export const deleteMediaById = async (mediaId) => {
     throw error.response.data;
   }
 };
+
+/**
+ * Lấy báo cáo cảm xúc trong một khoảng thời gian.
+ * @param {string} startDate - Chuỗi ngày tháng ISO (ví dụ: "2025-07-01T00:00:00.000Z")
+ * @param {string} endDate - Chuỗi ngày tháng ISO
+ */
+export const getEmotionReport = async (startDate, endDate) => {
+  try {
+    // Gửi startDate và endDate dưới dạng query params
+    const response = await apiClient.get('/reports/emotions', {
+      params: { startDate, endDate },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

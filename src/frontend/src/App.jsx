@@ -25,6 +25,7 @@ import EnterOTP from './pages/EnterOTP/index.jsx';
 import ResetPassword from './pages/ResetPassword/index.jsx';
 
 import EditMemory from './pages/EditMemory/index.jsx'; 
+import EmotionReport from './pages/ReportEmotion/index.jsx';
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
             <Route path="/settings" element={<SettingLayout />} />
             <Route path="/delete-account" element={<DeleteAccount />} />
             <Route path="/memory/:memoryId/edit" element={<EditMemory />} />
+            <Route path="/report" element={<EmotionReport />} />
           </Route>
 
           

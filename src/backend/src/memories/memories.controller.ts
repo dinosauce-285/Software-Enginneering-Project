@@ -24,7 +24,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-@UseGuards(AuthGuard('jwt')) // Bảo vệ tất cả các route trong controller này
+@UseGuards(AuthGuard('jwt'))
 @Controller('memories')
 export class MemoriesController {
   constructor(private readonly memoriesService: MemoriesService) {}
@@ -65,39 +65,32 @@ export class MemoriesController {
     return this.memoriesService.deleteMemoryById(userId, memoryId);
   }
 
-  // === PHẦN ĐƯỢC THAY ĐỔI ===
-  // Endpoint để tạo hoặc lấy link chia sẻ
   @Post(':id/share')
-  @HttpCode(HttpStatus.OK) // Trả về 200 OK vì có thể chỉ lấy link cũ
+  @HttpCode(HttpStatus.OK)
   createOrGetShareLink(
     @GetUser('userID') userId: string,
     @Param('id', ParseUUIDPipe) memoryId: string,
   ) {
-    // Không cần @Body() và DTO nữa
     return this.memoriesService.createOrGetShareLink(userId, memoryId);
   }
 
 
   @Post(':id/media')
-  // Thay đổi ở đây: Dùng FilesInterceptor để nhận một mảng file có tên là 'files'
-  @UseInterceptors(FilesInterceptor('files', 10)) // Cho phép tối đa 10 file
+  @UseInterceptors(FilesInterceptor('files', 10))
   addMedia(
     @GetUser('userID') userId: string,
     @Param('id', ParseUUIDPipe) memoryId: string,
-    // Thay đổi ở đây: Dùng @UploadedFiles và kiểu dữ liệu là một mảng
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // 10 MB cho mỗi file
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // 10 MB
           new FileTypeValidator({ 
-            // Regex mới hỗ trợ nhiều định dạng phổ biến hơn
             fileType: '.(png|jpeg|jpg|gif|webp|mp3|mpeg|wav|ogg|mp4|webm|mov|pdf|docx)',
           }),
         ],
       }),
-    ) files: Array<Express.Multer.File>, // <-- Kiểu dữ liệu là một mảng
+    ) files: Array<Express.Multer.File>,
   ) {
-    // Gọi đến service, truyền vào cả mảng files
     return this.memoriesService.addMediaToMemory(userId, memoryId, files);
   }
 

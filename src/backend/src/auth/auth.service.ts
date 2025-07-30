@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
   UnauthorizedException,
-  NotFoundException, // THÊM NOTFOUNDEXCEPTION VÀO
+  NotFoundException, 
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
@@ -205,13 +205,14 @@ export class AuthService {
   /**
    * Tạo JWT Token của ứng dụng, bao gồm cả vai trò (role).
    */
-  private async generateAppJwt(userId: string, email: string, role: Role, expiresIn: string): Promise<string> {
-    const payload = { sub: userId, email, role };
-    return this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: expiresIn,
-    });
-  }
+
+private async generateAppJwt(userId: string, email: string, role: Role, expiresIn: string): Promise<string> {
+  const payload = { sub: userId, email, role, userID: userId };
+  return this.jwtService.signAsync(payload, {
+    secret: process.env.JWT_SECRET,
+    expiresIn: expiresIn,
+  });
+}
 
   /**
    * Tạo mã OTP 6 số.

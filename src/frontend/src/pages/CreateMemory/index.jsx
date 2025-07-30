@@ -437,7 +437,7 @@ export default function CreateMemory() {
 
     return (
         <AppLayout>
-            <div className="relative max-w-3xl mx-auto bg-white p-8 rounded-lg mt-8">
+            <div className="relative w-full mx-auto bg-white p-8 rounded-lg mt-8">
                 <header className="flex justify-between items-center pb-4 border-b border-gray-200">
                     <h1 className="text-xl font-bold text-gray-800">New Memory</h1>
                     <div className="flex items-center gap-4">

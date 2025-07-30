@@ -327,25 +327,22 @@
 
 // export default LogIn;
 
-
-
 import '../../index.css';
-// --- SỬA LẠI CÁC ĐƯỜNG DẪN IMPORT TẠI ĐÂY ---
-import CustomInput from '../../components/CustomInput'; // Sửa từ ../components/input
-import MediaButton from '../../components/mediaButton';   // Sửa từ ../components/mediaButton
-// ---------------------------------------------
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from '../../firebase';
 import { loginUser, authenticateWithFirebase } from '../../services/api';
 
-// Import assets
+import CustomInput from '../../components/CustomInput';
+import MediaButton from '../../components/mediaButton';
 import accountBanner from '../../assets/accountBanner.jpg';
 import logo from '../../assets/logo.png';
 import fbLogo from '../../assets/fbLogo.png';
 import ggLogo from '../../assets/ggLogo.png';
 import { FiX } from 'react-icons/fi';
+
+import { useAuth } from '../../contexts/AuthContext';
 
 function LogIn() {
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -354,6 +351,7 @@ function LogIn() {
     const [loading, setLoading] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     useEffect(() => {
         const timer = setTimeout(() => setIsMounted(true), 100);
@@ -367,8 +365,10 @@ function LogIn() {
         setError(null);
         setLoading(true);
         try {
-            const response = await loginUser({ ...formData, rememberMe });
-            if (response.user.role === 'ADMIN') {
+            const data = await loginUser({ ...formData, rememberMe });
+            login(data.user);
+
+            if (data.user.role === 'ADMIN') {
                 navigate('/user-management');
             } else {
                 navigate('/dashboard');
@@ -391,8 +391,10 @@ function LogIn() {
         try {
             const result = await signInWithPopup(auth, provider);
             const idToken = await result.user.getIdToken();
-            const response = await authenticateWithFirebase(idToken);
-            if (response.user.role === 'ADMIN') {
+            const data = await authenticateWithFirebase(idToken);
+            login(data.user);
+
+            if (data.user.role === 'ADMIN') {
                 navigate('/user-management');
             } else {
                 navigate('/dashboard');
@@ -409,12 +411,10 @@ function LogIn() {
 
     return (
         <div className="w-screen h-screen flex bg-gray-50">
-            {/* Left Panel: Image Banner */}
             <div className="hidden lg:block w-1/2 h-full">
                 <img src={accountBanner} alt="Banner" className="h-full w-full object-cover" />
             </div>
 
-            {/* Right Panel: Login Form with Animation */}
             <div className={`w-full lg:w-1/2 h-full flex flex-col items-center justify-center p-8 bg-white relative transition-all duration-1000 ease-out
                 ${isMounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}
             >
@@ -428,7 +428,6 @@ function LogIn() {
 
                 <div className="w-full max-w-sm">
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                        {/* Header */}
                         <div className="text-center mb-4">
                             <img src={logo} className="h-12 mx-auto mb-4" alt="Logo" />
                             <h1 className="text-3xl font-bold text-gray-800 font-poppins">Welcome Back!</h1>
@@ -438,7 +437,6 @@ function LogIn() {
                             </p>
                         </div>
                         
-                        {/* Social Logins */}
                         <div className="flex flex-col gap-3">
                             <MediaButton 
                                 onClick={() => handleSocialSignIn('google')} 
@@ -454,14 +452,12 @@ function LogIn() {
                             </MediaButton>
                         </div>
                         
-                        {/* Separator */}
                         <div className="flex items-center gap-4">
                             <hr className="flex-grow border-gray-200" />
                             <span className="text-gray-400 text-xs font-semibold">OR</span>
                             <hr className="flex-grow border-gray-200" />
                         </div>
                         
-                        {/* Email & Password Inputs */}
                         <div className="flex flex-col gap-4">
                             <CustomInput text="Email" placeholder="Enter your email" name="email" type="email" value={formData.email} onChange={handleChange} required />
                             <CustomInput text="Password" placeholder="Enter your password" type="password" name="password" value={formData.password} onChange={handleChange} required />
@@ -469,7 +465,6 @@ function LogIn() {
 
                         {error && <p className="text-red-500 text-sm text-center -my-2">{error}</p>}
                         
-                        {/* Remember Me & Forgot Password */}
                         <div className='flex justify-between items-center w-full text-sm'>
                             <div className="flex items-center gap-2">
                                 <input
@@ -486,7 +481,6 @@ function LogIn() {
                             <Link to="/forgot-password" className="font-semibold text-blue-600 hover:underline">Forgot password?</Link>
                         </div>
                         
-                        {/* Submit Button */}
                         <button 
                             type="submit" 
                             disabled={loading} 

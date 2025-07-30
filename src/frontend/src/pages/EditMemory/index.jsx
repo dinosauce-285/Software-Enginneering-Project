@@ -22,7 +22,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import '../../components/datePicker.css'; 
 import './CreateMemory.css'; 
 
-import { getMemoryById, updateMemory, getEmotions, uploadMediaForMemory } from '../../services/api';
+import { getMemoryById, updateMemory, getEmotions, uploadMediaForMemory, deleteMediaById } from '../../services/api';
 import { LocationSearchInput } from '../../components/LocationSearchInput';
 
 // 1. IMPORT HOOK `useAuth`
@@ -69,8 +69,12 @@ export default function EditMemory() {
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
     const [location, setLocation] = useState('');
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     //const [mediaFiles, setMediaFiles] = useState([]);
+    const [existingMedia, setExistingMedia] = useState([]); // Lưu media đã có từ DB
+    const [newMediaFiles, setNewMediaFiles] = useState([]); // Lưu các file mới chờ upload
+    const [mediaToDelete, setMediaToDelete] = useState([]); // Lưu ID của các media cần xóa
 
     const emotionDropdownRef = useRef(null);
     const navigate = useNavigate();
@@ -96,6 +100,13 @@ export default function EditMemory() {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     useEffect(() => {
+        // Hủy bỏ các URL object cũ để tránh rò rỉ bộ nhớ khi component bị unmount
+        return () => {
+            newMediaFiles.forEach(file => URL.revokeObjectURL(file.previewUrl));
+        };
+    }, [newMediaFiles]);
+
+    useEffect(() => {
         const fetchMemoryData = async () => {
             try {
                 // Fetch song song emotions và memory detail
@@ -114,6 +125,7 @@ export default function EditMemory() {
                 setTags(memoryData.memoryTags.map(({ tag }) => tag.name).join(', '));
                 setSelectedDate(new Date(memoryData.created_at));
                 setLocation(memoryData.location || '');
+                setExistingMedia(memoryData.media || []);
 
             } catch (err) {
                 console.error("Failed to load data for editing:", err);
@@ -156,22 +168,22 @@ export default function EditMemory() {
 
 
     const handleFileChange = (e) => {
-        const newFiles = Array.from(e.target.files);
-        setMediaFiles(prev => [...prev, ...newFiles]);
-        const newPreviews = newFiles.map(file => ({
-            id: `${file.name}-${file.lastModified}`,
-            name: file.name,
-            url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
-            type: file.type.startsWith('image/') ? 'IMAGE' : 'OTHER',
-        }));
-        setMediaPreviews(prev => [...prev, ...newPreviews]);
+        const files = Array.from(e.target.files);
+        // Thêm một thuộc tính previewUrl tạm thời vào mỗi file object
+        files.forEach(file => file.previewUrl = URL.createObjectURL(file));
+        setNewMediaFiles(prev => [...prev, ...files]);
     };
 
-    const handleRemoveFile = (previewId) => {
-        const previewToRemove = mediaPreviews.find(p => p.id === previewId);
-        if (previewToRemove?.url) URL.revokeObjectURL(previewToRemove.url);
-        setMediaFiles(prev => prev.filter(f => `${f.name}-${f.lastModified}` !== previewId));
-        setMediaPreviews(prev => prev.filter(p => p.id !== previewId));
+    const handleRemoveNewFile = (fileToRemove) => {
+        URL.revokeObjectURL(fileToRemove.previewUrl); // Dọn dẹp bộ nhớ
+        setNewMediaFiles(prev => prev.filter(file => file !== fileToRemove));
+    };
+
+    const handleMarkForDeletion = (mediaId) => {
+        // Ẩn media đó khỏi UI
+        setExistingMedia(prev => prev.filter(media => media.mediaID !== mediaId));
+        // Thêm ID vào danh sách chờ xóa
+        setMediaToDelete(prev => [...prev, mediaId]);
     };
     
     const handleSave = async () => {
@@ -192,8 +204,14 @@ export default function EditMemory() {
                 location,
             };
 
-            // Gọi API update thay vì create
-            await updateMemory(memoryId, memoryDataToUpdate);
+            await Promise.all([
+                // 1. Cập nhật text
+                updateMemory(memoryId, memoryDataToUpdate),
+                // 2. Xóa media
+                ...mediaToDelete.map(id => deleteMediaById(id)),
+                // 3. Upload media mới (chỉ chạy nếu có file mới)
+                newMediaFiles.length > 0 ? uploadMediaForMemory(memoryId, newMediaFiles) : Promise.resolve(),
+            ]);
             
             // Tạm thời chưa xử lý upload/delete media khi edit
             
@@ -336,16 +354,30 @@ export default function EditMemory() {
                         className="w-full text-3xl font-extrabold text-gray-900 border-none focus:outline-none focus:ring-0 mb-2"
                     />
 
-                    {mediaPreviews.length > 0 && (
-                        <div className="my-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                            {mediaPreviews.map(p => (
-                                <div key={p.id} className="relative group aspect-square">
-                                    <img src={p.url} alt={p.name} className="w-full h-full object-cover rounded-lg bg-gray-100"/>
-                                    <button onClick={() => handleRemoveFile(p.id)} className="absolute top-1.5 right-1.5 bg-black bg-opacity-50 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <FiX size={14}/>
-                                    </button>
-                                </div>
-                            ))}
+                    {/* === THAY ĐỔI 5: Hiển thị cả media cũ và media mới === */}
+                    {(existingMedia.length > 0 || newMediaFiles.length > 0) && (
+                        <div className="my-4">
+                            <h3 className="font-semibold text-gray-700 mb-2">Media</h3>
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                                {/* Hiển thị media đã có */}
+                                {existingMedia.map(media => (
+                                    <div key={media.mediaID} className="relative group aspect-square">
+                                        <img src={media.url} alt="existing media" className="w-full h-full object-cover rounded-lg bg-gray-100"/>
+                                        <button onClick={() => handleMarkForDeletion(media.mediaID)} className="absolute top-1.5 right-1.5 bg-black bg-opacity-50 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <FiX size={14}/>
+                                        </button>
+                                    </div>
+                                ))}
+                                {/* Hiển thị preview của các file mới */}
+                                {newMediaFiles.map((file, index) => (
+                                    <div key={index} className="relative group aspect-square">
+                                        <img src={file.previewUrl} alt="new file preview" className="w-full h-full object-cover rounded-lg bg-gray-100"/>
+                                        <button onClick={() => handleRemoveNewFile(file)} className="absolute top-1.5 right-1.5 bg-black bg-opacity-50 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <FiX size={14}/>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                     

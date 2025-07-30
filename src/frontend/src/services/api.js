@@ -408,3 +408,23 @@ export const updateMemory = async (memoryId, memoryData) => {
     throw error.response.data;
   }
 };
+
+/**
+ * Xóa một file media cụ thể.
+ * @param {string} mediaId - ID của media cần xóa.
+ */
+export const deleteMediaById = async (mediaId) => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) throw new Error('No access token found.');
+
+  try {
+    const response = await apiClient.delete(`/memories/media/${mediaId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.status;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

@@ -4,11 +4,15 @@ import axios from 'axios';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-export const LocationSearchInput = ({ onLocationSelect, className, placeholder }) => {
+export const LocationSearchInput = ({ onLocationSelect, className, placeholder, initialValue = '' }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const searchTimeout = useRef(null);
+
+  useEffect(() => {
+    setQuery(initialValue);
+  }, [initialValue]);
 
   const handleInputChange = (e) => {
     const newQuery = e.target.value;

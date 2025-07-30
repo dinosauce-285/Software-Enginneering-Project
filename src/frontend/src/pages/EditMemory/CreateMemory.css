@@ -1,0 +1,31 @@
+/* ./pages/CreateMemory/CreateMemory.css */
+
+/* Custom styles for Tiptap editor placeholder */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Custom styles for the Date Picker input to match the minimalist theme */
+.react-datepicker-wrapper input {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    width: 100%;
+    background-color: transparent !important;
+}
+
+.react-datepicker-popper {
+    z-index: 20 !important;
+}
+
+.location-search-input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+}

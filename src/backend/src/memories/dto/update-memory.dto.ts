@@ -18,4 +18,8 @@ export class UpdateMemoryDto {
   @IsString({ each: true })
   @IsOptional()
   tags?: string[];
+
+  @IsString()
+  @IsOptional()
+  location?: string;
 }

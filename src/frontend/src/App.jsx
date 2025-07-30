@@ -24,6 +24,8 @@ import AdminRoute from './components/AdminRoute';
 import EnterOTP from './pages/EnterOTP/index.jsx';
 import ResetPassword from './pages/ResetPassword/index.jsx';
 
+import EditMemory from './pages/EditMemory/index.jsx'; 
+
 function App() {
   return (
     <AuthProvider>
@@ -47,6 +49,7 @@ function App() {
             <Route path="/memory/:memoryId" element={<MemoryDetail />} />
             <Route path="/settings" element={<SettingLayout />} />
             <Route path="/delete-account" element={<DeleteAccount />} />
+            <Route path="/memory/:memoryId/edit" element={<EditMemory />} />
           </Route>
 
           

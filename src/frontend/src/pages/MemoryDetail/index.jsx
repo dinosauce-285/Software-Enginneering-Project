@@ -290,14 +290,24 @@ export default function MemoryDetail() {
                 </button>
                 {isMenuOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-xl border z-10">
-                    <button className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left">
-                      <PencilIcon className="w-5 h-5" /> Edit
+                    <RouterLink
+                        to={`/memory/${memoryId}/edit`}
+                        className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
+                    >
+                        <PencilIcon className="w-5 h-5" />
+                        <span>Edit</span>
+                    </RouterLink>
+                    <button 
+                     onClick={() => setShowShareDialog(true)} 
+                     className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
+                    >
+                      <ShareIcon className="w-5 h-5" /> 
+                      <span>Share</span>
                     </button>
-                    <button onClick={() => setShowShareDialog(true)} className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left">
-                      <ShareIcon className="w-5 h-5" /> Share
-                    </button>
+
                     <button onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-gray-100 w-full text-left">
-                      <TrashIcon className="w-5 h-5" /> Delete
+                      <TrashIcon className="w-5 h-5" /> 
+                      <span>Delete</span>
                     </button>
                   </div>
                 )}

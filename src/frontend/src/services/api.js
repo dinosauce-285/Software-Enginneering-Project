@@ -387,3 +387,24 @@ export const getEmotions = async () => {
     throw error.response.data;
   }
 };
+
+/**
+ * Cập nhật một kỷ niệm đã có.
+ * @param {string} memoryId - ID của memory cần cập nhật.
+ * @param {object} memoryData - Dữ liệu mới để cập nhật.
+ */
+export const updateMemory = async (memoryId, memoryData) => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) throw new Error('No access token found.');
+
+  try {
+    const response = await apiClient.patch(`/memories/${memoryId}`, memoryData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

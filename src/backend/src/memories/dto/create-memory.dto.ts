@@ -1,5 +1,5 @@
 // src/memories/dto/create-memory.dto.ts
-import { IsArray, IsOptional, IsString, MaxLength, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsArray, IsOptional, IsString, MaxLength, IsNotEmpty, IsUUID, IsDateString } from 'class-validator';
 
 export class CreateMemoryDto {
   @IsString()
@@ -16,11 +16,17 @@ export class CreateMemoryDto {
   emotionID: string;
 
   @IsArray()
-  @IsString({ each: true }) // Mỗi phần tử là một chuỗi
-  @IsOptional() // Cho phép không có tag nào
-  tags?: string[]; // Ví dụ: ["du lịch", "kỷ niệm đẹp"]
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
 
   @IsString()
   @IsOptional()
   location?: string;
+  
+  // THÊM TRƯỜNG NÀY VÀO
+  // Tên trường phải là "created_at" để khớp với schema
+  @IsDateString()
+  @IsOptional() // Đặt là Optional để nếu không gửi, nó sẽ lấy giá trị mặc định now()
+  created_at?: string; 
 }

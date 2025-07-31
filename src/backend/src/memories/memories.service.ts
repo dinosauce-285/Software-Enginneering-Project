@@ -35,32 +35,49 @@ export class MemoriesService {
     }));
   }
 
-  async createMemory(userId: string, dto: CreateMemoryDto) {
-    const { tags: tagNames, ...memoryData } = dto;
-    const tagConnections = await this.manageTags(tagNames);
+ // src/memories/memories.service.ts
 
+async createMemory(userId: string, dto: CreateMemoryDto) {
+  // Tách tags và các trường khác của DTO
+  const { tags: tagNames, ...memoryData } = dto;
+  
+  // Xử lý tags
+  const tagConnections = await this.manageTags(tagNames);
 
-    const memory = await this.prisma.memory.create({
-      data: {
-        userID: userId,
-        ...memoryData,
-        memoryTags: {
-          create: tagConnections,
-        },
-      },
-      include: {
-        emotion: true,
-        memoryTags: {
-          include: {
-            tag: true,
-          },
-        },
-      },
-    });
-
-    return memory;
+  // Chuẩn bị dữ liệu cuối cùng để truyền vào Prisma
+  // Kiểu của `finalData` sẽ được TypeScript suy luận ra là phù hợp với `Prisma.MemoryCreateInput`
+  const finalData: Prisma.MemoryCreateInput = {
+    user: { connect: { userID: userId } }, // Kết nối với user
+    emotion: { connect: { emotionID: memoryData.emotionID } }, // Kết nối với emotion
+    title: memoryData.title,
+    content: memoryData.content,
+    location: memoryData.location,
+    memoryTags: {
+      create: tagConnections,
+    },
+  };
+  
+  // Nếu frontend gửi lên trường "created_at", hãy sử dụng nó
+  // Nếu không, hãy để Prisma tự điền giá trị mặc định
+  if (memoryData.created_at) {
+    finalData.created_at = new Date(memoryData.created_at);
   }
 
+  // Tạo bản ghi memory
+  const memory = await this.prisma.memory.create({
+    data: finalData,
+    include: {
+      emotion: true,
+      memoryTags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
+  });
+
+  return memory;
+}
   async getMemories(userId: string) {
     return this.prisma.memory.findMany({
       where: { userID: userId },

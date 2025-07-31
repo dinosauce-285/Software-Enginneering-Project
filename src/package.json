@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "@nestjs/config": "^4.0.2"
+    "@google/generative-ai": "^0.24.1",
+    "@nestjs/config": "^4.0.2",
+    "dompurify": "^3.2.6"
   }
 }

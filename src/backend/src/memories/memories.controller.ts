@@ -83,7 +83,7 @@ export class MemoriesController {
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }), // 10 MB
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 50 }), // 50 MB
           new FileTypeValidator({ 
             fileType: '.(png|jpeg|jpg|gif|webp|mp3|mpeg|wav|ogg|mp4|webm|mov|pdf|docx)',
           }),

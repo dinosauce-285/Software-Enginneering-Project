@@ -248,14 +248,13 @@
 //         </AppLayout>
 //     );
 // }
-
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/AppLayout';
 
 import {
     FaImage, FaSmile, FaBold, FaUnderline, FaItalic, FaAlignCenter,
-    FaMapMarkerAlt, FaTag, FaCalendarAlt
+    FaMapMarkerAlt, FaTag, FaCalendarAlt, FaMusic // Thêm icon cho audio
 } from 'react-icons/fa';
 import { FiChevronDown, FiX } from 'react-icons/fi';
 
@@ -275,8 +274,6 @@ import './CreateMemory.css';
 
 import { createMemory, getEmotions, uploadMediaForMemory } from '../../services/api';
 import { LocationSearchInput } from '../../components/LocationSearchInput';
-
-// 1. IMPORT HOOK `useAuth`
 import { useAuth } from '../../contexts/AuthContext';
 
 // --- HELPER COMPONENTS ---
@@ -303,7 +300,6 @@ const InputChip = ({ icon, children }) => (
 
 
 export default function CreateMemory() {
-    // 2. GỌI HOOK `useAuth` ĐỂ LẤY THÔNG TIN USER
     const { user } = useAuth();
 
     const [title, setTitle] = useState('');
@@ -367,6 +363,7 @@ export default function CreateMemory() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
+            // Dọn dẹp các URL object khi component unmount
             mediaPreviews.forEach(p => URL.revokeObjectURL(p.url));
         };
     }, [mediaPreviews]);
@@ -375,20 +372,40 @@ export default function CreateMemory() {
     const handleFileChange = (e) => {
         const newFiles = Array.from(e.target.files);
         setMediaFiles(prev => [...prev, ...newFiles]);
-        const newPreviews = newFiles.map(file => ({
-            id: `${file.name}-${file.lastModified}`,
-            name: file.name,
-            url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
-            type: file.type.startsWith('image/') ? 'IMAGE' : 'OTHER',
-        }));
+
+        const newPreviews = newFiles.map(file => {
+            let fileType = 'OTHER';
+            if (file.type.startsWith('image/')) {
+                fileType = 'IMAGE';
+            } else if (file.type.startsWith('video/')) {
+                fileType = 'VIDEO';
+            } else if (file.type.startsWith('audio/')) {
+                fileType = 'AUDIO';
+            }
+
+            // Chỉ tạo preview cho các loại file được hỗ trợ
+            if (fileType === 'OTHER') {
+                return null;
+            }
+
+            return {
+                id: `${file.name}-${file.lastModified}`,
+                name: file.name,
+                url: URL.createObjectURL(file),
+                type: fileType,
+            };
+        }).filter(Boolean);
+
         setMediaPreviews(prev => [...prev, ...newPreviews]);
     };
 
-    const handleRemoveFile = (previewId) => {
-        const previewToRemove = mediaPreviews.find(p => p.id === previewId);
-        if (previewToRemove?.url) URL.revokeObjectURL(previewToRemove.url);
-        setMediaFiles(prev => prev.filter(f => `${f.name}-${f.lastModified}` !== previewId));
-        setMediaPreviews(prev => prev.filter(p => p.id !== previewId));
+    const handleRemoveFile = (previewIdToRemove) => {
+        const previewToRemove = mediaPreviews.find(p => p.id === previewIdToRemove);
+        if (previewToRemove?.url) {
+            URL.revokeObjectURL(previewToRemove.url);
+        }
+        setMediaFiles(prev => prev.filter(f => `${f.name}-${f.lastModified}` !== previewIdToRemove));
+        setMediaPreviews(prev => prev.filter(p => p.id !== previewIdToRemove));
     };
     
     const handleSave = async () => {
@@ -404,7 +421,8 @@ export default function CreateMemory() {
                 content: editor.getHTML(),
                 emotionID: selectedEmotionId,
                 tags: tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean),
-                createdAt: selectedDate.toISOString(),
+                // Gửi ngày tháng do người dùng chọn vào trường created_at
+                created_at: selectedDate.toISOString(),
                 location,
             };
             const newMemory = await createMemory(memoryData);
@@ -459,7 +477,6 @@ export default function CreateMemory() {
                             className="w-10 h-10 rounded-full object-cover" 
                             alt="avatar" 
                         />
-                        {/* 3. HIỂN THỊ USERNAME ĐỘNG */}
                         <p className="font-semibold text-gray-800">
                             {user ? user.display_name : 'Loading...'}
                         </p>
@@ -546,11 +563,26 @@ export default function CreateMemory() {
                     />
 
                     {mediaPreviews.length > 0 && (
-                        <div className="my-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                        <div className="my-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                             {mediaPreviews.map(p => (
-                                <div key={p.id} className="relative group aspect-square">
-                                    <img src={p.url} alt={p.name} className="w-full h-full object-cover rounded-lg bg-gray-100"/>
-                                    <button onClick={() => handleRemoveFile(p.id)} className="absolute top-1.5 right-1.5 bg-black bg-opacity-50 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div key={p.id} className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center text-white">
+                                    {p.type === 'IMAGE' && (
+                                        <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
+                                    )}
+                                    {p.type === 'VIDEO' && (
+                                        <video src={p.url} className="w-full h-full object-cover" controls />
+                                    )}
+                                    {p.type === 'AUDIO' && (
+                                        <div className="flex flex-col items-center justify-center p-2 text-center">
+                                            <FaMusic size={40} className="text-gray-500" />
+                                            <p className="text-xs mt-2 text-gray-600 break-all line-clamp-2">{p.name}</p>
+                                        </div>
+                                    )}
+
+                                    <button 
+                                        onClick={() => handleRemoveFile(p.id)} 
+                                        className="absolute top-1.5 right-1.5 bg-black bg-opacity-60 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                    >
                                         <FiX size={14}/>
                                     </button>
                                 </div>
@@ -580,7 +612,14 @@ export default function CreateMemory() {
                         </div>
                     </div>
                     
-                    <input type="file" accept="image/*" multiple onChange={handleFileChange} ref={fileInputRef} style={{ display: 'none' }} />
+                    <input 
+                        type="file" 
+                        accept="image/*,video/*,audio/*" 
+                        multiple 
+                        onChange={handleFileChange} 
+                        ref={fileInputRef} 
+                        style={{ display: 'none' }} 
+                    />
                 </div>
                 {error && <p className="text-red-500 mt-4 text-center text-sm">{error}</p>}
             </div>

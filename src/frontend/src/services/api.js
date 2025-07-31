@@ -196,9 +196,11 @@
 
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
 // Cấu hình một instance của axios với các cài đặt mặc định
 const apiClient = axios.create({
-  baseURL: 'https://software-enginneering-project.onrender.com/', // Địa chỉ của server backend
+  baseURL: API_BASE_URL, // Địa chỉ của server backend
   headers: {
     'Content-Type': 'application/json',
   },

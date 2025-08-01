@@ -387,3 +387,23 @@ export const getEmotionReport = async (startDate, endDate) => {
     throw error.response.data;
   }
 };
+
+export const uploadAvatar = async (avatarFile) => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) throw new Error('No access token found.');
+
+  const formData = new FormData();
+  formData.append('avatar', avatarFile); // Tên trường 'avatar' phải khớp với controller
+
+  try {
+    const response = await apiClient.post('/users/me/avatar', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

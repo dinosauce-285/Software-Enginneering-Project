@@ -25,6 +25,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import AdminRoute from './components/AdminRoute';
 
+import ChangeAvatarPage from './pages/ChangeAvatar/index.jsx';
+
 function App() {
   return (
     <AuthProvider>
@@ -51,6 +53,7 @@ function App() {
               <Route path="/delete-account" element={<DeleteAccount />} />
               <Route path="/memory/:memoryId/edit" element={<EditMemory />} />
               <Route path="/report" element={<EmotionReport />} />
+              <Route path="/change-avatar" element={<ChangeAvatarPage />} />
             </Route>
 
             <Route element={<AdminRoute />}>

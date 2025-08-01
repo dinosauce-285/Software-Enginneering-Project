@@ -3,10 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private cloudinary: CloudinaryService) {}
 
   /**
    * Cập nhật thông tin user theo ID.
@@ -37,4 +38,20 @@ export class UsersService {
       return result;
     });
   }
+
+  async uploadAvatar(userId: string, file: Express.Multer.File) {
+    // Upload file lên Cloudinary, lưu vào thư mục 'avatars'
+    const uploadResult = await this.cloudinary.uploadFile(file, 'avatars');
+
+    // Cập nhật trường avatar của user trong DB với URL mới
+    const updatedUser = await this.prisma.user.update({
+      where: { userID: userId },
+      data: { avatar: uploadResult.secure_url },
+    });
+
+    // Loại bỏ passwordHash trước khi trả về
+    const { passwordHash, ...result } = updatedUser;
+    return result;
+  }
+
 }

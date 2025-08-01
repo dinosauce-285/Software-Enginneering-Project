@@ -59,7 +59,7 @@
 
 
 // src/users/users.controller.ts
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/get-user.decorator';
@@ -67,6 +67,7 @@ import { Role, User } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from '../auth/decorator/roles.decorator'; // Import decorator mới
 import { RolesGuard } from '../auth/guard/roles.guard';   // Import guard mới
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard('jwt')) // Áp dụng AuthGuard cho tất cả các route
 @Controller('users')
@@ -105,5 +106,22 @@ export class UsersController {
   @UseGuards(RolesGuard) // << "Gác cổng": Dùng RolesGuard để kiểm tra "biển báo"
   getAllUsers() {
     return this.usersService.getUsers();
+  }
+
+  @Post('me/avatar')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('avatar')) // Nhận file có tên trường là 'avatar'
+  uploadAvatar(
+    @GetUser('userID') userId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // Giới hạn 2MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+        ],
+      }),
+    ) file: Express.Multer.File
+  ) {
+    return this.usersService.uploadAvatar(userId, file);
   }
 }

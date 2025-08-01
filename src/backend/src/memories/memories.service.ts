@@ -316,9 +316,7 @@
 //     return { message: 'Media deleted successfully.' };
 //   }
 // }
-
-
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException, GoneException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
@@ -333,44 +331,42 @@ export class MemoriesService {
     private cloudinary: CloudinaryService,
   ) {}
 
-  /**
-   * 1. Tìm kiếm Ký ức. Đã cập nhật để tìm kiếm theo `memoryDate`.
-   */
   async search(userId: string, searchDto: SearchMemoryDto) {
     const { query, emotions, startDate, endDate } = searchDto;
 
-    const where: Prisma.MemoryWhereInput = {
-      userID: userId,
-    };
+    // === PHIÊN BẢN SỬA LỖI LOGIC: SỬ DỤNG MẢNG AND RÕ RÀNG ===
+    const andConditions: Prisma.MemoryWhereInput[] = [{ userID: userId }];
 
     if (emotions && emotions.length > 0) {
-      where.emotionID = { in: emotions };
+      andConditions.push({ emotionID: { in: emotions } });
     }
-    
-    // --- SỬA LOGIC LỌC NGÀY THÁNG ---
-    // Thay thế 'created_at' bằng 'memoryDate'
-    if (startDate || endDate) {
-      where.memoryDate = {};
-      if (startDate) {
-        (where.memoryDate as Prisma.DateTimeFilter).gte = new Date(startDate);
-      }
-      if (endDate) {
-        (where.memoryDate as Prisma.DateTimeFilter).lte = new Date(endDate);
-      }
+
+    if (startDate) {
+      andConditions.push({ memoryDate: { gte: new Date(startDate) } });
+    }
+
+    if (endDate) {
+      andConditions.push({ memoryDate: { lte: new Date(endDate) } });
     }
     
     if (query) {
-      where.OR = [
-        { title: { contains: query, mode: 'insensitive' } },
-        { content: { contains: query, mode: 'insensitive' } },
-        { memoryTags: { some: { tag: { name: { contains: query, mode: 'insensitive' } } } } },
-      ];
+      andConditions.push({
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { content: { contains: query, mode: 'insensitive' } },
+          { memoryTags: { some: { tag: { name: { contains: query, mode: 'insensitive' } } } } },
+        ],
+      });
     }
-    
+
+    const where: Prisma.MemoryWhereInput = {
+      AND: andConditions,
+    };
+     console.log('[BACKEND-SERVICE] Final Prisma WHERE clause:', JSON.stringify(where, null, 2));
     return this.prisma.memory.findMany({
       where,
       orderBy: {
-        memoryDate: 'desc', // Sắp xếp theo ngày của ký ức
+        memoryDate: 'desc',
       },
       include: {
         emotion: true,
@@ -384,11 +380,10 @@ export class MemoriesService {
     });
   }
 
-  /**
-   * [HELPER] Xử lý tags.
-   */
   private async manageTags(tagNames: string[] | undefined) {
-    if (!tagNames || tagNames.length === 0) return [];
+    if (!tagNames || tagNames.length === 0) {
+      return [];
+    }
     const tags = await this.prisma.$transaction(
       tagNames.map((name) => {
         const tagName = name.toLowerCase().trim();
@@ -400,20 +395,18 @@ export class MemoriesService {
       }),
     );
     return tags.map((tag) => ({
-      tagID: tag.tagID,
+      tag: {
+        connect: {
+          tagID: tag.tagID,
+        },
+      },
     }));
   }
 
-  /**
-   * 2. Tạo Ký ức mới. Đã cập nhật để lưu `memoryDate`.
-   */
   async createMemory(userId: string, dto: CreateMemoryDto) {
     const { tags: tagNames, ...memoryData } = dto;
-    
-    // Xử lý tags để lấy ra mảng các ID
-    const tagIds = await this.manageTags(tagNames);
+    const tagConnections = await this.manageTags(tagNames);
 
-    // Tạo bản ghi Memory với dữ liệu trực tiếp từ DTO
     const memory = await this.prisma.memory.create({
       data: {
         user: { connect: { userID: userId } },
@@ -421,16 +414,10 @@ export class MemoriesService {
         title: memoryData.title,
         content: memoryData.content,
         location: memoryData.location,
-        memoryDate: new Date(memoryData.memoryDate), // Lấy chính xác memoryDate
-        
-        // Kết nối với các tag thông qua bảng trung gian
+        memoryDate: new Date(memoryData.memoryDate),
         memoryTags: {
-          create: tagIds.map(tag => ({
-            tag: {
-              connect: { tagID: tag.tagID }
-            }
-          }))
-        }
+          create: tagConnections,
+        },
       },
       include: {
         emotion: true,
@@ -441,18 +428,13 @@ export class MemoriesService {
         },
       },
     });
-
     return memory;
   }
 
-
-  /**
-   * 3. Lấy tất cả Ký ức. Đã cập nhật để sắp xếp theo `memoryDate`.
-   */
   async getMemories(userId: string) {
     return this.prisma.memory.findMany({
       where: { userID: userId },
-      orderBy: { memoryDate: 'desc' }, // <<< THAY ĐỔI Ở ĐÂY
+      orderBy: { memoryDate: 'desc' },
       include: {
         emotion: true,
         media: true,
@@ -463,9 +445,6 @@ export class MemoriesService {
     });
   }
 
-  /**
-   * 4. Lấy một Ký ức bằng ID.
-   */
   async getMemoryById(userId: string, memoryId: string) {
     const memory = await this.prisma.memory.findUnique({
       where: { memoryID: memoryId },
@@ -481,9 +460,6 @@ export class MemoriesService {
     return memory;
   }
 
-  /**
-   * 5. Cập nhật một Ký ức. Đã cập nhật để cho phép sửa `memoryDate`.
-   */
   async updateMemoryById(
     userId: string,
     memoryId: string,
@@ -492,11 +468,11 @@ export class MemoriesService {
     await this.getMemoryById(userId, memoryId);
     const { tags: tagNames, ...memoryData } = dto;
     const tagConnections = await this.manageTags(tagNames);
+
     return this.prisma.memory.update({
       where: { memoryID: memoryId },
       data: {
         ...memoryData,
-        // Cập nhật memoryDate nếu được cung cấp
         memoryDate: memoryData.memoryDate ? new Date(memoryData.memoryDate) : undefined,
         memoryTags: {
           deleteMany: {},
@@ -510,9 +486,6 @@ export class MemoriesService {
     });
   }
 
-  /**
-   * 6. Xóa một Ký ức.
-   */
   async deleteMemoryById(userId: string, memoryId: string) {
     await this.getMemoryById(userId, memoryId);
     await this.prisma.memory.delete({
@@ -521,9 +494,6 @@ export class MemoriesService {
     return { message: 'Memory deleted successfully' };
   }
 
-  /**
-   * 7. Tạo/Lấy link chia sẻ.
-   */
   async createOrGetShareLink(userId: string, memoryId: string) {
     await this.getMemoryById(userId, memoryId);
     const existingLink = await this.prisma.shareLink.findFirst({
@@ -551,9 +521,6 @@ export class MemoriesService {
     });
   }
 
-  /**
-   * 8. Thêm media vào Ký ức.
-   */
   async addMediaToMemory(
     userId: string,
     memoryId: string,
@@ -577,14 +544,14 @@ export class MemoriesService {
         ? MediaType.VIDEO
         : MediaType.DOCUMENT;
       acc.push({
-          memoryID: memoryId,
-          url: result.secure_url,
-          publicId: result.public_id,
-          type: mediaType,
+        memoryID: memoryId,
+        url: result.secure_url,
+        publicId: result.public_id,
+        type: mediaType,
       });
       return acc;
     }, [] as Prisma.MediaCreateManyInput[]);
-    
+
     if (mediaDataToCreate.length === 0) {
       throw new BadRequestException(
         'None of the uploaded files were of a supported type.',
@@ -598,9 +565,6 @@ export class MemoriesService {
     };
   }
 
-  /**
-   * 9. Xóa media.
-   */
   async deleteMedia(userId: string, mediaId: string) {
     const media = await this.prisma.media.findUnique({
       where: { mediaID: mediaId },

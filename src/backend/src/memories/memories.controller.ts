@@ -15,7 +15,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
-  Query, // Thêm Query
+  Query,
 } from '@nestjs/common';
 import { MemoriesService } from './memories.service';
 import { CreateMemoryDto } from './dto/create-memory.dto';
@@ -23,7 +23,7 @@ import { UpdateMemoryDto } from './dto/update-memory.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { SearchMemoryDto } from './dto/search-memory.dto'; // Thêm DTO mới
+import { SearchMemoryDto } from './dto/search-memory.dto'; // Import DTO
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('memories')
@@ -32,7 +32,6 @@ export class MemoriesController {
 
   @Post()
   createMemory(@GetUser('userID') userId: string, @Body() dto: CreateMemoryDto) {
-    console.log('Backend nhận được DTO:', dto);
     return this.memoriesService.createMemory(userId, dto);
   }
 
@@ -41,14 +40,14 @@ export class MemoriesController {
     return this.memoriesService.getMemories(userId);
   }
 
-  // Phương thức search mới được thêm vào đây
-  // Vị trí này rất quan trọng: nó phải được đặt TRƯỚC route động ':id'
   @Get('search')
   searchMemories(
     @GetUser('userID') userId: string,
+    // === KHÔI PHỤC LẠI TRẠNG THÁI CHUẨN ===
     @Query() dto: SearchMemoryDto,
   ) {
-    return this.memoriesService.search(userId, dto);
+     console.log('[BACKEND-CONTROLLER] Received DTO:', dto);
+     return this.memoriesService.search(userId, dto);
   }
 
   @Get(':id')
@@ -97,7 +96,7 @@ export class MemoriesController {
           new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 50 }),
           new FileTypeValidator({
             fileType:
-              '.(png|jpeg|jpg|gif|webp|mp3|mpeg|wav|ogg|mp4|webm|mov|pdf|docx)',
+              '.(png|jpeg|jpg|gif|webp|mp3|mpeg|wav|ogg|mp4|webm|mov|mov|)',
           }),
         ],
       }),

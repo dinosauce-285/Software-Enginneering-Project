@@ -145,16 +145,18 @@ export default function Dashboard() {
       try {
         const searchParams = {
             query: debouncedSearchText,
-            emotions: selectedEmotions,
+            // === THAY ĐỔI QUAN TRỌNG NHẤT Ở ĐÂY ===
+            emotions: selectedEmotions.length > 0 ? selectedEmotions.join(',') : null,
             startDate: fromDate ? fromDate.toISOString().split('T')[0] : null,
             endDate: toDate ? toDate.toISOString().split('T')[0] : null,
         };
 
         const filteredParams = Object.fromEntries(
-            Object.entries(searchParams).filter(([_, v]) => v !== null && v !== '' && (!Array.isArray(v) || v.length > 0))
+            Object.entries(searchParams).filter(([_, v]) => v !== null && v !== '')
         );
 
         const hasSearchParams = Object.keys(filteredParams).length > 0;
+        console.log('[FRONTEND] Sending to API:', filteredParams); 
         
         let data;
         if (hasSearchParams) {

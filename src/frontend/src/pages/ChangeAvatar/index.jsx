@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/AppLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { uploadAvatar } from '../../services/api';
+import SuccessDialog from '../../components/Dialogs/SuccessDialog';
 
 export default function ChangeAvatarPage() {
   const { user, setUser } = useAuth(); // Lấy cả hàm setUser để cập nhật context
@@ -11,6 +12,8 @@ export default function ChangeAvatarPage() {
   const [preview, setPreview] = useState(user?.avatar || null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -32,13 +35,17 @@ export default function ChangeAvatarPage() {
     try {
       const updatedUser = await uploadAvatar(file);
       setUser(updatedUser); // Cập nhật thông tin user trong context
-      alert('Avatar updated successfully!');
-      navigate('/dashboard');
+      setIsSuccessDialogOpen(true);
     } catch (err) {
       setError(err.message || 'Failed to upload avatar.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCloseSuccessDialog = () => {
+    setIsSuccessDialogOpen(false);
+    navigate('/dashboard'); // Chuyển hướng sau khi đóng dialog
   };
 
   return (
@@ -74,6 +81,12 @@ export default function ChangeAvatarPage() {
           </button>
         </div>
       </div>
+      <SuccessDialog
+        isOpen={isSuccessDialogOpen}
+        onClose={handleCloseSuccessDialog}
+        title="Avatar Updated!"
+        message="Your new avatar has been saved successfully."
+      />
     </AppLayout>
   );
 }

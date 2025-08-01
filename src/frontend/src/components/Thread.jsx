@@ -97,13 +97,13 @@ const Thread = ({ memory }) => {
     ? memory.media.find(item => item.type === 'IMAGE' || item.type === 'VIDEO')
     : null;
 
-  const date = new Date(memory.created_at).toLocaleDateString('vi-VN', {
+  const date = new Date(memory.memoryDate).toLocaleDateString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
   });
 
-  const time = new Date(memory.created_at).toLocaleTimeString('vi-VN', {
+  const time = new Date(memory.memoryDate).toLocaleTimeString('vi-VN', {
     hour: '2-digit',
     minute: '2-digit',
   });

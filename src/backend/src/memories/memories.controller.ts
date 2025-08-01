@@ -32,6 +32,7 @@ export class MemoriesController {
 
   @Post()
   createMemory(@GetUser('userID') userId: string, @Body() dto: CreateMemoryDto) {
+    console.log('Backend nhận được DTO:', dto);
     return this.memoriesService.createMemory(userId, dto);
   }
 

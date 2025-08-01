@@ -249,8 +249,8 @@ export default function MemoryDetail() {
   }
 
   const displayMedia = Array.isArray(memory.media) ? memory.media.find(item => item.type === 'IMAGE' || item.type === 'VIDEO') : null;
-  const date = new Date(memory.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const time = new Date(memory.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  const date = new Date(memory.memoryDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const time = new Date(memory.memoryDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   const tagsString = Array.isArray(memory.memoryTags) ? memory.memoryTags.map(({ tag }) => tag ? `#${tag.name}` : '').join(' ') : '';
   const emotionName = memory.emotion?.name || 'N/A';
   const emotionSymbol = memory.emotion?.symbol || '';

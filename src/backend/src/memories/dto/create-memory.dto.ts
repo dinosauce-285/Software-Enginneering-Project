@@ -29,4 +29,8 @@ export class CreateMemoryDto {
   @IsDateString()
   @IsOptional() // Đặt là Optional để nếu không gửi, nó sẽ lấy giá trị mặc định now()
   created_at?: string; 
+
+  @IsDateString()
+  @IsNotEmpty()
+  memoryDate: string;
 }

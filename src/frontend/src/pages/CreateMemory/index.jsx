@@ -422,9 +422,10 @@ export default function CreateMemory() {
                 emotionID: selectedEmotionId,
                 tags: tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean),
                 // Gửi ngày tháng do người dùng chọn vào trường created_at
-                created_at: selectedDate.toISOString(),
+                memoryDate: selectedDate.toISOString(), 
                 location,
             };
+            console.log("Dữ liệu gửi đi:", memoryData);
             const newMemory = await createMemory(memoryData);
             if (mediaFiles.length > 0) {
                 await uploadMediaForMemory(newMemory.memoryID, mediaFiles);

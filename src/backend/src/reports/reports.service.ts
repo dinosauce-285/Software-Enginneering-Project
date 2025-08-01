@@ -21,7 +21,7 @@ export class ReportsService {
       // BƯỚỚC 1: Thống kê (giữ nguyên)
       const emotionStats = await this.prisma.memory.groupBy({
         by: ['emotionID'],
-        where: { userID: userId, created_at: { gte: startDate, lte: endDate } },
+        where: { userID: userId, memoryDate: { gte: startDate, lte: endDate } },
         _count: { emotionID: true },
       });
 

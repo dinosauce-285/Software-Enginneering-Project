@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUUID, MaxLength, IsArray } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MaxLength, IsArray, IsDateString, IsNotEmpty } from 'class-validator';
 
 export class UpdateMemoryDto {
   @IsString()
@@ -22,4 +22,8 @@ export class UpdateMemoryDto {
   @IsString()
   @IsOptional()
   location?: string;
+
+  @IsDateString()
+  @IsNotEmpty()
+  memoryDate: string;
 }

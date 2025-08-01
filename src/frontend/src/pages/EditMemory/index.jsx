@@ -150,7 +150,7 @@ export default function EditMemory() {
                 if (editor) editor.commands.setContent(memoryData.content);
                 setSelectedEmotionId(memoryData.emotionID);
                 setTags(memoryData.memoryTags.map(({ tag }) => tag.name).join(', '));
-                setSelectedDate(new Date(memoryData.created_at));
+                setSelectedDate(memoryData.memoryDate ? new Date(memoryData.memoryDate) : new Date());
                 setLocation(memoryData.location || '');
 
                 setExistingMedia(memoryData.media || []);
@@ -214,6 +214,7 @@ export default function EditMemory() {
                 emotionID: selectedEmotionId,
                 tags: tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean),
                 location,
+                memoryDate: selectedDate.toISOString(),
             };
 
             await Promise.all([
@@ -365,14 +366,24 @@ export default function EditMemory() {
                             <h3 className="font-semibold text-gray-700 mb-2">Media</h3>
                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                                 {/* Hiển thị media đã có */}
-                                {existingMedia.map(media => (
-                                    <MediaPreviewItem 
-                                        key={media.mediaID}
-                                        url={media.url}
-                                        type={media.mimeType || 'image/jpeg'} 
-                                        onRemove={() => handleMarkForDeletion(media.mediaID)}
-                                    />
-                                ))}
+                                {existingMedia.map(media => {
+                                    // Chuyển đổi ENUM từ DB sang một chuỗi MIME type giả định
+                                    // để component MediaPreviewItem có thể hiểu được.
+                                    let mimeType = 'application/octet-stream'; // Mặc định cho file không xác định
+                                    if (media.type === 'IMAGE') mimeType = 'image/jpeg';
+                                    if (media.type === 'VIDEO') mimeType = 'video/mp4';
+                                    if (media.type === 'AUDIO') mimeType = 'audio/mpeg';
+                                    if (media.type === 'DOCUMENT') mimeType = 'application/pdf';
+
+                                    return (
+                                        <MediaPreviewItem 
+                                            key={media.mediaID}
+                                            url={media.url}
+                                            type={mimeType} // <<< Truyền vào MIME type đã được chuyển đổi
+                                            onRemove={() => handleMarkForDeletion(media.mediaID)}
+                                        />
+                                    );
+                                })}
   
                                 {newMediaFiles.map((file, index) => (
                                     <MediaPreviewItem 

@@ -138,26 +138,13 @@ export default function UserMenu() {
     <div className="flex items-center gap-1"> {/* Giảm khoảng cách giữa 2 nút */}
       
       {/* === NÚT AVATAR RIÊNG VỚI HIỆU ỨNG HOVER === */}
-      <div className="relative" ref={avatarMenuRef}>
-        <button 
-          onClick={() => setIsAvatarMenuOpen(!isAvatarMenuOpen)}
-          className="p-1 rounded-full transition-colors duration-200 hover:bg-gray-100" // Thêm padding và hover
-        >
-          <img
-            src={user.avatar || "/src/assets/defaultAvt.png"}
-            alt="User Avatar"
-            className="w-9 h-9 rounded-full object-cover bg-gray-200"
-          />
-        </button>
-        {isAvatarMenuOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border z-50">
-            <Link to="/change-avatar" className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left">
-              <FiEdit3 />
-              <span>Change Avatar</span>
-            </Link>
-          </div>
-        )}
-      </div>
+      <Link to="/change-avatar" title="Change Avatar">
+        <img
+          src={user.avatar || "/src/assets/defaultAvt.png"}
+          alt="User Avatar"
+          className="w-9 h-9 rounded-full object-cover bg-gray-200 cursor-pointer transition-opacity hover:opacity-80"
+        />
+      </Link>
 
       {/* === NÚT DROPDOWN RIÊNG VỚI HIỆU ỨNG HOVER === */}
       <div className="relative" ref={menuRef}>
@@ -174,11 +161,15 @@ export default function UserMenu() {
             {/* ... Nội dung menu chính giữ nguyên ... */}
             <div className="px-4 py-3 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <img
-                  src={user.avatar || "/src/assets/defaultAvt.png"}
-                  alt="User Avatar"
-                  className="w-10 h-10 rounded-full object-cover bg-gray-200"
-                />
+                <Link to="/change-avatar" title="Change Avatar">
+                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                        <img
+                        src={user.avatar || "/src/assets/defaultAvt.png"}
+                        alt="User Avatar"
+                        className="w-10 h-10 rounded-full object-cover bg-gray-200 cursor-pointer transition-opacity hover:opacity-80"
+                        />
+                    </div>
+                </Link>
                 <div>
                   <p className="font-semibold text-sm text-gray-800 truncate" title={user.display_name}>
                     {user.display_name}

@@ -4,6 +4,7 @@ import { CreateMemoryDto } from './dto/create-memory.dto';
 import { UpdateMemoryDto } from './dto/update-memory.dto';
 import { AccessLevel, Prisma, MediaType } from '@prisma/client';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { SearchMemoryDto } from './dto/search-memory.dto';
 
 @Injectable()
 export class MemoriesService {
@@ -11,6 +12,88 @@ export class MemoriesService {
     private prisma: PrismaService,
     private cloudinary: CloudinaryService,
   ) {}
+
+  async search(userId: string, searchDto: SearchMemoryDto) {
+    const { query, emotions, startDate, endDate } = searchDto;
+
+    const where: Prisma.MemoryWhereInput = {
+      userID: userId,
+    };
+
+    if (emotions && emotions.length > 0) {
+   
+      where.emotionID = { 
+        in: emotions,
+      };
+    }
+    
+    if (startDate) {
+      if (!where.created_at) {
+        where.created_at = {};
+      }
+      (where.created_at as Prisma.DateTimeFilter).gte = new Date(startDate);
+    }
+    
+    if (endDate) {
+      if (!where.created_at) {
+        where.created_at = {};
+      }
+      (where.created_at as Prisma.DateTimeFilter).lte = new Date(endDate);
+    }
+    
+    if (query) {
+      where.OR = [
+        {
+          title: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+        {
+          content: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+        {
+          memoryTags: {
+            some: {
+              tag: {
+                name: {
+                  contains: query,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
+        },
+      ];
+    }
+    
+
+    console.log('Prisma WHERE clause:', JSON.stringify(where, null, 2));
+    
+    return this.prisma.memory.findMany({
+      where,
+      orderBy: {
+        created_at: 'desc',
+      },
+      include: {
+        emotion: true,
+        media: true,
+        memoryTags: {
+          select: {
+            tag: {
+              select: {
+                name: true,
+                tagID: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 
   private async manageTags(tagNames: string[] | undefined) {
     if (!tagNames || tagNames.length === 0) {
@@ -35,49 +118,38 @@ export class MemoriesService {
     }));
   }
 
- // src/memories/memories.service.ts
-
-async createMemory(userId: string, dto: CreateMemoryDto) {
-  // Tách tags và các trường khác của DTO
-  const { tags: tagNames, ...memoryData } = dto;
-  
-  // Xử lý tags
-  const tagConnections = await this.manageTags(tagNames);
-
-  // Chuẩn bị dữ liệu cuối cùng để truyền vào Prisma
-  // Kiểu của `finalData` sẽ được TypeScript suy luận ra là phù hợp với `Prisma.MemoryCreateInput`
-  const finalData: Prisma.MemoryCreateInput = {
-    user: { connect: { userID: userId } }, // Kết nối với user
-    emotion: { connect: { emotionID: memoryData.emotionID } }, // Kết nối với emotion
-    title: memoryData.title,
-    content: memoryData.content,
-    location: memoryData.location,
-    memoryTags: {
-      create: tagConnections,
-    },
-  };
-  
-  // Nếu frontend gửi lên trường "created_at", hãy sử dụng nó
-  // Nếu không, hãy để Prisma tự điền giá trị mặc định
-  if (memoryData.created_at) {
-    finalData.created_at = new Date(memoryData.created_at);
-  }
-
-  // Tạo bản ghi memory
-  const memory = await this.prisma.memory.create({
-    data: finalData,
-    include: {
-      emotion: true,
+  async createMemory(userId: string, dto: CreateMemoryDto) {
+    const { tags: tagNames, ...memoryData } = dto;
+    const tagConnections = await this.manageTags(tagNames);
+    const finalData: Prisma.MemoryCreateInput = {
+      user: { connect: { userID: userId } },
+      emotion: { connect: { emotionID: memoryData.emotionID } },
+      title: memoryData.title,
+      content: memoryData.content,
+      location: memoryData.location,
       memoryTags: {
-        include: {
-          tag: true,
+        create: tagConnections,
+      },
+    };
+
+    if (memoryData.created_at) {
+      finalData.created_at = new Date(memoryData.created_at);
+    }
+
+    const memory = await this.prisma.memory.create({
+      data: finalData,
+      include: {
+        emotion: true,
+        memoryTags: {
+          include: {
+            tag: true,
+          },
         },
       },
-    },
-  });
+    });
+    return memory;
+  }
 
-  return memory;
-}
   async getMemories(userId: string) {
     return this.prisma.memory.findMany({
       where: { userID: userId },
@@ -112,11 +184,9 @@ async createMemory(userId: string, dto: CreateMemoryDto) {
         },
       },
     });
-
     if (!memory || memory.userID !== userId) {
       throw new ForbiddenException('Access to resource denied');
     }
-
     return memory;
   }
 
@@ -128,7 +198,6 @@ async createMemory(userId: string, dto: CreateMemoryDto) {
     await this.getMemoryById(userId, memoryId);
     const { tags: tagNames, ...memoryData } = dto;
     const tagConnections = await this.manageTags(tagNames);
-
     return this.prisma.memory.update({
       where: { memoryID: memoryId },
       data: {
@@ -156,7 +225,7 @@ async createMemory(userId: string, dto: CreateMemoryDto) {
     });
     return { message: 'Memory deleted successfully' };
   }
-  
+
   async createOrGetShareLink(userId: string, memoryId: string) {
     await this.getMemoryById(userId, memoryId);
     const existingLink = await this.prisma.shareLink.findFirst({
@@ -165,11 +234,9 @@ async createMemory(userId: string, dto: CreateMemoryDto) {
         access_level: AccessLevel.PUBLIC,
       },
     });
-
     if (existingLink) {
       return existingLink;
     }
-
     const newShareLink = await this.prisma.shareLink.create({
       data: {
         memoryID: memoryId,
@@ -178,14 +245,12 @@ async createMemory(userId: string, dto: CreateMemoryDto) {
         url: '',
       },
     });
-
     const finalLink = await this.prisma.shareLink.update({
       where: { shareID: newShareLink.shareID },
       data: {
         url: newShareLink.shareID,
       },
     });
-
     return finalLink;
   }
 
@@ -198,19 +263,21 @@ async createMemory(userId: string, dto: CreateMemoryDto) {
     if (!files || files.length === 0) {
       throw new BadRequestException('At least one file is required.');
     }
-
-    const uploadPromises = files.map(file => 
-      this.cloudinary.uploadFile(file, `soulnote-memories/${userId}`)
+    const uploadPromises = files.map((file) =>
+      this.cloudinary.uploadFile(file, `soulnote-memories/${userId}`),
     );
     const uploadResults = await Promise.all(uploadPromises);
-
     const mediaDataToCreate = uploadResults.reduce((acc, result, index) => {
       const file = files[index];
-      const mediaType = file.mimetype.startsWith('image/') ? MediaType.IMAGE
-                      : file.mimetype.startsWith('audio/') ? MediaType.AUDIO
-                      : file.mimetype.startsWith('video/') ? MediaType.VIDEO
-                      : file.mimetype.includes('pdf') || file.mimetype.includes('document') ? MediaType.DOCUMENT
-                      : null;
+      const mediaType = file.mimetype.startsWith('image/')
+        ? MediaType.IMAGE
+        : file.mimetype.startsWith('audio/')
+        ? MediaType.AUDIO
+        : file.mimetype.startsWith('video/')
+        ? MediaType.VIDEO
+        : file.mimetype.includes('pdf') || file.mimetype.includes('document')
+        ? MediaType.DOCUMENT
+        : null;
       if (mediaType) {
         acc.push({
           memoryID: memoryId,
@@ -221,16 +288,17 @@ async createMemory(userId: string, dto: CreateMemoryDto) {
       }
       return acc;
     }, [] as Prisma.MediaCreateManyInput[]);
-
     if (mediaDataToCreate.length === 0) {
-      throw new BadRequestException('None of the uploaded files were of a supported type.');
+      throw new BadRequestException(
+        'None of the uploaded files were of a supported type.',
+      );
     }
-
     await this.prisma.media.createMany({
       data: mediaDataToCreate,
     });
-
-    return { message: `${mediaDataToCreate.length} file(s) uploaded successfully.` };
+    return {
+      message: `${mediaDataToCreate.length} file(s) uploaded successfully.`,
+    };
   }
 
   async deleteMedia(userId: string, mediaId: string) {
@@ -238,16 +306,13 @@ async createMemory(userId: string, dto: CreateMemoryDto) {
       where: { mediaID: mediaId },
       include: { memory: true },
     });
-
     if (!media || media.memory.userID !== userId) {
       throw new ForbiddenException('Access to resource denied.');
     }
-
     await this.cloudinary.deleteFile(media.publicId);
     await this.prisma.media.delete({
       where: { mediaID: mediaId },
     });
-
     return { message: 'Media deleted successfully.' };
   }
 }

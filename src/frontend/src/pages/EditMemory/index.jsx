@@ -4,7 +4,7 @@ import AppLayout from '../../components/AppLayout';
 
 import {
     FaImage, FaSmile, FaBold, FaUnderline, FaItalic, FaAlignCenter,
-    FaMapMarkerAlt, FaTag, FaCalendarAlt
+    FaMapMarkerAlt, FaTag, FaCalendarAlt, FaFileAudio, FaFileVideo, FaFile
 } from 'react-icons/fa';
 import { FiChevronDown, FiX } from 'react-icons/fi';
 
@@ -25,7 +25,6 @@ import './CreateMemory.css';
 import { getMemoryById, updateMemory, getEmotions, uploadMediaForMemory, deleteMediaById } from '../../services/api';
 import { LocationSearchInput } from '../../components/LocationSearchInput';
 
-// 1. IMPORT HOOK `useAuth`
 import { useAuth } from '../../contexts/AuthContext';
 
 // --- HELPER COMPONENTS ---
@@ -50,18 +49,51 @@ const InputChip = ({ icon, children }) => (
     </div>
 );
 
+const MediaPreviewItem = ({ url, type, onRemove }) => {
+    let content;
+
+    if (type.startsWith('image/')) {
+        content = <img src={url} alt="media preview" className="w-full h-full object-cover rounded-lg bg-gray-100" />;
+    } else if (type.startsWith('video/')) {
+        content = <video src={url} controls className="w-full h-full object-contain rounded-lg bg-black"></video>;
+    } else if (type.startsWith('audio/')) {
+        content = (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 rounded-lg p-2">
+                <FaFileAudio className="text-4xl text-gray-500 mb-2" />
+                <audio src={url} controls className="w-full"></audio>
+            </div>
+        );
+    } else {
+        content = (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 rounded-lg p-2 text-center">
+                 <FaFile className="text-4xl text-gray-500 mb-2" />
+                 <span className="text-xs text-gray-600">Unsupported file</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="relative group aspect-square">
+            {content}
+            <button 
+                onClick={onRemove} 
+                className="absolute top-1.5 right-1.5 bg-black bg-opacity-50 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            >
+                <FiX size={14}/>
+            </button>
+        </div>
+    );
+};
+
 
 export default function EditMemory() {
     const { memoryId } = useParams();
-    // 2. GỌI HOOK `useAuth` ĐỂ LẤY THÔNG TIN USER
     const { user } = useAuth();
 
     const [title, setTitle] = useState('');
     const [selectedEmotionId, setSelectedEmotionId] = useState('');
     const [tags, setTags] = useState('');
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [mediaFiles, setMediaFiles] = useState([]);
-    const [mediaPreviews, setMediaPreviews] = useState([]);
     const [emotions, setEmotions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -71,10 +103,9 @@ export default function EditMemory() {
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    //const [mediaFiles, setMediaFiles] = useState([]);
-    const [existingMedia, setExistingMedia] = useState([]); // Lưu media đã có từ DB
-    const [newMediaFiles, setNewMediaFiles] = useState([]); // Lưu các file mới chờ upload
-    const [mediaToDelete, setMediaToDelete] = useState([]); // Lưu ID của các media cần xóa
+    const [existingMedia, setExistingMedia] = useState([]); 
+    const [newMediaFiles, setNewMediaFiles] = useState([]); 
+    const [mediaToDelete, setMediaToDelete] = useState([]); 
 
     const emotionDropdownRef = useRef(null);
     const navigate = useNavigate();
@@ -100,7 +131,6 @@ export default function EditMemory() {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
     useEffect(() => {
-        // Hủy bỏ các URL object cũ để tránh rò rỉ bộ nhớ khi component bị unmount
         return () => {
             newMediaFiles.forEach(file => URL.revokeObjectURL(file.previewUrl));
         };
@@ -109,22 +139,20 @@ export default function EditMemory() {
     useEffect(() => {
         const fetchMemoryData = async () => {
             try {
-                // Fetch song song emotions và memory detail
                 const [emotionsData, memoryData] = await Promise.all([
                     getEmotions(),
                     getMemoryById(memoryId),
                 ]);
 
-                // Set emotions
                 setEmotions(emotionsData);
                 
-                // Điền dữ liệu memory vào form
                 setTitle(memoryData.title);
                 if (editor) editor.commands.setContent(memoryData.content);
                 setSelectedEmotionId(memoryData.emotionID);
                 setTags(memoryData.memoryTags.map(({ tag }) => tag.name).join(', '));
                 setSelectedDate(new Date(memoryData.created_at));
                 setLocation(memoryData.location || '');
+
                 setExistingMedia(memoryData.media || []);
 
             } catch (err) {
@@ -138,18 +166,6 @@ export default function EditMemory() {
         fetchMemoryData();
     }, [memoryId, editor]);
 
-
-    useEffect(() => {
-        const fetchEmotions = async () => {
-            try {
-                const data = await getEmotions();
-                setEmotions(data);
-                if (data.length > 0) setSelectedEmotionId(data[0].emotionID);
-            } catch (err) { console.error("Failed to fetch emotions", err); }
-        };
-        fetchEmotions();
-    }, []);
-
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (emotionDropdownRef.current && !emotionDropdownRef.current.contains(event.target)) {
@@ -162,27 +178,25 @@ export default function EditMemory() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
-            mediaPreviews.forEach(p => URL.revokeObjectURL(p.url));
         };
-    }, [mediaPreviews]);
+    }, []);
 
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
-        // Thêm một thuộc tính previewUrl tạm thời vào mỗi file object
         files.forEach(file => file.previewUrl = URL.createObjectURL(file));
         setNewMediaFiles(prev => [...prev, ...files]);
+
+        e.target.value = null;
     };
 
     const handleRemoveNewFile = (fileToRemove) => {
-        URL.revokeObjectURL(fileToRemove.previewUrl); // Dọn dẹp bộ nhớ
+        URL.revokeObjectURL(fileToRemove.previewUrl);
         setNewMediaFiles(prev => prev.filter(file => file !== fileToRemove));
     };
 
     const handleMarkForDeletion = (mediaId) => {
-        // Ẩn media đó khỏi UI
         setExistingMedia(prev => prev.filter(media => media.mediaID !== mediaId));
-        // Thêm ID vào danh sách chờ xóa
         setMediaToDelete(prev => [...prev, mediaId]);
     };
     
@@ -191,35 +205,28 @@ export default function EditMemory() {
             setError("Title and content are required.");
             return;
         }
-        setIsLoading(true);
+        setIsSaving(true);
         setError(null);
         try {
-            // Dùng DTO của backend (UpdateMemoryDto)
             const memoryDataToUpdate = {
                 title,
                 content: editor.getHTML(),
                 emotionID: selectedEmotionId,
                 tags: tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean),
-                // createdAt không cần gửi khi update
                 location,
             };
 
             await Promise.all([
-                // 1. Cập nhật text
                 updateMemory(memoryId, memoryDataToUpdate),
-                // 2. Xóa media
                 ...mediaToDelete.map(id => deleteMediaById(id)),
-                // 3. Upload media mới (chỉ chạy nếu có file mới)
                 newMediaFiles.length > 0 ? uploadMediaForMemory(memoryId, newMediaFiles) : Promise.resolve(),
             ]);
             
-            // Tạm thời chưa xử lý upload/delete media khi edit
-            
-            navigate(`/memory/${memoryId}`); // Quay lại trang detail sau khi save
+            navigate(`/memory/${memoryId}`);
         } catch (err) {
-            setError(err.message || 'An error occurred.');
+            setError(err.message || 'An error occurred during update.');
         } finally {
-            setIsLoading(false);
+            setIsSaving(false);
         }
     };
 
@@ -229,7 +236,6 @@ export default function EditMemory() {
     
     const toggleAlignCenter = () => {
         if (!editor) return;
-        
         if (editor.isActive({ textAlign: 'center' })) {
             editor.chain().focus().unsetTextAlign().run();
         } else {
@@ -252,10 +258,10 @@ export default function EditMemory() {
                         <Link to={`/memory/${memoryId}`} className="text-sm text-gray-600 hover:text-gray-900">Cancel</Link>
                          <button
                             onClick={handleSave}
-                            disabled={isLoading}
+                            disabled={isSaving}
                             className="bg-blue-500 text-white font-bold px-5 py-2 rounded-lg hover:bg-blue-600 disabled:bg-blue-300 transition-colors"
                         >
-                            {isLoading ? 'Updating...' : 'Update'}
+                            {isSaving ? 'Updating...' : 'Update'}
                         </button>
                     </div>
                 </header>
@@ -267,7 +273,6 @@ export default function EditMemory() {
                             className="w-10 h-10 rounded-full object-cover" 
                             alt="avatar" 
                         />
-                        {/* 3. HIỂN THỊ USERNAME ĐỘNG */}
                         <p className="font-semibold text-gray-800">
                             {user ? user.display_name : 'Loading...'}
                         </p>
@@ -354,28 +359,28 @@ export default function EditMemory() {
                         className="w-full text-3xl font-extrabold text-gray-900 border-none focus:outline-none focus:ring-0 mb-2"
                     />
 
-                    {/* === THAY ĐỔI 5: Hiển thị cả media cũ và media mới === */}
+
                     {(existingMedia.length > 0 || newMediaFiles.length > 0) && (
                         <div className="my-4">
                             <h3 className="font-semibold text-gray-700 mb-2">Media</h3>
                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                                 {/* Hiển thị media đã có */}
                                 {existingMedia.map(media => (
-                                    <div key={media.mediaID} className="relative group aspect-square">
-                                        <img src={media.url} alt="existing media" className="w-full h-full object-cover rounded-lg bg-gray-100"/>
-                                        <button onClick={() => handleMarkForDeletion(media.mediaID)} className="absolute top-1.5 right-1.5 bg-black bg-opacity-50 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <FiX size={14}/>
-                                        </button>
-                                    </div>
+                                    <MediaPreviewItem 
+                                        key={media.mediaID}
+                                        url={media.url}
+                                        type={media.mimeType || 'image/jpeg'} 
+                                        onRemove={() => handleMarkForDeletion(media.mediaID)}
+                                    />
                                 ))}
-                                {/* Hiển thị preview của các file mới */}
+  
                                 {newMediaFiles.map((file, index) => (
-                                    <div key={index} className="relative group aspect-square">
-                                        <img src={file.previewUrl} alt="new file preview" className="w-full h-full object-cover rounded-lg bg-gray-100"/>
-                                        <button onClick={() => handleRemoveNewFile(file)} className="absolute top-1.5 right-1.5 bg-black bg-opacity-50 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <FiX size={14}/>
-                                        </button>
-                                    </div>
+                                    <MediaPreviewItem 
+                                        key={`${file.name}-${index}`}
+                                        url={file.previewUrl}
+                                        type={file.type}
+                                        onRemove={() => handleRemoveNewFile(file)}
+                                    />
                                 ))}
                             </div>
                         </div>
@@ -403,7 +408,15 @@ export default function EditMemory() {
                         </div>
                     </div>
                     
-                    <input type="file" accept="image/*" multiple onChange={handleFileChange} ref={fileInputRef} style={{ display: 'none' }} />
+
+                    <input 
+                        type="file" 
+                        accept="image/*,video/*,audio/*" 
+                        multiple 
+                        onChange={handleFileChange} 
+                        ref={fileInputRef} 
+                        style={{ display: 'none' }} 
+                    />
                 </div>
                 {error && <p className="text-red-500 mt-4 text-center text-sm">{error}</p>}
             </div>

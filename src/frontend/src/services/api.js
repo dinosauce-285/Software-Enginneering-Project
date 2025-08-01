@@ -193,20 +193,17 @@
 //     throw error.response.data;
 //   }
 // };
-
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-// Cấu hình một instance của axios với các cài đặt mặc định
 const apiClient = axios.create({
-  baseURL: API_BASE_URL, // Địa chỉ của server backend
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor tự động gắn token vào mọi request gửi đi
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -220,14 +217,10 @@ apiClient.interceptors.request.use(
   }
 );
 
-
 // ========================================================
 //                 AUTHENTICATION SERVICES
 // ========================================================
 
-/**
- * Đăng ký tài khoản mới.
- */
 export const signUpUser = async (userData) => {
   try {
     const response = await apiClient.post('/auth/signup', userData);
@@ -237,9 +230,6 @@ export const signUpUser = async (userData) => {
   }
 };
 
-/**
- * Đăng nhập và lưu thông tin vào localStorage.
- */
 export const loginUser = async (credentials) => {
   try {
     const response = await apiClient.post('/auth/signin', credentials);
@@ -253,9 +243,6 @@ export const loginUser = async (credentials) => {
   }
 };
 
-/**
- * Đăng nhập bằng Firebase và lưu thông tin.
- */
 export const authenticateWithFirebase = async (idToken) => {
   try {
     const response = await apiClient.post('/auth/firebase', { idToken });
@@ -269,13 +256,8 @@ export const authenticateWithFirebase = async (idToken) => {
   }
 };
 
-/**
- * Lấy thông tin cá nhân của người dùng đã đăng nhập.
- * Hàm này rất quan trọng cho AuthContext.
- */
 export const getProfile = async () => {
     try {
-        // Endpoint này cần được backend hỗ trợ: nhận token và trả về thông tin user.
         const response = await apiClient.get('/auth/profile');
         return response.data;
     } catch (error) {
@@ -283,9 +265,6 @@ export const getProfile = async () => {
     }
 };
 
-/**
- * Đăng xuất bằng cách xóa dữ liệu khỏi localStorage.
- */
 export const logoutUser = () => {
   try {
     localStorage.removeItem('accessToken');
@@ -295,14 +274,10 @@ export const logoutUser = () => {
   }
 };
 
-
 // ========================================================
 //                    MEMORY SERVICES
 // ========================================================
 
-/**
- * Lấy danh sách Ký ức của người dùng.
- */
 export const getMyMemories = async () => {
   try {
     const response = await apiClient.get('/memories');
@@ -312,9 +287,15 @@ export const getMyMemories = async () => {
   }
 };
 
-/**
- * Tạo một Ký ức mới.
- */
+export const searchMemories = async (params) => {
+  try {
+    const response = await apiClient.get('/memories/search', { params });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
 export const createMemory = async (memoryData) => {
   try {
     const response = await apiClient.post('/memories', memoryData);
@@ -324,9 +305,6 @@ export const createMemory = async (memoryData) => {
   }
 };
 
-/**
- * Lấy chi tiết một Ký ức.
- */
 export const getMemoryById = async (memoryId) => {
   try {
     const response = await apiClient.get(`/memories/${memoryId}`);
@@ -336,9 +314,15 @@ export const getMemoryById = async (memoryId) => {
   }
 };
 
-/**
- * Xóa một Ký ức.
- */
+export const updateMemory = async (memoryId, memoryData) => {
+  try {
+    const response = await apiClient.patch(`/memories/${memoryId}`, memoryData);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
 export const deleteMemoryById = async (memoryId) => {
   try {
     const response = await apiClient.delete(`/memories/${memoryId}`);
@@ -352,9 +336,6 @@ export const deleteMemoryById = async (memoryId) => {
 //                     MEDIA SERVICES
 // ========================================================
 
-/**
- * Tải lên media cho một Ký ức.
- */
 export const uploadMediaForMemory = async (memoryId, files) => {
   if (!files || files.length === 0) return;
 
@@ -373,14 +354,19 @@ export const uploadMediaForMemory = async (memoryId, files) => {
   }
 };
 
+export const deleteMediaById = async (mediaId) => {
+  try {
+    const response = await apiClient.delete(`/memories/media/${mediaId}`);
+    return response.status;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
 
 // ========================================================
 //                   EMOTION SERVICES
 // ========================================================
 
-/**
- * Lấy danh sách tất cả các cảm xúc.
- */
 export const getEmotions = async () => {
   try {
     const response = await apiClient.get('/emotions');
@@ -390,55 +376,8 @@ export const getEmotions = async () => {
   }
 };
 
-/**
- * Cập nhật một kỷ niệm đã có.
- * @param {string} memoryId - ID của memory cần cập nhật.
- * @param {object} memoryData - Dữ liệu mới để cập nhật.
- */
-export const updateMemory = async (memoryId, memoryData) => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) throw new Error('No access token found.');
-
-  try {
-    const response = await apiClient.patch(`/memories/${memoryId}`, memoryData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-};
-
-/**
- * Xóa một file media cụ thể.
- * @param {string} mediaId - ID của media cần xóa.
- */
-export const deleteMediaById = async (mediaId) => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) throw new Error('No access token found.');
-
-  try {
-    const response = await apiClient.delete(`/memories/media/${mediaId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.status;
-  } catch (error) {
-    throw error.response.data;
-  }
-};
-
-/**
- * Lấy báo cáo cảm xúc trong một khoảng thời gian.
- * @param {string} startDate - Chuỗi ngày tháng ISO (ví dụ: "2025-07-01T00:00:00.000Z")
- * @param {string} endDate - Chuỗi ngày tháng ISO
- */
 export const getEmotionReport = async (startDate, endDate) => {
   try {
-    // Gửi startDate và endDate dưới dạng query params
     const response = await apiClient.get('/reports/emotions', {
       params: { startDate, endDate },
     });

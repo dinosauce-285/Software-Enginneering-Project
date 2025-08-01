@@ -1,4 +1,3 @@
-// src/memories/memories.controller.ts
 import {
   Controller,
   Get,
@@ -16,6 +15,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  Query, // Thêm Query
 } from '@nestjs/common';
 import { MemoriesService } from './memories.service';
 import { CreateMemoryDto } from './dto/create-memory.dto';
@@ -23,6 +23,7 @@ import { UpdateMemoryDto } from './dto/update-memory.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { SearchMemoryDto } from './dto/search-memory.dto'; // Thêm DTO mới
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('memories')
@@ -37,6 +38,16 @@ export class MemoriesController {
   @Get()
   getMemories(@GetUser('userID') userId: string) {
     return this.memoriesService.getMemories(userId);
+  }
+
+  // Phương thức search mới được thêm vào đây
+  // Vị trí này rất quan trọng: nó phải được đặt TRƯỚC route động ':id'
+  @Get('search')
+  searchMemories(
+    @GetUser('userID') userId: string,
+    @Query() dto: SearchMemoryDto,
+  ) {
+    return this.memoriesService.search(userId, dto);
   }
 
   @Get(':id')
@@ -74,7 +85,6 @@ export class MemoriesController {
     return this.memoriesService.createOrGetShareLink(userId, memoryId);
   }
 
-
   @Post(':id/media')
   @UseInterceptors(FilesInterceptor('files', 10))
   addMedia(
@@ -83,13 +93,15 @@ export class MemoriesController {
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 50 }), // 50 MB
-          new FileTypeValidator({ 
-            fileType: '.(png|jpeg|jpg|gif|webp|mp3|mpeg|wav|ogg|mp4|webm|mov|pdf|docx)',
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 50 }),
+          new FileTypeValidator({
+            fileType:
+              '.(png|jpeg|jpg|gif|webp|mp3|mpeg|wav|ogg|mp4|webm|mov|pdf|docx)',
           }),
         ],
       }),
-    ) files: Array<Express.Multer.File>,
+    )
+    files: Array<Express.Multer.File>,
   ) {
     return this.memoriesService.addMediaToMemory(userId, memoryId, files);
   }

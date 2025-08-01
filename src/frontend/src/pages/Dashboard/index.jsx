@@ -88,8 +88,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../../index.css';
 import AppLayout from '../../components/AppLayout';
-import  Thread from '../../components/Thread';
-import { getMyMemories } from '../../services/api';
+import Thread from '../../components/Thread';
+import { useSearch } from '../../contexts/SearchContext.jsx';
+import { useDebounce } from '../../hooks/useDebounce.js';
+import { getMyMemories, searchMemories } from '../../services/api';
 
 const LoadingSkeleton = () => (
   <div className="text-center p-10">
@@ -109,26 +111,77 @@ const EmptyState = () => (
   </div>
 );
 
+const NoResultsState = ({ onClear }) => (
+    <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+      <h2 className="text-2xl font-semibold text-gray-800">No memories found</h2>
+      <p className="mt-2 text-gray-500">We couldn't find any memories matching your search criteria.</p>
+      <button 
+        onClick={onClear} 
+        className="mt-6 px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition"
+      >
+        Clear Search
+      </button>
+    </div>
+);
+
 export default function Dashboard() {
   const [memories, setMemories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const { 
+    searchText, setSearchText,
+    selectedEmotions, setSelectedEmotions,
+    fromDate, setFromDate,
+    toDate, setToDate
+  } = useSearch();
+  const debouncedSearchText = useDebounce(searchText, 500);
+
   useEffect(() => {
-    const fetchMemories = async () => {
+    const fetchAndFilterMemories = async () => {
+      setIsLoading(true);
+      setError(null);
+      
       try {
-        const data = await getMyMemories();
+        const searchParams = {
+            query: debouncedSearchText,
+            emotions: selectedEmotions,
+            startDate: fromDate ? fromDate.toISOString().split('T')[0] : null,
+            endDate: toDate ? toDate.toISOString().split('T')[0] : null,
+        };
+
+        const filteredParams = Object.fromEntries(
+            Object.entries(searchParams).filter(([_, v]) => v !== null && v !== '' && (!Array.isArray(v) || v.length > 0))
+        );
+
+        const hasSearchParams = Object.keys(filteredParams).length > 0;
+        
+        let data;
+        if (hasSearchParams) {
+          data = await searchMemories(filteredParams); 
+        } else {
+          data = await getMyMemories();
+        }
+        
         setMemories(data);
+
       } catch (err) {
-        console.error('Failed to fetch memories:', err);
+        console.error('Failed to fetch or search memories:', err);
         setError('Could not load your memories. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMemories();
-  }, []);
+    fetchAndFilterMemories();
+  }, [debouncedSearchText, selectedEmotions, fromDate, toDate]);
+
+  const clearSearch = () => {
+    setSearchText('');
+    setSelectedEmotions([]);
+    setFromDate(null);
+    setToDate(null);
+  };
 
   if (error) {
     return (
@@ -145,8 +198,18 @@ export default function Dashboard() {
       </AppLayout>
     );
   }
+  
+  const isSearching = searchText || selectedEmotions.length > 0 || fromDate || toDate;
 
-  if (!isLoading && memories.length === 0) {
+  if (memories.length === 0 && isSearching) {
+    return (
+      <AppLayout>
+        <NoResultsState onClear={clearSearch} />
+      </AppLayout>
+    );
+  }
+
+  if (memories.length === 0 && !isSearching) {
     return (
       <AppLayout>
         <EmptyState />

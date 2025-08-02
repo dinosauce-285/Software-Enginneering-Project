@@ -7,6 +7,10 @@ import { uploadAvatar } from '../../services/api';
 import SuccessDialog from '../../components/Dialogs/SuccessDialog';
 
 export default function ChangeAvatarPage() {
+
+
+
+
   const { user, setUser } = useAuth(); // Lấy cả hàm setUser để cập nhật context
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(user?.avatar || null);
@@ -90,3 +94,5 @@ export default function ChangeAvatarPage() {
     </AppLayout>
   );
 }
+
+

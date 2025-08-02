@@ -59,7 +59,7 @@ model User {
 
   passwordResetOtp      String? 
   passwordResetExpires  DateTime?
-  otpVerificationToken  String?   @unique~
+  otpVerificationToken  String?   @unique
 
   gender        Gender
   dateOfBirth   DateTime 

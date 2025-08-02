@@ -1,17 +1,54 @@
-// src/pages/ChangeAvatar/index.jsx
+// File: src/pages/ChangeAvatar/index.jsx
+
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AppLayout from '../../components/AppLayout';
+import AppLayout from '../../components/AppLayout'; // <-- Giả sử AppLayout vẫn nằm ở đây và đã được git track
 import { useAuth } from '../../contexts/AuthContext';
 import { uploadAvatar } from '../../services/api';
-import SuccessDialog from '../../components/SuccessDialog';
 
+
+import { FiCheckCircle, FiX } from 'react-icons/fi';
+
+function SuccessDialog({ isOpen, onClose, title, message }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-md p-6 w-[320px] relative flex flex-col items-center text-center">
+        
+        <button
+          className="absolute top-2 right-3 text-gray-500 hover:text-black"
+          onClick={onClose}
+        >
+          <FiX size={20} />
+        </button>
+
+        <div className="mb-4 text-green-500">
+          <FiCheckCircle size={48} />
+        </div>
+
+        <h3 className="text-xl font-bold mb-2">{title || 'Success!'}</h3>
+        <p className="text-base text-gray-700 mb-6">
+          {message || 'Your action was completed successfully.'}
+        </p>
+        
+        <div className="w-full">
+          <button
+            className="w-full px-4 py-2 rounded bg-[#0050ff] text-white text-base shadow hover:bg-blue-700"
+            onClick={onClose}
+          >
+            OK
+          </button>
+        </div>
+        
+      </div>
+    </div>
+  );
+}
+
+// --- BƯỚC 2: COMPONENT CHÍNH CỦA BẠN (KHÔNG CẦN THAY ĐỔI GÌ) ---
 export default function ChangeAvatarPage() {
-
-
-
-
-  const { user, setUser } = useAuth(); // Lấy cả hàm setUser để cập nhật context
+  const { user, setUser } = useAuth();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(user?.avatar || null);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +75,7 @@ export default function ChangeAvatarPage() {
     setError('');
     try {
       const updatedUser = await uploadAvatar(file);
-      setUser(updatedUser); // Cập nhật thông tin user trong context
+      setUser(updatedUser);
       setIsSuccessDialogOpen(true);
     } catch (err) {
       setError(err.message || 'Failed to upload avatar.');
@@ -49,7 +86,7 @@ export default function ChangeAvatarPage() {
 
   const handleCloseSuccessDialog = () => {
     setIsSuccessDialogOpen(false);
-    navigate('/dashboard'); // Chuyển hướng sau khi đóng dialog
+    navigate('/dashboard');
   };
 
   return (
@@ -58,7 +95,7 @@ export default function ChangeAvatarPage() {
         <h1 className="text-2xl font-bold text-center mb-6">Change Your Avatar</h1>
         <div className="flex flex-col items-center gap-6">
           <img
-            src={preview || "/src/assets/defaultAvt.png"}
+            src={preview || "/src/assets/defaultAvt.png"} // Bạn nhớ kiểm tra lại đường dẫn ảnh mặc định này nhé
             alt="Avatar Preview"
             className="w-40 h-40 rounded-full object-cover border-4 border-gray-200"
           />
@@ -94,5 +131,3 @@ export default function ChangeAvatarPage() {
     </AppLayout>
   );
 }
-
-

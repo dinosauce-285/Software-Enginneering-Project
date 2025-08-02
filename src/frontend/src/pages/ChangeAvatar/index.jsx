@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/AppLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { uploadAvatar } from '../../services/api';
-import SuccessDialog from '../../components/Dialogs/SuccessDialog';
+import SuccessDialog from '../../components/SuccessDialog';
 
 export default function ChangeAvatarPage() {
 

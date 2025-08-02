@@ -269,8 +269,8 @@ import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 
 import "react-datepicker/dist/react-datepicker.css";
-import '../../components/datePicker.css'; 
-import './CreateMemory.css'; 
+import '../../components/datePicker.css';
+import './CreateMemory.css';
 
 import { createMemory, getEmotions, uploadMediaForMemory } from '../../services/api';
 import { LocationSearchInput } from '../../components/LocationSearchInput';
@@ -407,12 +407,30 @@ export default function CreateMemory() {
         setMediaFiles(prev => prev.filter(f => `${f.name}-${f.lastModified}` !== previewIdToRemove));
         setMediaPreviews(prev => prev.filter(p => p.id !== previewIdToRemove));
     };
-    
+
     const handleSave = async () => {
         if (!editor || !title.trim() || editor.isEmpty) {
             setError("Title and content are required.");
             return;
         }
+
+        const tagsArray = tags
+            .split(',')
+            .map(t => t.trim().replace(/^#/, ''))
+            .filter(Boolean);
+
+        // Kiểm tra số lượng tag
+        if (tagsArray.length > 10) {
+            setError("Maximum 10 tags allowed.");
+            return;
+        }
+
+        // Kiểm tra tag quá dài
+        if (tagsArray.some(tag => tag.length > 255)) {
+            setError("Tag too long.");
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
         try {
@@ -420,12 +438,10 @@ export default function CreateMemory() {
                 title,
                 content: editor.getHTML(),
                 emotionID: selectedEmotionId,
-                tags: tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean),
-                // Gửi ngày tháng do người dùng chọn vào trường created_at
-                memoryDate: selectedDate.toISOString(), 
+                tags: tagsArray,
+                memoryDate: selectedDate.toISOString(),
                 location,
             };
-            console.log("Dữ liệu gửi đi:", memoryData);
             const newMemory = await createMemory(memoryData);
             if (mediaFiles.length > 0) {
                 await uploadMediaForMemory(newMemory.memoryID, mediaFiles);
@@ -437,10 +453,12 @@ export default function CreateMemory() {
             setIsLoading(false);
         }
     };
-    
+
+
+
     const toggleAlignCenter = () => {
         if (!editor) return;
-        
+
         if (editor.isActive({ textAlign: 'center' })) {
             editor.chain().focus().unsetTextAlign().run();
         } else {
@@ -449,9 +467,8 @@ export default function CreateMemory() {
     };
 
     const selectedEmotion = emotions.find(e => e.emotionID === selectedEmotionId);
-    const iconButtonClass = (isActive) => 
-        `p-2 rounded-md transition-colors ${
-            isActive ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+    const iconButtonClass = (isActive) =>
+        `p-2 rounded-md transition-colors ${isActive ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
         }`;
 
     return (
@@ -461,7 +478,7 @@ export default function CreateMemory() {
                     <h1 className="text-xl font-bold text-gray-800">New Memory</h1>
                     <div className="flex items-center gap-4">
                         <Link to="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Cancel</Link>
-                         <button
+                        <button
                             onClick={handleSave}
                             disabled={isLoading}
                             className="bg-blue-500 text-white font-bold px-5 py-2 rounded-lg hover:bg-blue-600 disabled:bg-blue-300 transition-colors"
@@ -472,17 +489,17 @@ export default function CreateMemory() {
                 </header>
 
                 <div className="mt-6">
-                     <div className="flex items-center gap-3 mb-6">
-                        <img 
+                    <div className="flex items-center gap-3 mb-6">
+                        <img
                             src={user?.avatarUrl || "/src/assets/avt.avif"}
-                            className="w-10 h-10 rounded-full object-cover" 
-                            alt="avatar" 
+                            className="w-10 h-10 rounded-full object-cover"
+                            alt="avatar"
                         />
                         <p className="font-semibold text-gray-800">
                             {user ? user.display_name : 'Loading...'}
                         </p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                         <div className="relative" ref={emotionDropdownRef}>
                             <button onClick={() => setIsEmotionDropdownOpen(o => !o)} className="flex items-center justify-between w-full gap-2 border border-gray-300 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-gray-500 transition-colors">
@@ -507,8 +524,8 @@ export default function CreateMemory() {
                                 </div>
                             )}
                         </div>
-                        
-                        <InputChip icon={<FaTag className="flex-shrink-0"/>}>
+
+                        <InputChip icon={<FaTag className="flex-shrink-0" />}>
                             <input
                                 type="text"
                                 value={tags}
@@ -518,7 +535,7 @@ export default function CreateMemory() {
                             />
                         </InputChip>
 
-                        <InputChip icon={<FaMapMarkerAlt className="flex-shrink-0"/>}>
+                        <InputChip icon={<FaMapMarkerAlt className="flex-shrink-0" />}>
                             <LocationSearchInput
                                 onLocationSelect={setLocation}
                                 placeholder="Add location"
@@ -580,24 +597,24 @@ export default function CreateMemory() {
                                         </div>
                                     )}
 
-                                    <button 
-                                        onClick={() => handleRemoveFile(p.id)} 
+                                    <button
+                                        onClick={() => handleRemoveFile(p.id)}
                                         className="absolute top-1.5 right-1.5 bg-black bg-opacity-60 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity z-10"
                                     >
-                                        <FiX size={14}/>
+                                        <FiX size={14} />
                                     </button>
                                 </div>
                             ))}
                         </div>
                     )}
-                    
+
                     <EditorContent editor={editor} />
-                    
+
                     <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
                         <div className="flex items-center gap-1">
-                            <button type="button" onClick={() => fileInputRef.current?.click()} className={iconButtonClass(false)}><FaImage/></button>
+                            <button type="button" onClick={() => fileInputRef.current?.click()} className={iconButtonClass(false)}><FaImage /></button>
                             <div className="relative" ref={emojiPickerRef}>
-                                <button type="button" onClick={() => setIsEmojiPickerOpen(o => !o)} className={iconButtonClass(isEmojiPickerOpen)}><FaSmile/></button>
+                                <button type="button" onClick={() => setIsEmojiPickerOpen(o => !o)} className={iconButtonClass(isEmojiPickerOpen)}><FaSmile /></button>
                                 {isEmojiPickerOpen && (
                                     <div className="absolute z-20 bottom-full mb-2">
                                         <Picker onEmojiClick={(emoji) => editor.chain().focus().insertContent(emoji.emoji).run()} />
@@ -606,20 +623,20 @@ export default function CreateMemory() {
                             </div>
                         </div>
                         <div className="flex items-center gap-1">
-                            <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={iconButtonClass(editor.isActive('bold'))}><FaBold/></button>
-                            <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={iconButtonClass(editor.isActive('italic'))}><FaItalic/></button>
-                            <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={iconButtonClass(editor.isActive('underline'))}><FaUnderline/></button>
-                            <button type="button" onClick={toggleAlignCenter} className={iconButtonClass(editor.isActive({ textAlign: 'center' }))}><FaAlignCenter/></button>
+                            <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={iconButtonClass(editor.isActive('bold'))}><FaBold /></button>
+                            <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={iconButtonClass(editor.isActive('italic'))}><FaItalic /></button>
+                            <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()} className={iconButtonClass(editor.isActive('underline'))}><FaUnderline /></button>
+                            <button type="button" onClick={toggleAlignCenter} className={iconButtonClass(editor.isActive({ textAlign: 'center' }))}><FaAlignCenter /></button>
                         </div>
                     </div>
-                    
-                    <input 
-                        type="file" 
-                        accept="image/*,video/*,audio/*" 
-                        multiple 
-                        onChange={handleFileChange} 
-                        ref={fileInputRef} 
-                        style={{ display: 'none' }} 
+
+                    <input
+                        type="file"
+                        accept="image/*,video/*,audio/*"
+                        multiple
+                        onChange={handleFileChange}
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
                     />
                 </div>
                 {error && <p className="text-red-500 mt-4 text-center text-sm">{error}</p>}

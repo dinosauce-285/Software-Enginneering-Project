@@ -407,3 +407,42 @@ export const uploadAvatar = async (avatarFile) => {
     throw error.response.data;
   }
 };
+
+/**
+ * Gửi yêu cầu quên mật khẩu đến backend.
+ * Backend sẽ tự động gửi email chứa OTP nếu email hợp lệ.
+ * @param {string} email - Email của người dùng.
+ */
+export const forgotPassword = async (email) => {
+  try {
+    // Gửi request POST đến /auth/forgot-password với body chứa email
+    const response = await apiClient.post('/auth/forgot-password', { email });
+    // Trả về message thành công từ backend
+    return response.data;
+  } catch (error) {
+    // Ném lỗi ra để component có thể bắt và hiển thị
+    throw error.response.data;
+  }
+};
+
+/**
+ * Gửi yêu cầu đặt lại mật khẩu mới cùng với OTP.
+ * @param {object} resetData - Dữ liệu gồm { email, otp, newPassword }.
+ */
+export const resetPassword = async (otpVerificationToken, newPassword) => {
+  try {
+    const response = await apiClient.post('/auth/reset-password', { otpVerificationToken, newPassword });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const verifyOtp = async (email, otp) => {
+  try {
+    const response = await apiClient.post('/auth/verify-otp', { email, otp });
+    return response.data; // Trả về { otpVerificationToken: '...' }
+  } catch (error) {
+    throw error.response.data;
+  }
+};

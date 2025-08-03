@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/AppLayout';
 import SettingRow from '../../components/SettingRow';
 import EmailSetting from '../../components/EmailSetting';
-import PhoneSetting from '../../components/PhoneSetting';
 import UsernameSetting from '../../components/Username';
 import ChangePasswordSetting from '../../components/ChangePasswordSetting';
 import DeleteAccount from '../DeleteAccount/index.jsx';
 import EmailNotificationSetting from '../../components/EmailNotificationSetting';
 import ReminderTimeSetting from '../../components/ReminderTimeSetting';
 import ThemeSetting from '../../components/ThemeSetting';
+
 export default function SettingLayout() {
     const navigate = useNavigate();
     return (
@@ -19,11 +19,7 @@ export default function SettingLayout() {
                 <h2 className="text-xl font-semibold mb-4">Account</h2>
                 <div className="space-y-1 divide-y">
                     <EmailSetting />
-                    {/* <SettingRow label="Email" value="nguyentanvan123@gmail.com" /> */}
-                    {/* <SettingRow label="Phone" value="0325609027" /> */}
-                    <PhoneSetting />
                     <UsernameSetting />
-                    {/* <SettingRow label="Change Password" value="••••••••" /> */}
                     <ChangePasswordSetting />
                     <SettingRow
                         label="Delete Account"

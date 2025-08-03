@@ -270,7 +270,7 @@ export default function EditMemory() {
                 <div className="mt-6">
                      <div className="flex items-center gap-3 mb-6">
                         <img 
-                            src={user?.avatarUrl || "/src/assets/avt.avif"}
+                            src={user.avatar || "/src/assets/defaultAvt.png"}
                             className="w-10 h-10 rounded-full object-cover" 
                             alt="avatar" 
                         />

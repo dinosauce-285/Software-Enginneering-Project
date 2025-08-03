@@ -9,6 +9,7 @@ export default function ChangePasswordSetting() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [failCount, setFailCount] = useState(0);
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
     const handleCloseModal = () => {
         setShowModal(false);
@@ -44,7 +45,7 @@ export default function ChangePasswordSetting() {
             }
 
             // 3. Gọi API bằng fetch hoặc axios
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
+            const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

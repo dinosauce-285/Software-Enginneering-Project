@@ -145,6 +145,7 @@ export default function EmailSetting() {
     const [password, setPassword] = useState(""); // Cần mật khẩu để xác nhận
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
     const handleCloseModal = () => {
         setShowModal(false);
@@ -172,7 +173,7 @@ export default function EmailSetting() {
                 throw new Error("Authentication token not found. Please log in again.");
             }
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-email`, {
+            const response = await fetch(`${API_BASE_URL}/auth/change-email`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

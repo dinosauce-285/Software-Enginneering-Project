@@ -143,6 +143,7 @@ export default function UsernameSetting() {
     const [newUsername, setNewUsername] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
     // --- LOGIC 30 NGÀY DỰA TRÊN DỮ LIỆU THẬT TỪ BACKEND ---
     const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
@@ -168,7 +169,7 @@ export default function UsernameSetting() {
         try {
             const token = localStorage.getItem('accessToken');
             // Gọi đến API đúng mà chúng ta đã tạo
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-username`, {
+            const response = await fetch(`${API_BASE_URL}/auth/change-username`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

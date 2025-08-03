@@ -9,6 +9,7 @@ export default function DeleteAccount() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
     const [checked1, setChecked1] = useState(false);
     const [checked2, setChecked2] = useState(false);
@@ -28,7 +29,7 @@ export default function DeleteAccount() {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/delete-account`, {
+            const response = await fetch(`${API_BASE_URL}/auth/delete-account`, {
                 method: 'DELETE', // <-- Dùng phương thức DELETE
                 headers: {
                     'Content-Type': 'application/json',

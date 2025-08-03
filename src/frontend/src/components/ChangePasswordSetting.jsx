@@ -33,39 +33,73 @@ export default function ChangePasswordSetting() {
             setError("New passwords do not match.");
             return;
         }
-        if (failCount >= 5) {
-            setError("You have entered the wrong password too many times. Please wait until tomorrow to change your password.");
-            return;
-        }
-
         setLoading(true);
         setError("");
-
         try {
-    
-            if (oldPassword === "123456789") {
-                alert("Password changed successfully!");
-                handleCloseModal();
-            } else {
-                setFailCount(prev => prev + 1);
-                if (failCount + 1 >= 5) {
-                    setError("You have entered the wrong password too many times. Please wait until tomorrow to change your password.");
-                } else {
-                    setError("Incorrect old password, please try again.");
-                }
+            // 2. Lấy token từ localStorage
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                // Xử lý trường hợp không có token (ví dụ: chuyển hướng về trang đăng nhập)
+                throw new Error("Authentication token not found. Please log in again.");
             }
+
+            // 3. Gọi API bằng fetch hoặc axios
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`, // <-- Gửi token trong header
+                },
+                body: JSON.stringify({
+                    oldPassword: oldPassword,
+                    newPassword: newPassword,
+                }),
+            });
+
+            const data = await response.json();
+
+            // 4. Xử lý kết quả trả về
+            if (!response.ok) {
+                // Nếu response không thành công (status 4xx, 5xx), ném lỗi với message từ backend
+                throw new Error(data.message || 'An unknown error occurred.');
+            }
+
+            // Nếu thành công
+            alert(data.message); // Hoặc hiển thị một toast/notification đẹp hơn
+            handleCloseModal();
+
         } catch (err) {
-            setError("Server error, please try again.");
+            // 5. Bắt lỗi (lỗi mạng hoặc lỗi từ backend) và hiển thị cho người dùng
+            setError(err.message);
         } finally {
+            // 6. Luôn dừng trạng thái loading
             setLoading(false);
         }
+        // try {
+
+        //     if (oldPassword === "123456789") {
+        //         alert("Password changed successfully!");
+        //         handleCloseModal();
+        //     } else {
+        //         setFailCount(prev => prev + 1);
+        //         if (failCount + 1 >= 5) {
+        //             setError("You have entered the wrong password too many times. Please wait until tomorrow to change your password.");
+        //         } else {
+        //             setError("Incorrect old password, please try again.");
+        //         }
+        //     }
+        // } catch (err) {
+        //     setError("Server error, please try again.");
+        // } finally {
+        //     setLoading(false);
+        // }
     };
 
     return (
         <>
             <SettingRow
                 label="Change Password"
-                value="••••••••"
+                value="*********"
                 onClick={() => setShowModal(true)}
             />
 

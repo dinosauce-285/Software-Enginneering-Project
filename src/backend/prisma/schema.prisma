@@ -49,7 +49,7 @@ enum Gender {
 model User {
   userID       String   @id @default(uuid())
   email        String   @unique
-  display_name String
+  display_name String   
   avatar       String?
   passwordHash  String?
   auth_provider String
@@ -70,6 +70,8 @@ model User {
 
   failedLoginAttempts Int      @default(0)
   lockUntil     DateTime?
+  
+  usernameLastChangedAt DateTime?
 
 }
 

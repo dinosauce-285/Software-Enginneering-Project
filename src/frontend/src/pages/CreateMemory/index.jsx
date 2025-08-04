@@ -577,7 +577,7 @@ export default function CreateMemory() {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="An unforgettable title..."
-                        className="w-full text-3xl font-extrabold text-gray-900 border-none focus:outline-none focus:ring-0 mb-2"
+                        className="bg-white w-full text-3xl font-extrabold text-gray-900 border-none focus:outline-none focus:ring-0 mb-2"
                     />
 
                     {mediaPreviews.length > 0 && (

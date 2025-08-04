@@ -151,7 +151,7 @@ function ResetPassword() {
                             <CustomInput text="Confirm Password" placeholder="Confirm your new password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
                         </div>
                         {error && <p className="text-red-500 text-sm text-center -my-2">{error}</p>}
-                        <button type="submit" disabled={loading} className="w-full py-3 bg-gray-900 ...">
+                        <button type="submit" disabled={loading} className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-100">
                             {loading ? 'Resetting...' : 'Reset Password'}
                         </button>
                     </form>

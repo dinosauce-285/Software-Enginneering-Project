@@ -167,8 +167,8 @@ function ForgetPass() {
                             <CustomInput text="Email" placeholder="Enter your email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                         </div>
                         {error && <p className="text-red-500 text-sm text-center -my-2">{error}</p>}
-                        <button type="submit" disabled={loading} className="w-full py-3 bg-gray-900 ...">{loading ? 'Sending...' : 'Send Instructions'}</button>
-                        <Link to="/login" className="flex items-center justify-center ..."><FiArrowLeft /> Back to log in</Link>
+                        <button type="submit" disabled={loading} className="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-100">{loading ? 'Sending...' : 'Send Instructions'}</button>
+                        <Link to="/login" className="flex items-center justify-center gap-2 font-semibold text-blue-600 hover:underline text-sm mt-2"><FiArrowLeft /> Back to log in</Link>
                     </form>
                 </div>
             </div>

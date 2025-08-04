@@ -1,5 +1,4 @@
 import { StrictMode } from 'react'
-import { AuthProvider } from './contexts/AuthContext.jsx';
 import { createRoot } from 'react-dom/client'
 import './index.css'
 
@@ -14,11 +13,6 @@ import CreateMemory from './pages/CreateMemory/index.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* <BrowserRouter> */}
-    <AuthProvider>
-      <App />
-      {/* Các components khác sẽ được render bên trong App thông qua routing */}
-    </AuthProvider>
-    {/* </BrowserRouter> */}
+    <App />
   </StrictMode>
-);
+)

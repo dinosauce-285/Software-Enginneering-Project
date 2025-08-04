@@ -9,6 +9,7 @@ import DeleteAccount from '../DeleteAccount/index.jsx';
 import EmailNotificationSetting from '../../components/EmailNotificationSetting';
 import ReminderTimeSetting from '../../components/ReminderTimeSetting';
 import ThemeSetting from '../../components/ThemeSetting';
+
 export default function SettingLayout() {
     const navigate = useNavigate();
     return (

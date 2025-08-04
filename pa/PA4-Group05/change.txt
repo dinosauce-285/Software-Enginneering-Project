@@ -1,0 +1,4 @@
+Changes in PA4 compared to PA3:
+	- Added 5. Deployment and 6. Implementation View in Software Architecture document.
+	- Changed file storage service replaced Firebase Storage by Cloudinary.
+	- UI Design: no change

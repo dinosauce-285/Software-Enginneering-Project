@@ -264,7 +264,7 @@ import Picker, { Theme as EmojiTheme } from 'emoji-picker-react';
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
+// import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -324,7 +324,6 @@ export default function CreateMemory() {
     const editor = useEditor({
         extensions: [
             StarterKit,
-            Underline,
             TextAlign.configure({ types: ['heading', 'paragraph'] }),
             Placeholder.configure({ placeholder: 'Tell your story...' }),
         ],

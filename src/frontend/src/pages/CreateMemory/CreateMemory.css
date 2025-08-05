@@ -1,25 +1,36 @@
-/* ./pages/CreateMemory/CreateMemory.css */
+/* src/pages/CreateMemory/CreateMemory.css */
 
-/* Custom styles for Tiptap editor placeholder */
+/* --- Placeholder cho Chế độ Sáng --- */
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #adb5bd;
+  /* Màu xám trung bình, dễ nhìn trên nền trắng */
+  color: #9ca3af;
+  /* Tương đương text-gray-400 */
   pointer-events: none;
   height: 0;
 }
 
-/* Custom styles for the Date Picker input to match the minimalist theme */
+/* --- Placeholder cho Chế độ Tối --- */
+html.dark .tiptap p.is-editor-empty:first-child::before {
+  /* Màu xám sáng hơn, dễ nhìn trên nền tối */
+  color: #6b7280;
+  /* Tương đương text-gray-500 */
+}
+
+
+/* --- Các style cũ để reset giao diện input, giữ nguyên --- */
+
 .react-datepicker-wrapper input {
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    width: 100%;
-    background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  width: 100%;
+  background-color: transparent !important;
 }
 
 .react-datepicker-popper {
-    z-index: 20 !important;
+  z-index: 20 !important;
 }
 
 .location-search-input {

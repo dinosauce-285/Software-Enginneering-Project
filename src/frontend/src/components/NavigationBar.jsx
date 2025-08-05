@@ -40,7 +40,7 @@
 
 //     // Thống nhất các class cho icon để dễ quản lý và thêm hiệu ứng
 //     const iconClasses = "p-3 rounded-lg text-gray-600 transition-all duration-300 ease-in-out hover:bg-gray-100 hover:text-blue-600 hover:scale-110 hover:-translate-y-1";
-    
+
 //     return (
 //         <aside className="relative z-20 flex flex-col bg-white border-r shadow-md w-16 md:w-20 shrink-0">
 //             <div className="flex items-center justify-center h-24 shrink-0">
@@ -129,10 +129,11 @@ export default function NavigationBar() {
     }, [isNotificationPanelOpen]);
 
     // Thống nhất các class cho icon để dễ quản lý và thêm hiệu ứng
-    const iconClasses = "p-3 rounded-lg text-gray-600 transition-all duration-300 ease-in-out hover:bg-gray-100 hover:text-blue-600 hover:scale-110 hover:-translate-y-1";
-    
+    // const iconClasses = "p-3 rounded-lg text-gray-600 transition-all duration-300 ease-in-out hover:bg-gray-100 hover:text-blue-600 hover:scale-110 hover:-translate-y-1";
+    const iconClasses = "p-3 rounded-lg text-gray-600 dark:text-gray-400 transition-all duration-300 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-white hover:scale-110 hover:-translate-y-1";
     return (
-        <aside className="relative z-20 flex flex-col bg-white border-r shadow-md w-16 md:w-20 shrink-0">
+        // <aside className="relative z-20 flex flex-col bg-white border-r shadow-md w-16 md:w-20 shrink-0">
+        <aside className="relative z-20 flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-md w-16 md:w-20 shrink-0">
             <div className="flex items-center justify-center h-24 shrink-0">
                 <img
                     src={logo}

@@ -19,37 +19,35 @@ export const NextIcon = () => (<svg className="h-5 w-5" fill="none" viewBox="0 0
 export const CustomDateInput = forwardRef(({ value, onClick, placeholder }, ref) => (
     <div className="relative w-full" onClick={onClick} ref={ref}>
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"><CalendarIcon /></div>
-        <input 
-            type="text" 
-            value={value} 
-            readOnly 
-            placeholder={placeholder} 
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 text-sm cursor-pointer" 
+        <input
+            type="text"
+            value={value}
+            readOnly
+            placeholder={placeholder}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 text-sm cursor-pointer"
         />
     </div>
 ));
-
 const FilterPill = ({ label, onRemove }) => (
-    <div className="flex items-center bg-blue-100 text-blue-800 text-sm font-medium pl-3 pr-2 py-1 rounded-full">
+    <div className="flex items-center bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-200 text-sm font-medium pl-3 pr-2 py-1 rounded-full">
         <span>{label}</span>
-        <button onClick={onRemove} className="ml-2 text-blue-600 hover:bg-blue-200 rounded-full p-0.5">
+        <button onClick={onRemove} className="ml-2 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5">
             <FiX size={14} />
         </button>
     </div>
 );
-
 const FilterButton = forwardRef(({ icon, label, isActive, onClick }, ref) => (
     <button
         ref={ref}
         onClick={onClick}
         className={`
-      flex items-center justify-between w-full px-3 py-2 text-sm font-medium border rounded-lg 
-      transition-colors duration-200
-      ${isActive
-                ? 'bg-blue-50 border-blue-300 text-blue-800'
-                : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+            flex items-center justify-between w-full px-3 py-2 text-sm font-medium border rounded-lg 
+            transition-colors duration-200
+            ${isActive
+                ? 'bg-blue-50 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-200'
+                : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
             }
-    `}
+        `}
     >
         <div className="flex items-center gap-2 truncate">
             {icon}
@@ -146,20 +144,20 @@ export default function Header() {
         <>
             <header className="flex items-center justify-between w-full h-24 px-6 md:px-8">
                 <div ref={searchContainerRef} className="relative flex-1">
-                    <div className={`flex items-center border rounded-lg px-4 h-14 w-full bg-white transition-all duration-300 ${isExpanded ? 'ring-2 ring-blue-500 border-transparent' : 'border-gray-300'}`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                    <div className={`flex items-center border rounded-lg px-4 h-14 w-full bg-white  dark:bg-gray-700/60 transition-all duration-300 ${isExpanded ? 'ring-2 ring-blue-500 border-transparent' : 'border-gray-300'}`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 dark:text-gray-400"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
 
                         <input
                             type="text"
                             placeholder={isExpanded ? "Search tags, content, title..." : "Feeling nostalgic?"}
-                            className="flex-1 px-3 py-2 text-gray-700 focus:outline-none bg-transparent"
+                            className="flex-1 px-3 py-2 text-gray-700 dark:text-gray-200 bg-transparent focus:outline-none dark:placeholder-gray-400"
                             onFocus={() => setIsExpanded(true)}
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
                         />
                     </div>
                     {isExpanded && (
-                        <div className="absolute top-full left-0 right-0 z-20 bg-white border border-gray-200 shadow-lg rounded-lg p-4 mt-2 animate-fade-in-down">
+                        <div className="absolute top-full left-0 right-0 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg p-4 mt-2 animate-fade-in-down">
                             <div className="flex flex-col sm:flex-row items-center gap-3">
                                 <div className="w-full sm:flex-1">
                                     <DatePicker
@@ -213,10 +211,11 @@ export default function Header() {
                                         isActive={selectedEmotions.length > 0}
                                     />
                                     {isEmotionDropdownOpen && (
-                                        <div ref={emotionDropdownRef} className="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-30 max-h-60 overflow-y-auto">
+                                        // <div ref={emotionDropdownRef} className="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-30 max-h-60 overflow-y-auto">
+                                        <div ref={emotionDropdownRef} className="absolute top-full mt-1 w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-30 max-h-60 overflow-y-auto">
                                             {emotionOptions.map((emotion) => (
-                                                <label key={emotion.emotionID} className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-                                                    <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                <label key={emotion.emotionID} className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                                                    <input type="checkbox" className="h-4 w-4 rounded border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-600 checked:bg-blue-600"
                                                         checked={selectedEmotions.includes(emotion.emotionID)}
                                                         onChange={() => handleEmotionToggle(emotion.emotionID)}
                                                     />
@@ -237,8 +236,8 @@ export default function Header() {
 
             {hasActiveFilters && (
                 <div className="px-6 md:px-8 -mt-4 pb-4">
-                    <div className="flex items-center gap-2 flex-wrap border-t border-gray-200 pt-3">
-                        <span className="text-sm font-semibold text-gray-600 mr-2">Filters:</span>
+                    <div className="flex items-center gap-2 flex-wrap border-t border-gray-200 dark:border-gray-700 pt-3">
+                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 mr-2">Filters:</span>
                         {fromDate && (
                             <FilterPill
                                 label={formatDateRangeForPill()}

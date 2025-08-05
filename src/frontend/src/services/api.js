@@ -258,12 +258,12 @@ export const authenticateWithFirebase = async (idToken) => {
 };
 
 export const getProfile = async () => {
-    try {
-        const response = await apiClient.get('/auth/profile');
-        return response.data;
-    } catch (error) {
-        throw error.response.data;
-    }
+  try {
+    const response = await apiClient.get('/auth/profile');
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
 };
 
 export const logoutUser = () => {
@@ -387,7 +387,21 @@ export const getEmotionReport = async (startDate, endDate) => {
     throw error.response.data;
   }
 };
-
+/**
+ * Gửi yêu cầu thay đổi username của người dùng đang đăng nhập.
+ * @param {string} newUsername - Tên người dùng mới.
+ * @returns {Promise<object>} Đối tượng user đã được cập nhật.
+ */
+export const changeUsername = async (newUsername) => {
+  try {
+    const response = await apiClient.post('/auth/change-username', { newUsername });
+    // Trả về dữ liệu user mới từ backend
+    return response.data;
+  } catch (error) {
+    // Ném lỗi ra để component hoặc context có thể bắt và xử lý
+    throw error.response.data;
+  }
+};
 export const uploadAvatar = async (avatarFile) => {
   const token = localStorage.getItem('accessToken');
   if (!token) throw new Error('No access token found.');

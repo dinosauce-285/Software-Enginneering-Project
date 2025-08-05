@@ -18,9 +18,10 @@ import MemoryDetail from './pages/MemoryDetail/index.jsx';
 import SettingLayout from './pages/Setting/index.jsx';
 import EnterOTP from './pages/EnterOTP/index.jsx';
 import ResetPassword from './pages/ResetPassword/index.jsx';
-import EditMemory from './pages/EditMemory/index.jsx'; 
+import EditMemory from './pages/EditMemory/index.jsx';
 import EmotionReport from './pages/ReportEmotion/index.jsx';
 
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import AdminRoute from './components/AdminRoute';
@@ -32,37 +33,40 @@ function App() {
     <AuthProvider>
 
       <SearchProvider>
-        <BrowserRouter>
-          <ToastContainer position="top-center" autoClose={2000} />
-          <Routes>
+        <ThemeProvider>
+          <BrowserRouter>
+            <ToastContainer position="top-center" autoClose={2000} />
+            <Routes>
 
-            <Route element={<RedirectIfAuthenticated />}>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/login" element={<LogIn />} />
-              <Route path="/forgot-password" element={<ForgetPass />} />
-              <Route path="/enter-otp" element={<EnterOTP />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-            </Route>
-          
-            <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/create-memory" element={<CreateMemory />} />
-              <Route path="/memory/:memoryId" element={<MemoryDetail />} />
-              <Route path="/settings" element={<SettingLayout />} />
-              <Route path="/delete-account" element={<DeleteAccount />} />
-              <Route path="/memory/:memoryId/edit" element={<EditMemory />} />
-              <Route path="/report" element={<EmotionReport />} />
-              <Route path="/change-avatar" element={<ChangeAvatarPage />} />
-            </Route>
+              <Route element={<RedirectIfAuthenticated />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/login" element={<LogIn />} />
+                <Route path="/forgot-password" element={<ForgetPass />} />
+                <Route path="/enter-otp" element={<EnterOTP />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+              </Route>
 
-            <Route element={<AdminRoute />}>
-              <Route path="/user-management" element={<UserManagementLayout />} />
-            </Route>
-            
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </BrowserRouter>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/create-memory" element={<CreateMemory />} />
+                <Route path="/memory/:memoryId" element={<MemoryDetail />} />
+                <Route path="/settings" element={<SettingLayout />} />
+                <Route path="/delete-account" element={<DeleteAccount />} />
+                <Route path="/memory/:memoryId/edit" element={<EditMemory />} />
+                <Route path="/report" element={<EmotionReport />} />
+                <Route path="/change-avatar" element={<ChangeAvatarPage />} />
+              </Route>
+
+              <Route element={<AdminRoute />}>
+                <Route path="/user-management" element={<UserManagementLayout />} />
+              </Route>
+
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </BrowserRouter>
+        </ThemeProvider>
+
       </SearchProvider>
     </AuthProvider>
   );

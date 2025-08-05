@@ -260,14 +260,14 @@ import { FiChevronDown, FiX } from 'react-icons/fi';
 
 import DatePicker from 'react-datepicker';
 import { getYear, getMonth } from 'date-fns';
-import Picker from 'emoji-picker-react';
+import Picker, { Theme as EmojiTheme } from 'emoji-picker-react';
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
-
+import { useTheme } from '../../contexts/ThemeContext';
 import "react-datepicker/dist/react-datepicker.css";
 import '../../components/datePicker.css';
 import './CreateMemory.css';
@@ -282,7 +282,7 @@ const PrevIcon = () => (<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24"
 const NextIcon = () => (<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>);
 
 const CustomDateChip = forwardRef(({ value, onClick, isOpen }, ref) => (
-    <button onClick={onClick} ref={ref} className="flex items-center justify-between w-full gap-2 border border-gray-300 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-gray-500 transition-colors">
+    <button onClick={onClick} ref={ref} className="flex items-center justify-between w-full gap-2 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:border-gray-500 dark:hover:border-gray-400 transition-colors">
         <div className="flex items-center gap-2">
             <FaCalendarAlt />
             <span>{value || 'Date'}</span>
@@ -292,7 +292,7 @@ const CustomDateChip = forwardRef(({ value, onClick, isOpen }, ref) => (
 ));
 
 const InputChip = ({ icon, children }) => (
-    <div className="flex items-center w-full gap-2 border border-gray-300 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-gray-500 transition-colors focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+    <div className="flex items-center w-full gap-2 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:border-gray-500 dark:hover:border-gray-400 transition-colors focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 dark:focus-within:border-blue-400 dark:focus-within:ring-blue-400">
         {icon}
         {children}
     </div>
@@ -301,7 +301,7 @@ const InputChip = ({ icon, children }) => (
 
 export default function CreateMemory() {
     const { user } = useAuth();
-
+    const { theme } = useTheme();
     const [title, setTitle] = useState('');
     const [selectedEmotionId, setSelectedEmotionId] = useState('');
     const [tags, setTags] = useState('');
@@ -330,7 +330,7 @@ export default function CreateMemory() {
         ],
         editorProps: {
             attributes: {
-                class: 'prose max-w-none focus:outline-none min-h-[200px] py-4',
+                class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[200px] py-4',
             },
         },
         content: '',
@@ -468,16 +468,17 @@ export default function CreateMemory() {
 
     const selectedEmotion = emotions.find(e => e.emotionID === selectedEmotionId);
     const iconButtonClass = (isActive) =>
-        `p-2 rounded-md transition-colors ${isActive ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+        `p-2 rounded-md transition-colors ${isActive ? 'bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300'
+            : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
         }`;
 
     return (
         <AppLayout>
-            <div className="relative w-full mx-auto bg-white p-8 rounded-lg mt-8">
-                <header className="flex justify-between items-center pb-4 border-b border-gray-200">
-                    <h1 className="text-xl font-bold text-gray-800">New Memory</h1>
+            <div className="relative w-full mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg mt-8">
+                <header className="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">New Memory</h1>
                     <div className="flex items-center gap-4">
-                        <Link to="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Cancel</Link>
+                        <Link to="/dashboard" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">Cancel</Link>
                         <button
                             onClick={handleSave}
                             disabled={isLoading}
@@ -495,14 +496,14 @@ export default function CreateMemory() {
                             className="w-10 h-10 rounded-full object-cover"
                             alt="avatar"
                         />
-                        <p className="font-semibold text-gray-800">
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">
                             {user ? user.display_name : 'Loading...'}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                         <div className="relative" ref={emotionDropdownRef}>
-                            <button onClick={() => setIsEmotionDropdownOpen(o => !o)} className="flex items-center justify-between w-full gap-2 border border-gray-300 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-gray-500 transition-colors">
+                            <button onClick={() => setIsEmotionDropdownOpen(o => !o)} className="flex items-center justify-between w-full gap-2 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:border-gray-500 dark:hover:border-gray-400 transition-colors">
                                 <div className="flex items-center gap-2 truncate">
                                     {selectedEmotion ? (
                                         <>
@@ -514,9 +515,9 @@ export default function CreateMemory() {
                                 <FiChevronDown size={16} className={`flex-shrink-0 transition-transform duration-300 ${isEmotionDropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
                             {isEmotionDropdownOpen && (
-                                <div className="absolute z-20 top-full mt-2 w-full bg-white rounded-lg shadow-xl border">
+                                <div className="absolute z-20 top-full mt-2 w-full bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600">
                                     {emotions.map(e => (
-                                        <div key={e.emotionID} onClick={() => { setSelectedEmotionId(e.emotionID); setIsEmotionDropdownOpen(false); }} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+                                        <div key={e.emotionID} onClick={() => { setSelectedEmotionId(e.emotionID); setIsEmotionDropdownOpen(false); }} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer text-sm text-gray-800 dark:text-gray-200">
                                             <span>{e.symbol}</span>
                                             <span>{e.name}</span>
                                         </div>
@@ -531,7 +532,7 @@ export default function CreateMemory() {
                                 value={tags}
                                 onChange={(e) => setTags(e.target.value)}
                                 placeholder="Add tags"
-                                className="bg-transparent focus:outline-none w-full"
+                                className="bg-transparent focus:outline-none w-full placeholder-gray-500 dark:placeholder-gray-400"
                             />
                         </InputChip>
 
@@ -539,7 +540,7 @@ export default function CreateMemory() {
                             <LocationSearchInput
                                 onLocationSelect={setLocation}
                                 placeholder="Add location"
-                                className="bg-transparent focus:outline-none w-full"
+                                className="bg-transparent focus:outline-none w-full placeholder-gray-500 dark:placeholder-gray-400"
                             />
                         </InputChip>
 
@@ -577,13 +578,13 @@ export default function CreateMemory() {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="An unforgettable title..."
-                        className="bg-white w-full text-3xl font-extrabold text-gray-900 border-none focus:outline-none focus:ring-0 mb-2"
+                        className="bg-transparent w-full text-3xl font-extrabold text-gray-900 dark:text-gray-100 border-none focus:outline-none focus:ring-0 mb-2 placeholder-gray-400 dark:placeholder-gray-500"
                     />
 
                     {mediaPreviews.length > 0 && (
                         <div className="my-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                             {mediaPreviews.map(p => (
-                                <div key={p.id} className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center text-white">
+                                <div key={p.id} className="relative group aspect-square dark:bg-gray-700 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center text-white">
                                     {p.type === 'IMAGE' && (
                                         <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
                                     )}
@@ -592,8 +593,8 @@ export default function CreateMemory() {
                                     )}
                                     {p.type === 'AUDIO' && (
                                         <div className="flex flex-col items-center justify-center p-2 text-center">
-                                            <FaMusic size={40} className="text-gray-500" />
-                                            <p className="text-xs mt-2 text-gray-600 break-all line-clamp-2">{p.name}</p>
+                                            <FaMusic size={40} className="text-gray-500 dark:text-gray-400" />
+                                            <p className="text-xs mt-2 text-gray-600 dark:text-gray-300 break-all line-clamp-2">{p.name}</p>
                                         </div>
                                     )}
 
@@ -610,14 +611,17 @@ export default function CreateMemory() {
 
                     <EditorContent editor={editor} />
 
-                    <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
+                    <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
                         <div className="flex items-center gap-1">
                             <button type="button" onClick={() => fileInputRef.current?.click()} className={iconButtonClass(false)}><FaImage /></button>
                             <div className="relative" ref={emojiPickerRef}>
                                 <button type="button" onClick={() => setIsEmojiPickerOpen(o => !o)} className={iconButtonClass(isEmojiPickerOpen)}><FaSmile /></button>
                                 {isEmojiPickerOpen && (
                                     <div className="absolute z-20 bottom-full mb-2">
-                                        <Picker onEmojiClick={(emoji) => editor.chain().focus().insertContent(emoji.emoji).run()} />
+                                        <Picker onEmojiClick={(emoji) => editor.chain().focus().insertContent(emoji.emoji).run()}
+                                            theme={theme === 'Dark' ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                                        />
+
                                     </div>
                                 )}
                             </div>
@@ -639,7 +643,7 @@ export default function CreateMemory() {
                         style={{ display: 'none' }}
                     />
                 </div>
-                {error && <p className="text-red-500 mt-4 text-center text-sm">{error}</p>}
+                {error && <p className="text-red-500 mt-4 text-center dark:text-red-400 text-sm">{error}</p>}
             </div>
         </AppLayout>
     );

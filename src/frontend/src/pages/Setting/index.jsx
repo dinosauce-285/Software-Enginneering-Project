@@ -14,10 +14,10 @@ export default function SettingLayout() {
     const navigate = useNavigate();
     return (
         <AppLayout>
-            <div className="w-full bg-white rounded-md shadow p-6">
+            <div className="w-full bg-white dark:bg-gray-800 rounded-md shadow p-6">
                 {/* Account section */}
-                <h2 className="text-xl font-semibold mb-4">Account</h2>
-                <div className="space-y-1 divide-y">
+                <h2 className="text-xl font-semibold mb-4 dark:text-gray-100 ">Account</h2>
+                <div className="space-y-1 divide-y divide-gray-200 dark:divide-gray-700">
                     <EmailSetting />
                     <UsernameSetting />
                     <ChangePasswordSetting />
@@ -29,7 +29,7 @@ export default function SettingLayout() {
 
                 {/* Notifications */}
                 <h2 className="text-xl font-semibold mt-6 mb-4">Notifications</h2>
-                <div className="space-y-1 divide-y">
+                <div className="space-y-1 divide-y divide-gray-200 dark:divide-gray-700">
                     <EmailNotificationSetting />
                     <ReminderTimeSetting />
                 </div>

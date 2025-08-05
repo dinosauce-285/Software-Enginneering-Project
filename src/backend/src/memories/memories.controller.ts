@@ -24,6 +24,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { SearchMemoryDto } from './dto/search-memory.dto'; // Import DTO
+import { CreateShareLinkDto } from './dto/create-sharelink.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('memories')
@@ -81,8 +82,9 @@ export class MemoriesController {
   createOrGetShareLink(
     @GetUser('userID') userId: string,
     @Param('id', ParseUUIDPipe) memoryId: string,
+    @Body() dto: CreateShareLinkDto,
   ) {
-    return this.memoriesService.createOrGetShareLink(userId, memoryId);
+    return this.memoriesService.createOrGetShareLink(userId, memoryId, dto);
   }
 
   @Post(':id/media')

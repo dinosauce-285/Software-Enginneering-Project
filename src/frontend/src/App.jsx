@@ -27,6 +27,7 @@ import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import AdminRoute from './components/AdminRoute';
 
 import ChangeAvatarPage from './pages/ChangeAvatar/index.jsx';
+import SharedMemoryPage from './pages/SharedMemory/index.jsx'; 
 
 function App() {
   return (
@@ -61,6 +62,8 @@ function App() {
               <Route element={<AdminRoute />}>
                 <Route path="/user-management" element={<UserManagementLayout />} />
               </Route>
+
+              <Route path="/share/:token" element={<SharedMemoryPage />} />
 
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

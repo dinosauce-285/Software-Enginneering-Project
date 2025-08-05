@@ -170,9 +170,11 @@ import {
   CalendarDaysIcon, MapPinIcon, HashtagIcon, ArrowLeftIcon, HeartIcon,
   EllipsisHorizontalIcon, PencilIcon, ShareIcon, TrashIcon
 } from '../../components/Icons';
-import ShareDialog from '../SharingDialog';
 import DeleteDialog from '../DeleteDialog';
 import DOMPurify from 'dompurify';
+
+import ShareDialog from '../../components/ShareDialog';
+import { createShareLink } from '../../services/api';
 
 const LoadingDetail = () => (
   <div className="flex items-center justify-center h-full">
@@ -190,6 +192,8 @@ export default function MemoryDetail() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [isCreatingLink, setIsCreatingLink] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const menuRef = useRef(null);
 
@@ -231,6 +235,24 @@ export default function MemoryDetail() {
       toast.error(err.message || 'Could not delete memory. Please try again.');
     }
   };
+
+  const handleCreateShareLink = async (options) => {
+        setIsCreatingLink(true);
+        try {
+            const linkData = await createShareLink(memoryId, options);
+            setShareLink(linkData.fullUrl);
+        } catch (error) {
+            alert('Could not create share link.');
+            setShowShareDialog(false); // Đóng dialog nếu có lỗi
+        } finally {
+            setIsCreatingLink(false);
+        }
+    };
+
+    const openShareDialog = () => {
+      setShareLink(''); // Reset link cũ
+      setShowShareDialog(true);
+    }
 
   if (isLoading) return <AppLayout><LoadingDetail /></AppLayout>;
 
@@ -298,7 +320,7 @@ export default function MemoryDetail() {
                         <span>Edit</span>
                     </RouterLink>
                     <button 
-                     onClick={() => setShowShareDialog(true)} 
+                     onClick={openShareDialog} 
                      className="flex items-center gap-3 px-4 py-2 text-gray-800 hover:bg-gray-100 w-full text-left"
                     >
                       <ShareIcon className="w-5 h-5" /> 
@@ -366,7 +388,13 @@ export default function MemoryDetail() {
       </main>
 
       {/* Dialogs */}
-      <ShareDialog isOpen={showShareDialog} onClose={() => setShowShareDialog(false)} />
+      <ShareDialog 
+            isOpen={showShareDialog}
+            onClose={() => setShowShareDialog(false)}
+            onConfirm={handleCreateShareLink}
+            shareUrl={shareLink}
+            isLoading={isCreatingLink}
+        />
       <DeleteDialog isOpen={showDeleteDialog} onClose={() => setShowDeleteDialog(false)} onConfirm={handleDeleteConfirmed} />
     </AppLayout>
   );

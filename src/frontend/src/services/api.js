@@ -460,3 +460,27 @@ export const verifyOtp = async (email, otp) => {
     throw error.response.data;
   }
 };
+
+export const getSharedMemoryByToken = async (token) => {
+  try {
+    // API này không cần token xác thực
+    const response = await apiClient.get(`/share/${token}`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const createShareLink = async (memoryId, options = {}) => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) throw new Error('No access token found.');
+  try {
+    // Gửi options trong body của request POST
+    const response = await apiClient.post(`/memories/${memoryId}/share`, options, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

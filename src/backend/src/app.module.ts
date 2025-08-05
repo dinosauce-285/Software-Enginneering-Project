@@ -40,6 +40,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { MailModule } from './mail/mail.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmotionsModule } from './emotions/emotions.module';
+import { ShareModule } from './share/share.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { EmotionsModule } from './emotions/emotions.module';
     MailModule,
     CloudinaryModule,
     EmotionsModule,
+    ShareModule,
   ],
   controllers: [AppController],
   providers: [AppService],

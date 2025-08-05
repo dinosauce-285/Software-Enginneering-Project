@@ -323,6 +323,8 @@ import { UpdateMemoryDto } from './dto/update-memory.dto';
 import { AccessLevel, Prisma, MediaType } from '@prisma/client';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { SearchMemoryDto } from './dto/search-memory.dto';
+import { v4 as uuidv4 } from 'uuid';
+import { CreateShareLinkDto } from './dto/create-sharelink.dto';
 
 @Injectable()
 export class MemoriesService {
@@ -494,31 +496,35 @@ export class MemoriesService {
     return { message: 'Memory deleted successfully' };
   }
 
-  async createOrGetShareLink(userId: string, memoryId: string) {
+  async createOrGetShareLink(userId: string, memoryId: string, dto: CreateShareLinkDto) {
     await this.getMemoryById(userId, memoryId);
-    const existingLink = await this.prisma.shareLink.findFirst({
-      where: {
-        memoryID: memoryId,
-        access_level: AccessLevel.PUBLIC,
-      },
-    });
-    if (existingLink) {
-      return existingLink;
+
+    // Thay vì tìm link cũ, logic này sẽ luôn tạo link mới
+    // để áp dụng đúng tùy chọn expires của người dùng.
+    // Bạn có thể thêm logic xóa link cũ nếu muốn.
+
+    const shareToken = uuidv4();
+    let expirationDate: Date | null = null;
+
+    // Nếu người dùng chọn có hết hạn, đặt là 7 ngày
+    if (dto.expires === true) {
+      expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 7);
     }
+
     const newShareLink = await this.prisma.shareLink.create({
       data: {
         memoryID: memoryId,
+        url: shareToken,
         access_level: AccessLevel.PUBLIC,
-        expiration_date: null,
-        url: '',
+        expiration_date: expirationDate, // Lưu giá trị null hoặc ngày hết hạn
       },
     });
-    return this.prisma.shareLink.update({
-      where: { shareID: newShareLink.shareID },
-      data: {
-        url: newShareLink.shareID,
-      },
-    });
+
+    return {
+      ...newShareLink,
+      fullUrl: `${process.env.FRONTEND_URL}/share/${newShareLink.url}`
+    };
   }
 
   async addMediaToMemory(

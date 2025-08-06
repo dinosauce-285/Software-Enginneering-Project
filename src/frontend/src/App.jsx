@@ -1,17 +1,15 @@
-// --- BƯỚC 1: IMPORT SEARCHPROVIDER ---
 import { SearchProvider } from './contexts/SearchContext.jsx';
 import { AuthProvider } from './contexts/AuthContext';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Các trang
 import DeleteAccount from './pages/DeleteAccount';
 import LandingPage from './pages/landingPage/index.jsx';
 import SignUp from './pages/signUp/index.jsx';
 import LogIn from './pages/logIn/index.jsx';
 import ForgetPass from './pages/ForgetPass/index.jsx';
-import UserManagementLayout from './pages/UserManagement/index.jsx';
+import AdminUsersPage from './pages/UserManagement/AdminUsersPage.jsx'; 
 import CreateMemory from './pages/CreateMemory/index.jsx';
 import Dashboard from './pages/Dashboard/index.jsx';
 import MemoryDetail from './pages/MemoryDetail/index.jsx';
@@ -25,6 +23,7 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import AdminRoute from './components/AdminRoute';
+import ActivityLogsPage from './pages/ActivityLogs/ActivityLogsPage.jsx'; 
 
 import ChangeAvatarPage from './pages/ChangeAvatar/index.jsx';
 import SharedMemoryPage from './pages/SharedMemory/index.jsx'; 
@@ -32,7 +31,6 @@ import SharedMemoryPage from './pages/SharedMemory/index.jsx';
 function App() {
   return (
     <AuthProvider>
-
       <SearchProvider>
         <ThemeProvider>
           <BrowserRouter>
@@ -60,7 +58,8 @@ function App() {
               </Route>
 
               <Route element={<AdminRoute />}>
-                <Route path="/user-management" element={<UserManagementLayout />} />
+                <Route path="/user-management" element={<AdminUsersPage />} />
+                <Route path="/activity-logs" element={<ActivityLogsPage />} />
               </Route>
 
               <Route path="/share/:token" element={<SharedMemoryPage />} />
@@ -69,7 +68,6 @@ function App() {
             </Routes>
           </BrowserRouter>
         </ThemeProvider>
-
       </SearchProvider>
     </AuthProvider>
   );

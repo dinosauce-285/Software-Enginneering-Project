@@ -71,7 +71,7 @@ export default function UserMenu() {
     <>
       <div className="flex items-center gap-1">
         <div className="relative" ref={avatarMenuRef}>
-          <button onClick={() => setIsAvatarMenuOpen(!isAvatarMenuOpen)} title="Avatar Menu">
+          <button onClick={() => setIsAvatarMenuOpen(!isAvatarMenuOpen)} title="Avatar Menu"   className="flex items-center justify-center">
             <img
               src={user.avatar || "/src/assets/defaultAvt.png"}
               alt="User Avatar"

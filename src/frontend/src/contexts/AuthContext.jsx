@@ -129,10 +129,15 @@ export const AuthProvider = ({ children }) => {
      * Gọi API và cập nhật trạng thái ứng dụng.
      * @param {object} credentials - { email, password }
      */
-    const login = async (credentials) => {
-        // apiLogin đã xử lý việc lưu token và user vào localStorage
-        const authData = await apiLogin(credentials);
-        updateUserAndStorage(authData.user); // Cập nhật state với dữ liệu trả về
+
+    // const login = async (credentials) => {
+    //     // apiLogin đã xử lý việc lưu token và user vào localStorage
+    //     const authData = await apiLogin(credentials);
+    //     updateUserAndStorage(authData.user); // Cập nhật state với dữ liệu trả về
+    // };
+
+    const login = (userData) => {
+        updateUserAndStorage(userData);
     };
 
     /**

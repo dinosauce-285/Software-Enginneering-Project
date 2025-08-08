@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useDeferredValue, useEffect, useState } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import { getSharedMemoryByToken } from '../../services/api';
 import DOMPurify from 'dompurify';
@@ -8,6 +8,8 @@ import AppLayout from '../../components/AppLayout'; // Tái sử dụng layout c
 import {
   CalendarDaysIcon, MapPinIcon, HashtagIcon, HeartIcon
 } from '../../components/Icons'; // Chỉ import những icon cần thiết
+
+import defaultAvatar from '../../assets/defaultAvt.png';
 
 // Component hiển thị khi đang tải
 const LoadingShare = () => (
@@ -80,7 +82,7 @@ export default function SharedMemoryPage() {
                     <div className="flex justify-between items-center mb-6 pb-4 border-b">
                         <div className="flex items-center gap-3">
                             <img 
-                                src={author.avatar || '/src/assets/defaultAvt.png'} 
+                                src={author.avatar || defaultAvatar} 
                                 alt={author.display_name} 
                                 className="w-10 h-10 rounded-full object-cover"
                             />

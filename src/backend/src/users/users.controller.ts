@@ -68,6 +68,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from '../auth/decorator/roles.decorator'; // Import decorator mới
 import { RolesGuard } from '../auth/guard/roles.guard';   // Import guard mới
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateUserSettingsDto } from './dto/update-settings.dto';
 
 @UseGuards(AuthGuard('jwt')) // Áp dụng AuthGuard cho tất cả các route
 @Controller('users')
@@ -123,5 +124,13 @@ export class UsersController {
     ) file: Express.Multer.File
   ) {
     return this.usersService.uploadAvatar(userId, file);
+  }
+
+  @Patch('me/settings')
+  updateMySettings(
+    @GetUser('userID') userId: string,
+    @Body() dto: UpdateUserSettingsDto
+  ) {
+    return this.usersService.updateSettings(userId, dto);
   }
 }

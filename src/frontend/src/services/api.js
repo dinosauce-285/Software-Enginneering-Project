@@ -508,3 +508,26 @@ export async function getActivityLogs() {
   if (!res.ok) throw new Error('Failed to fetch activity logs');
   return res.json();
 }
+
+
+export const getReminders = async () => {
+  try {
+    const response = await apiClient.get('/reminders');
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+/**
+ * Đánh dấu một lời nhắc là đã đọc.
+ * @param {string} reminderId - ID của lời nhắc cần đánh dấu.
+ */
+export const markReminderAsRead = async (reminderId) => {
+  try {
+    const response = await apiClient.patch(`/reminders/${reminderId}/read`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+}

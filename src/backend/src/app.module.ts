@@ -23,6 +23,7 @@
 // src/app.module.ts
 
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config'; // <-- BƯỚC 1: Import ConfigModule
 
 // Import các controller và service cốt lõi
@@ -60,6 +61,7 @@ import { ActivityLogsModule } from './activity-logs/activity-logs.module';
     UsersModule,
     MemoriesModule,
     ReportsModule,
+    ScheduleModule.forRoot(),
     RemindersModule,
     FirebaseModule,
     MailModule,

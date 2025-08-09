@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { UpdateUserSettingsDto } from './dto/update-settings.dto';
 
 @Injectable()
 export class UsersService {
@@ -52,6 +53,14 @@ export class UsersService {
     // Loại bỏ passwordHash trước khi trả về
     const { passwordHash, ...result } = updatedUser;
     return result;
+  }
+
+  async updateSettings(userId: string, dto: UpdateUserSettingsDto) {
+    return this.prisma.user.update({
+      where: { userID: userId },
+      data: { ...dto },
+      select: { emailNotificationsEnabled: true, reminderTime: true }
+    });
   }
 
 }

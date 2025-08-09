@@ -64,6 +64,9 @@ model User {
   gender        Gender
   dateOfBirth   DateTime 
 
+  emailNotificationsEnabled Boolean @default(true)
+  reminderTime              Int     @default(9)
+
   memories     Memory[]
   reminders    Reminder[]
   reports      Report[]
@@ -128,12 +131,12 @@ model ShareLink {
 }
 
 model Reminder {
-  reminderID String            @id @default(uuid())
-  message    String
-  frequency  ReminderFrequency
-  time       DateTime
+  reminderID String   @id @default(uuid())
+  content    String   // Nội dung do AI tạo ra
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  user       User              @relation(fields: [userID], references: [userID], onDelete: Cascade)
+  user       User     @relation(fields: [userID], references: [userID], onDelete: Cascade)
   userID     String
 }
 

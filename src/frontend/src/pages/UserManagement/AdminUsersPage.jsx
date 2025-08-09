@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar.jsx';
 import UserTable from './UserTable.jsx';
+import UserMenu from '../../components/UserMenu';
 
 const mockUsers = Array.from({ length: 25 }, (_, i) => ({
     id: i + 1,
@@ -10,19 +11,29 @@ const mockUsers = Array.from({ length: 25 }, (_, i) => ({
     location: ['Los Angeles, CA', 'Cheyenne, WY', 'Syracuse, NY', 'Luanda, AN', 'Lagos, NG', 'London, UK', 'Paris, FR', 'Barcelona, ES', 'Tokyo, JP', 'Sydney, AU', 'Berlin, DE', 'Moscow, RU'][i] || 'Unknown',
     joined: new Date(Date.now() - Math.floor(Math.random() * 365) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     role: i < 4 ? 'Admin' : 'User',
-    avatar: `https://ui-avatars.com/api/?name=${['Le+Quang+Nguyen', 'Pham+Thinh+Quang', 'Thanh+Quoc+Ly', 'Van+Sinh+Huynh', 'Tan+Van+Nguyen', 'Cristiano+Ronaldo', 'Kylian+Mbappe', 'Lamine+Yamal', 'John+Doe', 'Jane+Smith', 'Peter+Jones', 'Mary+Williams'][i] || `User${i+1}`}&background=random`,
+    avatar: `https://ui-avatars.com/api/?name=${['Le+Quang+Nguyen', 'Pham+Thinh+Quang', 'Thanh+Quoc+Ly', 'Van+Sinh+Huynh', 'Tan+Van+Nguyen', 'Cristiano+Ronaldo', 'Kylian+Mbappe', 'Lamine+Yamal', 'John+Doe', 'Jane+Smith', 'Peter+Jones', 'Mary+Williams'][i] || `User${i + 1}`}&background=random`,
 }));
 
 const PageLayout = ({ children }) => (
     <div className="absolute inset-0 flex flex-col bg-gray-50 dark:bg-gray-900">
-        <header className="h-16 bg-white dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700/60 flex items-center justify-between px-6 lg:px-8 z-10 sticky top-0 shrink-0">
+        <header className="h-16 bg-white dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700/60 flex items-center justify-between px-6 lg:px-8 z-[9999] sticky top-0 shrink-0">
+            {/* Trái: logo + tên */}
             <div className="flex items-center gap-3">
                 <img src="/src/assets/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
-                <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">SoulNote<span className="text-blue-600">Admin</span></span>
+                <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    SoulNote<span className="text-blue-600">Admin</span>
+                </span>
             </div>
+
+            {/* Giữa: menu */}
             <div className="flex items-center gap-6 font-medium text-gray-700 dark:text-gray-300">
                 <Link to="/user-management" className="font-semibold text-gray-900 dark:text-gray-100">User Management</Link>
                 <Link to="/activity-logs" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">Activity</Link>
+            </div>
+
+            {/* Phải: UserMenu */}
+            <div className="ml-6 relative z-[9999]">
+                <UserMenu />
             </div>
         </header>
         <div className="flex flex-1 overflow-hidden">

@@ -79,7 +79,7 @@ export default function UserMenu() {
             />
           </button>
           {isAvatarMenuOpen && (
-            <div className="absolute right-0 md:left-1/2 md:-translate-x-1/2 mt-2 bg-white dark:bg-gray-700 shadow-lg rounded-md w-fit z-50 border border-gray-200 dark:border-gray-600 overflow-hidden">
+            <div className="absolute right-0 md:left-1/2 md:-translate-x-1/2 mt-2 bg-white dark:bg-gray-700 shadow-lg rounded-md w-fit z-[9999] border border-gray-200 dark:border-gray-600 overflow-hidden">
               <button
                 onClick={() => { setIsViewingAvatar(true); setIsAvatarMenuOpen(false); }}
                 className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
@@ -107,7 +107,7 @@ export default function UserMenu() {
             />
           </button>
           {isMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 shadow-lg rounded-lg border border-gray-200 dark:border-gray-600 z-50 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 shadow-lg rounded-lg border border-gray-200 dark:border-gray-600 z-[9999] overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">

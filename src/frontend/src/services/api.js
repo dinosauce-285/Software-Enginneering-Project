@@ -244,6 +244,21 @@ export const loginUser = async (credentials) => {
   }
 };
 
+/**
+ * Gọi API để lấy thông tin người dùng hiện tại (đã đăng nhập).
+ * Dựa trên accessToken được gắn sẵn từ interceptor.
+ * @returns {Promise<object>} Dữ liệu user: { id, email, display_name, avatar, ... }
+ */
+// export const getCurrentUser = async () => {
+//   try {
+//     const response = await apiClient.get('/users/me'); // backend trả user hiện tại
+//     return response.data;
+//   } catch (error) {
+//     // Trả về lỗi rõ ràng
+//     throw error.response?.data || error;
+//   }
+// };
+
 export const authenticateWithFirebase = async (idToken) => {
   try {
     const response = await apiClient.post('/auth/firebase', { idToken });
@@ -274,6 +289,8 @@ export const logoutUser = () => {
     console.error("Error during logout:", error);
   }
 };
+
+
 
 // ========================================================
 //                    MEMORY SERVICES
@@ -484,3 +501,10 @@ export const createShareLink = async (memoryId, options = {}) => {
     throw error.response.data;
   }
 };
+
+
+export async function getActivityLogs() {
+  const res = await fetch('http://localhost:3000/activity-logs');
+  if (!res.ok) throw new Error('Failed to fetch activity logs');
+  return res.json();
+}

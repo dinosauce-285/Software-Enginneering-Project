@@ -74,6 +74,13 @@ import {
     logoutUser as apiLogout,
     changeUsername as apiChangeUsername // Import hàm mới
 } from '../services/api';
+// import {
+//     getCurrentUser,
+//     loginUser as apiLogin,
+//     logoutUser as apiLogout,
+//     changeUsername as apiChangeUsername
+// } from '../services/api';
+
 
 // Tạo Context
 const AuthContext = createContext(null);
@@ -108,6 +115,7 @@ export const AuthProvider = ({ children }) => {
             // Nếu có token, thử lấy thông tin người dùng mới nhất từ server
             if (token) {
                 try {
+                    //const freshUserData = await getProfile();
                     const freshUserData = await getProfile();
                     updateUserAndStorage(freshUserData); // Cập nhật cả state và storage
                 } catch (error) {

@@ -1,17 +1,64 @@
-// src/users/users.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma, User } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from '@prisma/client';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService, private cloudinary: CloudinaryService) {}
+  constructor(private prisma: PrismaService, private cloudinary: CloudinaryService) { }
 
-  /**
-   * Cập nhật thông tin user theo ID.
-   */
+  async findAll(params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: 'ADMIN' | 'USER';
+  }) {
+    const { page = 1, limit = 8, search, role } = params;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        { display_name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (role) {
+      where.role = role;
+    }
+
+    const [users, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where,
+        select: {
+          userID: true,
+          display_name: true,
+          email: true,
+          avatar: true,
+          role: true,
+          created_at: true,
+        },
+        skip,
+        take: Number(limit),
+        orderBy: {
+          created_at: 'desc',
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / Number(limit)),
+    };
+  }
+
   async updateUser(userId: string, dto: UpdateUserDto): Promise<Omit<User, 'passwordHash'>> {
     const user = await this.prisma.user.update({
       where: { userID: userId },
@@ -21,37 +68,30 @@ export class UsersService {
     return result;
   }
 
-  // --- HÀM MỚI DÀNH CHO ADMIN ---
-  /**
-   * Lấy danh sách tất cả người dùng.
-   */
-  async getUsers(): Promise<Omit<User, 'passwordHash'>[]> {
-    const users = await this.prisma.user.findMany({
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
-
-    // Loại bỏ passwordHash khỏi mỗi user trong danh sách
-    return users.map(user => {
-      const { passwordHash, ...result } = user;
-      return result;
-    });
-  }
-
   async uploadAvatar(userId: string, file: Express.Multer.File) {
-    // Upload file lên Cloudinary, lưu vào thư mục 'avatars'
     const uploadResult = await this.cloudinary.uploadFile(file, 'avatars');
 
-    // Cập nhật trường avatar của user trong DB với URL mới
     const updatedUser = await this.prisma.user.update({
       where: { userID: userId },
       data: { avatar: uploadResult.secure_url },
     });
 
-    // Loại bỏ passwordHash trước khi trả về
     const { passwordHash, ...result } = updatedUser;
     return result;
   }
 
+  async updateUserRole(userId: string, dto: UpdateUserRoleDto) {
+    return this.prisma.user.update({
+      where: { userID: userId },
+      data: { role: dto.role },
+      select: { userID: true, role: true }, 
+    });
+  }
+
+  async deleteUser(userId: string) {
+    await this.prisma.user.delete({
+      where: { userID: userId },
+    });
+    return { message: 'User deleted successfully.' };
+  }
 }

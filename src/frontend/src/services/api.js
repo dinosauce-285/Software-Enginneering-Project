@@ -508,3 +508,30 @@ export async function getActivityLogs() {
   if (!res.ok) throw new Error('Failed to fetch activity logs');
   return res.json();
 }
+export const getAllUsers = async (params) => {
+  try {
+    const response = await apiClient.get('/users', { params });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'An unknown error occurred' };
+  }
+};
+
+
+export const updateUserRole = async (userId, role) => {
+  try {
+    const response = await apiClient.patch(`/users/${userId}/role`, { role });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'An unknown error occurred' };
+  }
+};
+
+export const deleteUser = async (userId) => {
+  try {
+    const response = await apiClient.delete(`/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'An unknown error occurred' };
+  }
+};

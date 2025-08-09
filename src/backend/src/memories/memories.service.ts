@@ -21,26 +21,26 @@
 //     };
 
 //     if (emotions && emotions.length > 0) {
-   
+
 //       where.emotionID = { 
 //         in: emotions,
 //       };
 //     }
-    
+
 //     if (startDate) {
 //       if (!where.created_at) {
 //         where.created_at = {};
 //       }
 //       (where.created_at as Prisma.DateTimeFilter).gte = new Date(startDate);
 //     }
-    
+
 //     if (endDate) {
 //       if (!where.created_at) {
 //         where.created_at = {};
 //       }
 //       (where.created_at as Prisma.DateTimeFilter).lte = new Date(endDate);
 //     }
-    
+
 //     if (query) {
 //       where.OR = [
 //         {
@@ -69,10 +69,10 @@
 //         },
 //       ];
 //     }
-    
+
 
 //     console.log('Prisma WHERE clause:', JSON.stringify(where, null, 2));
-    
+
 //     return this.prisma.memory.findMany({
 //       where,
 //       orderBy: {
@@ -326,12 +326,14 @@ import { SearchMemoryDto } from './dto/search-memory.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateShareLinkDto } from './dto/create-sharelink.dto';
 
+import { NotFoundException } from '@nestjs/common';
+
 @Injectable()
 export class MemoriesService {
   constructor(
     private prisma: PrismaService,
     private cloudinary: CloudinaryService,
-  ) {}
+  ) { }
 
   async search(userId: string, searchDto: SearchMemoryDto) {
     const { query, emotions, startDate, endDate } = searchDto;
@@ -350,7 +352,7 @@ export class MemoriesService {
     if (endDate) {
       andConditions.push({ memoryDate: { lte: new Date(endDate) } });
     }
-    
+
     if (query) {
       andConditions.push({
         OR: [
@@ -364,7 +366,7 @@ export class MemoriesService {
     const where: Prisma.MemoryWhereInput = {
       AND: andConditions,
     };
-     console.log('[BACKEND-SERVICE] Final Prisma WHERE clause:', JSON.stringify(where, null, 2));
+    console.log('[BACKEND-SERVICE] Final Prisma WHERE clause:', JSON.stringify(where, null, 2));
     return this.prisma.memory.findMany({
       where,
       orderBy: {
@@ -488,25 +490,59 @@ export class MemoriesService {
     });
   }
 
+  // async deleteMemoryById(userId: string, memoryId: string) {
+  //   await this.getMemoryById(userId, memoryId);
+  //   await this.prisma.memory.delete({
+  //     where: { memoryID: memoryId },
+  //   });
+  //   return { message: 'Memory deleted successfully' };
+  // }
+
   async deleteMemoryById(userId: string, memoryId: string) {
-    await this.getMemoryById(userId, memoryId);
+    // 👇 Lấy memory trước khi xóa
+    const memory = await this.prisma.memory.findFirst({
+      where: {
+        memoryID: memoryId,
+        userID: userId,
+      },
+      select: {
+        title: true,
+      },
+    });
+
+    if (!memory) {
+      throw new NotFoundException('Memory not found');
+    }
+
+    // 👇 Thực hiện xóa
     await this.prisma.memory.delete({
       where: { memoryID: memoryId },
     });
-    return { message: 'Memory deleted successfully' };
+
+    // 👇 Trả về title để controller dùng
+    return memory;
   }
 
-  async createOrGetShareLink(userId: string, memoryId: string, dto: CreateShareLinkDto) {
-    await this.getMemoryById(userId, memoryId);
 
-    // Thay vì tìm link cũ, logic này sẽ luôn tạo link mới
-    // để áp dụng đúng tùy chọn expires của người dùng.
-    // Bạn có thể thêm logic xóa link cũ nếu muốn.
+  async createOrGetShareLink(userId: string, memoryId: string, dto: CreateShareLinkDto) {
+    // 👇 THÊM TRUY VẤN memory để lấy title
+    const memory = await this.prisma.memory.findFirst({
+      where: {
+        memoryID: memoryId,
+        userID: userId,
+      },
+      select: {
+        title: true,
+      },
+    });
+
+    if (!memory) {
+      throw new NotFoundException('Memory not found');
+    }
 
     const shareToken = uuidv4();
     let expirationDate: Date | null = null;
 
-    // Nếu người dùng chọn có hết hạn, đặt là 7 ngày
     if (dto.expires === true) {
       expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + 7);
@@ -517,13 +553,14 @@ export class MemoriesService {
         memoryID: memoryId,
         url: shareToken,
         access_level: AccessLevel.PUBLIC,
-        expiration_date: expirationDate, // Lưu giá trị null hoặc ngày hết hạn
+        expiration_date: expirationDate,
       },
     });
 
     return {
       ...newShareLink,
-      fullUrl: `${process.env.FRONTEND_URL}/share/${newShareLink.url}`
+      fullUrl: `${process.env.FRONTEND_URL}/share/${newShareLink.url}`,
+      title: memory.title, // ✅ giờ thì hợp lệ rồi!
     };
   }
 
@@ -532,44 +569,101 @@ export class MemoriesService {
     memoryId: string,
     files: Array<Express.Multer.File>,
   ) {
-    await this.getMemoryById(userId, memoryId);
+    const memory = await this.prisma.memory.findFirst({
+      where: {
+        memoryID: memoryId,
+        userID: userId,
+      },
+      select: {
+        title: true,
+      },
+    });
+
+    if (!memory) {
+      throw new NotFoundException('Memory not found');
+    }
+
     if (!files || files.length === 0) {
       throw new BadRequestException('At least one file is required.');
     }
-    const uploadPromises = files.map((file) =>
-      this.cloudinary.uploadFile(file, `soulnote-memories/${userId}`),
+
+    const uploadResults = await Promise.all(
+      files.map((file) =>
+        this.cloudinary.uploadFile(file, `soulnote-memories/${userId}`),
+      )
     );
-    const uploadResults = await Promise.all(uploadPromises);
-    const mediaDataToCreate = uploadResults.reduce((acc, result, index) => {
+
+    const mediaDataToCreate = uploadResults.map((result, index) => {
       const file = files[index];
       const mediaType = file.mimetype.startsWith('image/')
         ? MediaType.IMAGE
         : file.mimetype.startsWith('audio/')
-        ? MediaType.AUDIO
-        : file.mimetype.startsWith('video/')
-        ? MediaType.VIDEO
-        : MediaType.DOCUMENT;
-      acc.push({
+          ? MediaType.AUDIO
+          : file.mimetype.startsWith('video/')
+            ? MediaType.VIDEO
+            : MediaType.DOCUMENT;
+
+      return {
         memoryID: memoryId,
         url: result.secure_url,
         publicId: result.public_id,
         type: mediaType,
-      });
-      return acc;
-    }, [] as Prisma.MediaCreateManyInput[]);
-
-    if (mediaDataToCreate.length === 0) {
-      throw new BadRequestException(
-        'None of the uploaded files were of a supported type.',
-      );
-    }
-    await this.prisma.media.createMany({
-      data: mediaDataToCreate,
+      };
     });
+
+    await this.prisma.media.createMany({ data: mediaDataToCreate });
+
     return {
+      title: memory.title, // ✅ giờ dùng được rồi
       message: `${mediaDataToCreate.length} file(s) uploaded successfully.`,
     };
   }
+
+
+  // async addMediaToMemory(
+  //   userId: string,
+  //   memoryId: string,
+  //   files: Array<Express.Multer.File>,
+  // ) {
+  //   await this.getMemoryById(userId, memoryId);
+  //   if (!files || files.length === 0) {
+  //     throw new BadRequestException('At least one file is required.');
+  //   }
+  //   const uploadPromises = files.map((file) =>
+  //     this.cloudinary.uploadFile(file, `soulnote-memories/${userId}`),
+  //   );
+  //   const uploadResults = await Promise.all(uploadPromises);
+  //   const mediaDataToCreate = uploadResults.reduce((acc, result, index) => {
+  //     const file = files[index];
+  //     const mediaType = file.mimetype.startsWith('image/')
+  //       ? MediaType.IMAGE
+  //       : file.mimetype.startsWith('audio/')
+  //         ? MediaType.AUDIO
+  //         : file.mimetype.startsWith('video/')
+  //           ? MediaType.VIDEO
+  //           : MediaType.DOCUMENT;
+  //     acc.push({
+  //       memoryID: memoryId,
+  //       url: result.secure_url,
+  //       publicId: result.public_id,
+  //       type: mediaType,
+  //     });
+  //     return acc;
+  //   }, [] as Prisma.MediaCreateManyInput[]);
+
+  //   if (mediaDataToCreate.length === 0) {
+  //     throw new BadRequestException(
+  //       'None of the uploaded files were of a supported type.',
+  //     );
+  //   }
+  //   await this.prisma.media.createMany({
+  //     data: mediaDataToCreate,
+  //   });
+  //   return {
+
+  //     message: `${mediaDataToCreate.length} file(s) uploaded successfully.`,
+  //   };
+  // }
 
   async deleteMedia(userId: string, mediaId: string) {
     const media = await this.prisma.media.findUnique({

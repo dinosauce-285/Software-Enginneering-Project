@@ -23,6 +23,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { ChangeUsernameDto } from './dto/change-username.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
+
 
 type AuthResponse = {
   accessToken: string;
@@ -36,6 +38,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly firebaseService: FirebaseService,
     private readonly mailService: MailService,
+    private activityLogsService: ActivityLogsService, 
   ) { }
 
   async changePassword(userId: string, dto: ChangePasswordDto): Promise<{ message: string }> {
@@ -63,6 +66,9 @@ export class AuthService {
       where: { userID: user.userID },
       data: { passwordHash: newHashedPassword },
     });
+
+     // ✅ Ghi log đổi mật khẩu thành công
+    await this.activityLogsService.logActivity(user.userID, 'Change Password', '-');
 
     try {
       await this.mailService.sendPasswordChangeNotification(user.email, user.display_name);
@@ -206,6 +212,8 @@ export class AuthService {
       where: { userID: user.userID },
       data: { failedLoginAttempts: 0, lockUntil: null },
     });
+
+    await this.activityLogsService.logActivity(user.userID, 'Login', '-');
 
     const expiresIn = dto.rememberMe ? '30d' : '1d';
     const accessToken = await this.generateAppJwt(user.userID, user.email, user.role, expiresIn);
@@ -355,6 +363,8 @@ export class AuthService {
       throw new BadRequestException('Social accounts do not require a password for deletion.');
     }
 
+     // ✅ Ghi log trước khi xóa tài khoản
+    await this.activityLogsService.logActivity(user.userID, 'Delete Account', user.email);
 
     // 3. THỰC HIỆN XÓA TÀI KHOẢN
     // Nhờ có "onDelete: Cascade", Prisma sẽ xóa tất cả dữ liệu liên quan

@@ -41,6 +41,8 @@ import { MailModule } from './mail/mail.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmotionsModule } from './emotions/emotions.module';
 import { ShareModule } from './share/share.module';
+import { ActivityLogsModule } from './activity-logs/activity-logs.module';
+
 
 @Module({
   imports: [
@@ -64,6 +66,7 @@ import { ShareModule } from './share/share.module';
     CloudinaryModule,
     EmotionsModule,
     ShareModule,
+    ActivityLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -163,3 +163,13 @@ model MemoryTag {
 
   @@id([memoryID, tagID])
 }
+
+model ActivityLog {
+  id      String   @id @default(uuid())
+  name    String
+  email   String
+  action  String
+  target  String
+  date    DateTime @default(now())
+  avatar  String
+}

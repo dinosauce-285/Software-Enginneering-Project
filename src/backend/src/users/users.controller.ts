@@ -1,10 +1,23 @@
-import { Controller, Get, Query, UseGuards, Patch, Param, Body, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Patch,
+  Param,
+  Body,
+  Delete,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/guard/roles.guard';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { Role } from '@prisma/client';
+import { GetUser } from '../auth/decorator/get-user.decorator';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { UpdateUserSettingsDto } from './dto/update-settings.dto';
 
 @Controller('users')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -26,10 +39,22 @@ export class UsersController {
       role,
     });
   }
+
+  @Patch('me/settings')
+  updateMySettings(
+    @GetUser('userID') userId: string,
+    @Body() dto: UpdateUserSettingsDto,
+  ) {
+    return this.usersService.updateSettings(userId, dto);
+  }
+
   @Patch(':id/role')
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
-  updateUserRole(@Param('id') id: string, @Body() updateUserRoleDto: UpdateUserRoleDto) {
+  updateUserRole(
+    @Param('id') id: string,
+    @Body() updateUserRoleDto: UpdateUserRoleDto,
+  ) {
     return this.usersService.updateUserRole(id, updateUserRoleDto);
   }
 

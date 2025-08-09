@@ -508,6 +508,7 @@ export async function getActivityLogs() {
   if (!res.ok) throw new Error('Failed to fetch activity logs');
   return res.json();
 }
+<<<<<<< HEAD
 export const getAllUsers = async (params) => {
   try {
     const response = await apiClient.get('/users', { params });
@@ -535,3 +536,28 @@ export const deleteUser = async (userId) => {
     throw error.response?.data || { message: 'An unknown error occurred' };
   }
 };
+=======
+
+
+export const getReminders = async () => {
+  try {
+    const response = await apiClient.get('/reminders');
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+/**
+ * Đánh dấu một lời nhắc là đã đọc.
+ * @param {string} reminderId - ID của lời nhắc cần đánh dấu.
+ */
+export const markReminderAsRead = async (reminderId) => {
+  try {
+    const response = await apiClient.patch(`/reminders/${reminderId}/read`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+}
+>>>>>>> cf820fb2409ba26029614730257b3a8de7c646ad

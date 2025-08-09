@@ -4,9 +4,14 @@ import { Prisma, User } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { UpdateUserSettingsDto } from './dto/update-settings.dto';
+
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService, private cloudinary: CloudinaryService) { }
+  constructor(
+    private prisma: PrismaService,
+    private cloudinary: CloudinaryService,
+  ) {}
 
   async findAll(params: {
     page?: number;
@@ -59,7 +64,10 @@ export class UsersService {
     };
   }
 
-  async updateUser(userId: string, dto: UpdateUserDto): Promise<Omit<User, 'passwordHash'>> {
+  async updateUser(
+    userId: string,
+    dto: UpdateUserDto,
+  ): Promise<Omit<User, 'passwordHash'>> {
     const user = await this.prisma.user.update({
       where: { userID: userId },
       data: { ...dto },
@@ -80,11 +88,19 @@ export class UsersService {
     return result;
   }
 
+  async updateSettings(userId: string, dto: UpdateUserSettingsDto) {
+    return this.prisma.user.update({
+      where: { userID: userId },
+      data: { ...dto },
+      select: { emailNotificationsEnabled: true, reminderTime: true },
+    });
+  }
+
   async updateUserRole(userId: string, dto: UpdateUserRoleDto) {
     return this.prisma.user.update({
       where: { userID: userId },
       data: { role: dto.role },
-      select: { userID: true, role: true }, 
+      select: { userID: true, role: true },
     });
   }
 

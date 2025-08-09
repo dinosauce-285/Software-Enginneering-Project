@@ -101,7 +101,7 @@ const LoadingSkeleton = () => (
 
 const EmptyState = () => (
   <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-    <h2 className="text-2xl font-semibold text-gray-800">Your SoulNote is empty</h2>
+    <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Your SoulNote is empty</h2>
     <p className="mt-2 text-gray-500">It looks like you haven't saved any memories yet. Let's create your first one!</p>
     <Link to="/create-memory">
       <button className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
@@ -145,7 +145,6 @@ export default function Dashboard() {
       try {
         const searchParams = {
             query: debouncedSearchText,
-            // === THAY ĐỔI QUAN TRỌNG NHẤT Ở ĐÂY ===
             emotions: selectedEmotions.length > 0 ? selectedEmotions.join(',') : null,
             startDate: fromDate ? fromDate.toISOString().split('T')[0] : null,
             endDate: toDate ? toDate.toISOString().split('T')[0] : null,

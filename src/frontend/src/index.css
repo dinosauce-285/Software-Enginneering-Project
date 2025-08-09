@@ -56,3 +56,13 @@ body {
 .tiptap-rendered-content [style*="text-align: right"] {
   text-align: right;
 }
+
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}

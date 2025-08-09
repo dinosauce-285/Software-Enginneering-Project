@@ -1,6 +1,46 @@
 import React, { useState } from 'react';
 import SettingRow from './SettingRow';
 
+const SuccessView = () => (
+    <div className="p-6 flex flex-col items-center text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-4">
+            Password Changed!
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Your password has been updated successfully.
+        </p>
+    </div>
+);
+
+const FormView = ({ oldPassword, setOldPassword, newPassword, setNewPassword, confirmPassword, setConfirmPassword, error }) => (
+    <div className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Change Your Password
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            To protect your account, please choose a strong password.
+        </p>
+        <div className="space-y-4">
+            <div>
+                <label htmlFor="old-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Old Password</label>
+                <input id="old-password" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+            <div>
+                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+                <input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+            <div>
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
+                <input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="mt-1 w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+        </div>
+        {error && <p className="text-red-500 dark:text-red-400 text-sm mt-4">⚠ {error}</p>}
+    </div>
+);
+
 export default function ChangePasswordSetting() {
     const [showModal, setShowModal] = useState(false);
     const [oldPassword, setOldPassword] = useState("");
@@ -8,20 +48,21 @@ export default function ChangePasswordSetting() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [failCount, setFailCount] = useState(0);
+    const [showSuccess, setShowSuccess] = useState(false);
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        setError("");
-        setFailCount(0);
+        setTimeout(() => {
+            setOldPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setError("");
+            setShowSuccess(false);
+        }, 300);
     };
 
     const handleChangePassword = async () => {
-        // Validate form
         if (!oldPassword || !newPassword || !confirmPassword) {
             setError("Please fill in all fields.");
             return;
@@ -34,124 +75,69 @@ export default function ChangePasswordSetting() {
             setError("New passwords do not match.");
             return;
         }
+
         setLoading(true);
         setError("");
-        try {
-            // 2. Lấy token từ localStorage
-            const token = localStorage.getItem('accessToken');
-            if (!token) {
-                // Xử lý trường hợp không có token (ví dụ: chuyển hướng về trang đăng nhập)
-                throw new Error("Authentication token not found. Please log in again.");
-            }
 
-            // 3. Gọi API bằng fetch hoặc axios
+        try {
+            const token = localStorage.getItem('accessToken');
+            if (!token) throw new Error("Authentication token not found.");
+            
             const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`, // <-- Gửi token trong header
-                },
-                body: JSON.stringify({
-                    oldPassword: oldPassword,
-                    newPassword: newPassword,
-                }),
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ oldPassword, newPassword }),
             });
 
             const data = await response.json();
-
-            // 4. Xử lý kết quả trả về
-            if (!response.ok) {
-                // Nếu response không thành công (status 4xx, 5xx), ném lỗi với message từ backend
-                throw new Error(data.message || 'An unknown error occurred.');
-            }
-
-            // Nếu thành công
-            alert(data.message); // Hoặc hiển thị một toast/notification đẹp hơn
-            handleCloseModal();
-
+            if (!response.ok) throw new Error(data.message || 'An unknown error occurred.');
+            
+            setShowSuccess(true);
         } catch (err) {
-            // 5. Bắt lỗi (lỗi mạng hoặc lỗi từ backend) và hiển thị cho người dùng
             setError(err.message);
         } finally {
-            // 6. Luôn dừng trạng thái loading
             setLoading(false);
         }
-        // try {
-
-        //     if (oldPassword === "123456789") {
-        //         alert("Password changed successfully!");
-        //         handleCloseModal();
-        //     } else {
-        //         setFailCount(prev => prev + 1);
-        //         if (failCount + 1 >= 5) {
-        //             setError("You have entered the wrong password too many times. Please wait until tomorrow to change your password.");
-        //         } else {
-        //             setError("Incorrect old password, please try again.");
-        //         }
-        //     }
-        // } catch (err) {
-        //     setError("Server error, please try again.");
-        // } finally {
-        //     setLoading(false);
-        // }
     };
 
     return (
         <>
             <SettingRow
                 label="Change Password"
-                value="*********"
+                value="••••••••"
                 onClick={() => setShowModal(true)}
             />
-
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-                    <div className="bg-white rounded-md shadow max-w-md w-full">
-                        <div className="w-full bg-orange-100 py-3 rounded-t-md flex justify-center">
-                            <span className="text-orange-700 text-lg font-semibold">Change Password</span>
-                        </div>
-                        <div className="p-6">
-                            <p className="mb-4">To change your password, please fill in the form below:</p>
-
-                            <input
-                                type="password"
-                                placeholder="Old password"
-                                value={oldPassword}
-                                onChange={(e) => setOldPassword(e.target.value)}
-                                className="w-full border rounded px-3 py-2 mb-2"
+                <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full transform transition-all">
+                        
+                        {showSuccess ? <SuccessView /> : 
+                            <FormView 
+                                oldPassword={oldPassword}
+                                setOldPassword={setOldPassword}
+                                newPassword={newPassword}
+                                setNewPassword={setNewPassword}
+                                confirmPassword={confirmPassword}
+                                setConfirmPassword={setConfirmPassword}
+                                error={error}
                             />
-                            <input
-                                type="password"
-                                placeholder="New password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full border rounded px-3 py-2 mb-2"
-                            />
-                            <input
-                                type="password"
-                                placeholder="Confirm new password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full border rounded px-3 py-2 mb-2"
-                            />
-
-                            {error && <p className="text-red-500 mb-2">⚠ {error}</p>}
-
-                            <div className="flex gap-3 justify-end">
-                                <button
-                                    onClick={handleChangePassword}
-                                    disabled={loading || failCount >= 5}
-                                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                                >
-                                    {loading ? "Processing..." : "Change"}
+                        }
+                        
+                        <div className="flex gap-3 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-b-2xl">
+                            {showSuccess ? (
+                                <button onClick={handleCloseModal} className="w-full px-5 py-2.5 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                                    Done
                                 </button>
-                                <button
-                                    onClick={handleCloseModal}
-                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
+                            ) : (
+                                <>
+                                    <button onClick={handleCloseModal} className="w-full px-5 py-2.5 rounded-lg font-semibold bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                        Cancel
+                                    </button>
+                                    <button onClick={handleChangePassword} disabled={loading} className="w-full px-5 py-2.5 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-wait transition-colors">
+                                        {loading ? "Saving..." : "Change Password"}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

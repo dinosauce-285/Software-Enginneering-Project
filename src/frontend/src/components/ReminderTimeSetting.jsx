@@ -1,32 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import SettingRow from './SettingRow';
+import TimeWheelPicker from './TimeWheelPicker';
 
 export default function ReminderTimeSetting() {
-    const [reminderTime, setReminderTime] = useState("00:00"); 
+    const [reminderTime, setReminderTime] = useState("09:00");
     const [showModal, setShowModal] = useState(false);
-    const [newTime, setNewTime] = useState(reminderTime);
-    const [error, setError] = useState("");
+    
+    const [tempTime, setTempTime] = useState({ hour: 9, minute: 0 });
+
+    const padZero = (num) => String(num).padStart(2, '0');
 
     const handleOpenModal = () => {
-        setNewTime(reminderTime); 
-        setError("");
         setShowModal(true);
     };
 
-    const handleSave = () => {
-        if (!newTime) {
-            setError("Please select a time.");
-            return;
-        }
-        setReminderTime(newTime);
+    const handleCloseModal = () => {
         setShowModal(false);
     };
 
-    const formatTime = (time24) => {
-        if (!time24) return "";
-        const [hour, minute] = time24.split(":");
-        return `${hour}:${minute}`; 
+    const handleSave = () => {
+        const newTime = `${padZero(tempTime.hour)}:${padZero(tempTime.minute)}`;
+        setReminderTime(newTime);
+        handleCloseModal();
     };
+
+    const handleTimeChange = useCallback((newTime) => {
+        setTempTime(newTime);
+    }, []);
 
     return (
         <>
@@ -37,37 +37,36 @@ export default function ReminderTimeSetting() {
             />
 
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
-                    <div className="bg-white rounded-md shadow max-w-md w-full">
-                        <div className="w-full bg-orange-100 py-3 rounded-t-md flex justify-center">
-                            <span className="text-orange-700 text-lg font-semibold">Change Reminder Time</span>
-                        </div>
-                        <div className="p-6">
-                            <p className="mb-4">Choose your daily reminder time:</p>
-
-                            <input
-                                type="time"
-                                value={newTime}
-                                onChange={(e) => setNewTime(e.target.value)}
-                                className="w-full border rounded px-3 py-2 mb-2"
+                <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-sm w-full transform transition-all">
+                        
+                        <div className="p-6 text-center">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                Reminder Time
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                Choose a time for your daily notification.
+                            </p>
+                            
+                            <TimeWheelPicker 
+                                initialTime={reminderTime}
+                                onTimeChange={handleTimeChange}
                             />
-
-                            {error && <p className="text-red-500 mb-2">⚠ {error}</p>}
-
-                            <div className="flex gap-3 justify-end">
-                                <button
-                                    onClick={handleSave}
-                                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                                >
-                                    Save
-                                </button>
-                                <button
-                                    onClick={() => setShowModal(false)}
-                                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
+                        </div>
+                        
+                        <div className="flex gap-3 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-b-2xl">
+                            <button
+                                onClick={handleCloseModal}
+                                className="w-full px-5 py-2.5 rounded-lg font-semibold bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="w-full px-5 py-2.5 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+                            >
+                                Save
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -75,4 +74,3 @@ export default function ReminderTimeSetting() {
         </>
     );
 }
-

@@ -11,7 +11,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private cloudinary: CloudinaryService,
-  ) {}
+  ) { }
 
   async findAll(params: {
     page?: number;
@@ -88,14 +88,15 @@ export class UsersService {
     return result;
   }
 
+
   async updateSettings(userId: string, dto: UpdateUserSettingsDto) {
     return this.prisma.user.update({
       where: { userID: userId },
       data: { ...dto },
+
       select: { emailNotificationsEnabled: true, reminderTime: true },
     });
   }
-
   async updateUserRole(userId: string, dto: UpdateUserRoleDto) {
     return this.prisma.user.update({
       where: { userID: userId },

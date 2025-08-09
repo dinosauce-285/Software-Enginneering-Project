@@ -193,6 +193,9 @@
 //     throw error.response.data;
 //   }
 // };
+
+
+// // src/services/api.js
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -205,6 +208,8 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Interceptor để tự động thêm Authorization header vào mỗi request
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -244,21 +249,6 @@ export const loginUser = async (credentials) => {
   }
 };
 
-/**
- * Gọi API để lấy thông tin người dùng hiện tại (đã đăng nhập).
- * Dựa trên accessToken được gắn sẵn từ interceptor.
- * @returns {Promise<object>} Dữ liệu user: { id, email, display_name, avatar, ... }
- */
-// export const getCurrentUser = async () => {
-//   try {
-//     const response = await apiClient.get('/users/me'); // backend trả user hiện tại
-//     return response.data;
-//   } catch (error) {
-//     // Trả về lỗi rõ ràng
-//     throw error.response?.data || error;
-//   }
-// };
-
 export const authenticateWithFirebase = async (idToken) => {
   try {
     const response = await apiClient.post('/auth/firebase', { idToken });
@@ -290,7 +280,60 @@ export const logoutUser = () => {
   }
 };
 
+export const forgotPassword = async (email) => {
+  try {
+    const response = await apiClient.post('/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
 
+export const verifyOtp = async (email, otp) => {
+  try {
+    const response = await apiClient.post('/auth/verify-otp', { email, otp });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const resetPassword = async (otpVerificationToken, newPassword) => {
+  try {
+    const response = await apiClient.post('/auth/reset-password', { otpVerificationToken, newPassword });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+
+// ========================================================
+//                    USER SERVICES
+// ========================================================
+
+export const changeUsername = async (newUsername) => {
+  try {
+    const response = await apiClient.post('/auth/change-username', { newUsername });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const uploadAvatar = async (avatarFile) => {
+  const formData = new FormData();
+  formData.append('avatar', avatarFile);
+
+  try {
+    const response = await apiClient.post('/users/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
 
 // ========================================================
 //                    MEMORY SERVICES
@@ -382,12 +425,21 @@ export const deleteMediaById = async (mediaId) => {
 };
 
 // ========================================================
-//                   EMOTION SERVICES
+//               SHARE & REPORT SERVICES
 // ========================================================
 
-export const getEmotions = async () => {
+export const getSharedMemoryByToken = async (token) => {
   try {
-    const response = await apiClient.get('/emotions');
+    const response = await apiClient.get(`/share/${token}`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const createShareLink = async (memoryId, options = {}) => {
+  try {
+    const response = await apiClient.post(`/memories/${memoryId}/share`, options);
     return response.data;
   } catch (error) {
     throw error.response.data;
@@ -404,111 +456,46 @@ export const getEmotionReport = async (startDate, endDate) => {
     throw error.response.data;
   }
 };
-/**
- * Gửi yêu cầu thay đổi username của người dùng đang đăng nhập.
- * @param {string} newUsername - Tên người dùng mới.
- * @returns {Promise<object>} Đối tượng user đã được cập nhật.
- */
-export const changeUsername = async (newUsername) => {
-  try {
-    const response = await apiClient.post('/auth/change-username', { newUsername });
-    // Trả về dữ liệu user mới từ backend
-    return response.data;
-  } catch (error) {
-    // Ném lỗi ra để component hoặc context có thể bắt và xử lý
-    throw error.response.data;
-  }
-};
-export const uploadAvatar = async (avatarFile) => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) throw new Error('No access token found.');
 
-  const formData = new FormData();
-  formData.append('avatar', avatarFile); // Tên trường 'avatar' phải khớp với controller
+// ========================================================
+//                   EMOTION SERVICES
+// ========================================================
 
+export const getEmotions = async () => {
   try {
-    const response = await apiClient.post('/users/me/avatar', formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiClient.get('/emotions');
     return response.data;
   } catch (error) {
     throw error.response.data;
   }
 };
 
-/**
- * Gửi yêu cầu quên mật khẩu đến backend.
- * Backend sẽ tự động gửi email chứa OTP nếu email hợp lệ.
- * @param {string} email - Email của người dùng.
- */
-export const forgotPassword = async (email) => {
-  try {
-    // Gửi request POST đến /auth/forgot-password với body chứa email
-    const response = await apiClient.post('/auth/forgot-password', { email });
-    // Trả về message thành công từ backend
-    return response.data;
-  } catch (error) {
-    // Ném lỗi ra để component có thể bắt và hiển thị
-    throw error.response.data;
-  }
-};
+// ========================================================
+//                   REMINDER SERVICES
+// ========================================================
 
-/**
- * Gửi yêu cầu đặt lại mật khẩu mới cùng với OTP.
- * @param {object} resetData - Dữ liệu gồm { email, otp, newPassword }.
- */
-export const resetPassword = async (otpVerificationToken, newPassword) => {
+export const getReminders = async () => {
   try {
-    const response = await apiClient.post('/auth/reset-password', { otpVerificationToken, newPassword });
+    const response = await apiClient.get('/reminders');
     return response.data;
   } catch (error) {
     throw error.response.data;
   }
 };
 
-export const verifyOtp = async (email, otp) => {
+export const markReminderAsRead = async (reminderId) => {
   try {
-    const response = await apiClient.post('/auth/verify-otp', { email, otp });
-    return response.data; // Trả về { otpVerificationToken: '...' }
-  } catch (error) {
-    throw error.response.data;
-  }
-};
-
-export const getSharedMemoryByToken = async (token) => {
-  try {
-    // API này không cần token xác thực
-    const response = await apiClient.get(`/share/${token}`);
+    const response = await apiClient.patch(`/reminders/${reminderId}/read`);
     return response.data;
   } catch (error) {
     throw error.response.data;
   }
-};
-
-export const createShareLink = async (memoryId, options = {}) => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) throw new Error('No access token found.');
-  try {
-    // Gửi options trong body của request POST
-    const response = await apiClient.post(`/memories/${memoryId}/share`, options, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-};
-
-
-export async function getActivityLogs() {
-  const res = await fetch('http://localhost:3000/activity-logs');
-  if (!res.ok) throw new Error('Failed to fetch activity logs');
-  return res.json();
 }
-<<<<<<< HEAD
+
+// ========================================================
+//                   ADMIN SERVICES
+// ========================================================
+
 export const getAllUsers = async (params) => {
   try {
     const response = await apiClient.get('/users', { params });
@@ -517,7 +504,6 @@ export const getAllUsers = async (params) => {
     throw error.response?.data || { message: 'An unknown error occurred' };
   }
 };
-
 
 export const updateUserRole = async (userId, role) => {
   try {
@@ -536,28 +522,9 @@ export const deleteUser = async (userId) => {
     throw error.response?.data || { message: 'An unknown error occurred' };
   }
 };
-=======
 
-
-export const getReminders = async () => {
-  try {
-    const response = await apiClient.get('/reminders');
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-};
-
-/**
- * Đánh dấu một lời nhắc là đã đọc.
- * @param {string} reminderId - ID của lời nhắc cần đánh dấu.
- */
-export const markReminderAsRead = async (reminderId) => {
-  try {
-    const response = await apiClient.patch(`/reminders/${reminderId}/read`);
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
+export async function getActivityLogs() {
+  const res = await fetch('http://localhost:3000/activity-logs');
+  if (!res.ok) throw new Error('Failed to fetch activity logs');
+  return res.json();
 }
->>>>>>> cf820fb2409ba26029614730257b3a8de7c646ad

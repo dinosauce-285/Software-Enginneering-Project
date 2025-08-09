@@ -6,6 +6,8 @@ import { FiSettings, FiLogOut, FiChevronDown } from "react-icons/fi";
 import { logoutUser } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
+import defaultAvatar from '../assets/defaultAvt.png';
+
 export default function UserMenu() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -73,7 +75,7 @@ export default function UserMenu() {
         <div className="relative" ref={avatarMenuRef}>
           <button onClick={() => setIsAvatarMenuOpen(!isAvatarMenuOpen)} title="Avatar Menu"   className="flex items-center justify-center">
             <img
-              src={user.avatar || "/src/assets/defaultAvt.png"}
+              src={user.avatar || defaultAvatar}
               alt="User Avatar"
               className="w-9 h-9 rounded-full object-cover bg-gray-200 cursor-pointer transition-opacity hover:opacity-80"
             />
@@ -112,7 +114,7 @@ export default function UserMenu() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                     <img
-                      src={user.avatar || "/src/assets/defaultAvt.png"}
+                      src={user.avatar || defaultAvatar}
                       alt="User Avatar"
                       className="w-10 h-10 object-cover bg-gray-200"
                     />
@@ -169,7 +171,7 @@ export default function UserMenu() {
           >
             {/* Ảnh vẫn giữ nguyên các lớp để giới hạn kích thước và có hiệu ứng */}
             <img
-              src={user.avatar || "/src/assets/defaultAvt.png"}
+              src={user.avatar || defaultAvatar}
               className="max-w-full max-h-[80vh] rounded-lg shadow-lg"
             />
 

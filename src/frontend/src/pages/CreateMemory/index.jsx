@@ -276,6 +276,8 @@ import { createMemory, getEmotions, uploadMediaForMemory } from '../../services/
 import { LocationSearchInput } from '../../components/LocationSearchInput';
 import { useAuth } from '../../contexts/AuthContext';
 
+import defaultAvatar from '../../assets/defaultAvt.png';
+
 // --- HELPER COMPONENTS ---
 
 const PrevIcon = () => (<svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>);
@@ -491,7 +493,7 @@ export default function CreateMemory() {
                 <div className="mt-6">
                     <div className="flex items-center gap-3 mb-6">
                         <img
-                            src={user.avatar || "/src/assets/defaultAvt.png"}
+                            src={user.avatar || defaultAvatar}
                             className="w-10 h-10 rounded-full object-cover"
                             alt="avatar"
                         />

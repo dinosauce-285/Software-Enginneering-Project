@@ -8,6 +8,7 @@ import { uploadAvatar } from '../../services/api';
 
 
 import { FiCheckCircle, FiX } from 'react-icons/fi';
+import defaultAvatar from '../../assets/defaultAvt.png';
 
 function SuccessDialog({ isOpen, onClose, title, message }) {
   if (!isOpen) return null;
@@ -95,7 +96,7 @@ export default function ChangeAvatarPage() {
         <h1 className="text-2xl font-bold text-center mb-6">Change Your Avatar</h1>
         <div className="flex flex-col items-center gap-6">
           <img
-            src={preview || "/src/assets/defaultAvt.png"} // Bạn nhớ kiểm tra lại đường dẫn ảnh mặc định này nhé
+            src={preview || defaultAvatar} // Bạn nhớ kiểm tra lại đường dẫn ảnh mặc định này nhé
             alt="Avatar Preview"
             className="w-40 h-40 rounded-full object-cover border-4 border-gray-200"
           />

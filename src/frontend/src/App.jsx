@@ -9,7 +9,7 @@ import LandingPage from './pages/landingPage/index.jsx';
 import SignUp from './pages/signUp/index.jsx';
 import LogIn from './pages/logIn/index.jsx';
 import ForgetPass from './pages/ForgetPass/index.jsx';
-import AdminUsersPage from './pages/UserManagement/AdminUsersPage.jsx'; 
+import AdminUsersPage from './pages/UserManagement/AdminUsersPage.jsx';
 import CreateMemory from './pages/CreateMemory/index.jsx';
 import Dashboard from './pages/Dashboard/index.jsx';
 import MemoryDetail from './pages/MemoryDetail/index.jsx';
@@ -18,15 +18,14 @@ import EnterOTP from './pages/EnterOTP/index.jsx';
 import ResetPassword from './pages/ResetPassword/index.jsx';
 import EditMemory from './pages/EditMemory/index.jsx';
 import EmotionReport from './pages/ReportEmotion/index.jsx';
-
+import AdminSettings from './pages/AdminSettings/index.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import AdminRoute from './components/AdminRoute';
-import ActivityLogsPage from './pages/ActivityLogs/ActivityLogsPage.jsx'; 
-
+import ActivityLogsPage from './pages/ActivityLogs/ActivityLogsPage.jsx';
 import ChangeAvatarPage from './pages/ChangeAvatar/index.jsx';
-import SharedMemoryPage from './pages/SharedMemory/index.jsx'; 
+import SharedMemoryPage from './pages/SharedMemory/index.jsx';
 
 function App() {
   return (
@@ -60,6 +59,7 @@ function App() {
               <Route element={<AdminRoute />}>
                 <Route path="/user-management" element={<AdminUsersPage />} />
                 <Route path="/activity-logs" element={<ActivityLogsPage />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
               </Route>
 
               <Route path="/share/:token" element={<SharedMemoryPage />} />

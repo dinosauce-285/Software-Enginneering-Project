@@ -5,20 +5,28 @@ import UserTable from './UserTable.jsx';
 import { getAllUsers } from '../../services/api.js';
 import { useDebounce } from '../../hooks/useDebounce.js';
 
+import AdminMenu from '../../components/AdminMenu.jsx'; 
+
 const PageLayout = ({ children }) => (
     <div className="absolute inset-0 flex flex-col bg-gray-50 dark:bg-gray-900">
         <header className="h-16 bg-white dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700/60 flex items-center justify-between px-6 lg:px-8 z-[9999] sticky top-0 shrink-0">
+            {/* Logo and Title */}
             <div className="flex items-center gap-3">
                 <img src="/src/assets/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
                 <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                     SoulNote<span className="text-blue-600">Admin</span>
                 </span>
             </div>
-            <div className="flex items-center gap-6 font-medium text-gray-700 dark:text-gray-300">
+            
+            {/* Navigation Links */}
+            <div className="flex-grow flex items-center justify-center gap-6 font-medium text-gray-700 dark:text-gray-300">
                 <Link to="/user-management" className="font-semibold text-gray-900 dark:text-gray-100">User Management</Link>
                 <Link to="/activity-logs" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">Activity</Link>
             </div>
-            <div className="ml-6 relative z-[9999]">
+
+            <div className="flex items-center">
+            
+                <AdminMenu />
             </div>
         </header>
         <div className="flex flex-1 overflow-hidden">
@@ -26,6 +34,7 @@ const PageLayout = ({ children }) => (
         </div>
     </div>
 );
+
 
 export default function AdminUsersPage() {
     const [users, setUsers] = useState([]);
@@ -69,16 +78,13 @@ export default function AdminUsersPage() {
 
     useEffect(() => {
         fetchUsers(1);
-    }, [debouncedSearchQuery, filters.permission]);
-
-
+    }, [debouncedSearchQuery, filters.permission, fetchUsers]); // Thêm fetchUsers vào dependency array
 
     const handlePageChange = (newPage) => {
         fetchUsers(newPage);
     };
 
     const handleActionComplete = () => {
-        // Tải lại trang hiện tại sau khi có hành động
         fetchUsers(pagination.currentPage);
     }
 

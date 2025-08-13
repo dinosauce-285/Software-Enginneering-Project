@@ -10,7 +10,7 @@ export default function ActivityTable({ logs }) {
     const totalPages = useMemo(() => Math.ceil(logs.length / ITEMS_PER_PAGE), [logs]);
 
     const paginatedLogs = useMemo(() => {
-        // Reset về trang 1 nếu kết quả lọc làm trang hiện tại không còn hợp lệ
+
         if (currentPage > totalPages && totalPages > 0) {
             setCurrentPage(1);
         }

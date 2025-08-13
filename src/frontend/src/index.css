@@ -1,33 +1,38 @@
+/* src/index.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Poppins:ital,wght@0,100..900;1,100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* {
-margin:0;
-padding: 0;
-box-sizing: border-box;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
+
+
+* {
+  box-sizing: border-box;
+}
+
 :root {
   font-family: "Nunito", sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light dark;
-  color: #000000;
-  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-width: 320px;
-  min-height: 100vh;
 }
 
 
@@ -40,27 +45,7 @@ body {
   font-weight: 700; 
 }
 
-.tiptap-rendered-content em {
-  font-style: italic
-}
 
-.tiptap-rendered-content u {
-  text-decoration: underline; 
-}
-
-
-.tiptap-rendered-content [style*="text-align: center"] {
-  text-align: center;
-}
-
-.tiptap-rendered-content [style*="text-align: right"] {
-  text-align: right;
-}
-
-
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
 
 .no-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */

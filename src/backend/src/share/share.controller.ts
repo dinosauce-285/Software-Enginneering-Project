@@ -1,30 +1,32 @@
 // src/share/share.controller.ts
-import { ActivityLogsService } from '../activity-logs/activity-logs.service'
-//import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
-import { Controller, Get, Param, Req } from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { ShareService } from './share.service';
-
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '../auth/decorator/get-user.decorator'; // Import decorator GetUser
+import { User } from '@prisma/client';
+import { JwtOptionalGuard } from '../auth/guard/jwt-optional.guard';
+// Dùng AuthGuard nhưng đặt nó ở chế độ tùy chọn (optional)
+// Nó sẽ gắn req.user nếu có token hợp lệ, nhưng không báo lỗi nếu không có.
+@UseGuards(JwtOptionalGuard)
 @Controller('share')
 export class ShareController {
-  // constructor(private readonly shareService: ShareService) { }
-
-  // Endpoint này là PUBLIC, không có @UseGuards
-  // @Get(':token')
-  // getSharedMemory(@Param('token') token: string) {
-  //   return this.shareService.getSharedMemory(token);
-  // }
   constructor(
     private readonly shareService: ShareService,
     private readonly activityLogsService: ActivityLogsService,
-  ) { }
+  ) {}
 
   @Get(':token')
-  async getSharedMemory(@Param('token') token: string, @Req() req: any) {
-    const sharedMemory = await this.shareService.getSharedMemory(token, req.user); // ✅ truyền currentUser vào đây
+  async getSharedMemory(
+    @Param('token') token: string,
+    @GetUser() currentUser: User | undefined // Dùng GetUser để lấy user, có thể là undefined
+  ) {
+    const sharedMemory = await this.shareService.getSharedMemory(token);
 
-    if (req.user) {
+    // Chỉ ghi log nếu người xem là một người dùng đã đăng nhập
+    if (currentUser) {
       await this.activityLogsService.logActivity(
-        req.user.userID, // ✅ nhớ truyền userID chứ không truyền nguyên object
+        currentUser.userID,
         'Viewed shared memory',
         sharedMemory?.memory?.title || 'Unknown'
       );
@@ -32,5 +34,4 @@ export class ShareController {
 
     return sharedMemory;
   }
-
 }

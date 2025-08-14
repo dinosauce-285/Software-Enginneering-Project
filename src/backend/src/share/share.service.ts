@@ -47,13 +47,13 @@ export class ShareService {
     private activityLogsService: ActivityLogsService
   ) {}
 
-  async getSharedMemory(shareToken: string, currentUser: any) {
+  async getSharedMemory(shareToken: string) { // <<< Xóa tham số currentUser đi
     const shareLink = await this.prisma.shareLink.findUnique({
       where: { url: shareToken },
       include: {
         memory: {
           include: {
-            user: { select: { display_name: true, avatar: true } },
+            user: { select: { userID: true, display_name: true, avatar: true } }, // Lấy cả userID để ghi log
             emotion: true,
             media: true,
             memoryTags: { include: { tag: true } },
@@ -71,14 +71,9 @@ export class ShareService {
       );
     }
 
-    // ✅ Ghi log sau khi truy cập share link thành công
-    await this.activityLogsService.logActivity(
-      currentUser.id, // userID
-      'Viewed shared memory', // action
-      shareLink.memory.title || '-' // target
-    );
+    // Phần ghi log đã được chuyển sang controller
+    // vì service không nên biết về `req.user`
 
-    // Chỉ trả về những thông tin cần thiết, không trả về thông tin nhạy cảm của user
     const { user, ...memoryDetails } = shareLink.memory;
 
     return {

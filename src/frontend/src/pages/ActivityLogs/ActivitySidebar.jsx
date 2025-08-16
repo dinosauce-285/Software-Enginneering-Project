@@ -75,7 +75,7 @@ export default function ActivitySidebar({ filters, setFilters }) {
             
             <div className="space-y-6">
                 <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Filters</p>
-                <SearchInput filters={filters} setFilters={setFilters} />
+                {/* <SearchInput filters={filters} setFilters={setFilters} /> */}
                 <ActionFilter filters={filters} setFilters={setFilters} />
                 <DateRangeFilter
                     startDate={filters.startDate}

@@ -528,3 +528,26 @@ export async function getActivityLogs() {
   if (!res.ok) throw new Error('Failed to fetch activity logs');
   return res.json();
 }
+export const getUserSettings = async () => {
+  try {
+    // API /auth/profile thường trả về toàn bộ đối tượng user, bao gồm cả settings.
+    const response = await apiClient.get('/auth/profile');
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+/**
+ * Cập nhật cài đặt của người dùng hiện tại.
+ * @param {object} settingsData - Dữ liệu cài đặt, ví dụ: { reminderTime: "10:30" }
+ */
+export const updateUserSettings = async (settingsData) => {
+  try {
+    // Gọi đến endpoint PATCH /users/me/settings mà bạn đã tạo ở backend
+    const response = await apiClient.patch('/users/me/settings', settingsData);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

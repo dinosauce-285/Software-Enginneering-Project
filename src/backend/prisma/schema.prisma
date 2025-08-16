@@ -65,7 +65,7 @@ model User {
   dateOfBirth   DateTime 
 
   emailNotificationsEnabled Boolean @default(true)
-  reminderTime              Int     @default(9)
+  reminderTime String? @default("09:00")
 
   memories     Memory[]
   reminders    Reminder[]

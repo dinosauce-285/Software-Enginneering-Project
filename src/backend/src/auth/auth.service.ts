@@ -38,7 +38,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly firebaseService: FirebaseService,
     private readonly mailService: MailService,
-    private activityLogsService: ActivityLogsService, 
+    private activityLogsService: ActivityLogsService,
   ) { }
 
   async changePassword(userId: string, dto: ChangePasswordDto): Promise<{ message: string }> {
@@ -67,7 +67,7 @@ export class AuthService {
       data: { passwordHash: newHashedPassword },
     });
 
-     // ✅ Ghi log đổi mật khẩu thành công
+    // ✅ Ghi log đổi mật khẩu thành công
     await this.activityLogsService.logActivity(user.userID, 'Change Password', '-');
 
     try {
@@ -336,6 +336,7 @@ export class AuthService {
         display_name: true,
         avatar: true,
         role: true,
+        reminderTime: true,
       },
     });
     if (!user) {
@@ -363,7 +364,7 @@ export class AuthService {
       throw new BadRequestException('Social accounts do not require a password for deletion.');
     }
 
-     // ✅ Ghi log trước khi xóa tài khoản
+    // ✅ Ghi log trước khi xóa tài khoản
     await this.activityLogsService.logActivity(user.userID, 'Delete Account', user.email);
 
     // 3. THỰC HIỆN XÓA TÀI KHOẢN

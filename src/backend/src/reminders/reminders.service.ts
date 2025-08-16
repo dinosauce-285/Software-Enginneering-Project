@@ -20,21 +20,38 @@ export class RemindersService {
   /**
    * Tác vụ tự động chạy mỗi giờ để tạo lời nhắc AI.
    */
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleHourlyAIReminders() {
-    const currentHourUTC = new Date().getUTCHours();
-    this.logger.log(`Running reminder job for hour: ${currentHourUTC} UTC`);
+    // const currentHourUTC = new Date().getUTCHours();
+    // this.logger.log(`Running reminder job for hour: ${currentHourUTC} UTC`);
+
+    // const usersToRemind = await this.prisma.user.findMany({
+    //   where: {
+    //     emailNotificationsEnabled: true,
+    //     reminderTime: currentHourUTC,
+    //   },
+    //   select: { userID: true }
+    // });
+
+    // if (usersToRemind.length === 0) return;
+    // this.logger.log(`Found ${usersToRemind.length} users to remind.`);
+    const now = new Date();
+    const currentHourUTC = String(now.getUTCHours()).padStart(2, '0');
+    const currentMinuteUTC = String(now.getUTCMinutes()).padStart(2, '0');
+    const currentTimeUTC = `${currentHourUTC}:${currentMinuteUTC}`;
+
+    this.logger.log(`Running reminder job for time: ${currentTimeUTC} UTC`);
 
     const usersToRemind = await this.prisma.user.findMany({
       where: {
         emailNotificationsEnabled: true,
-        reminderTime: currentHourUTC,
+        reminderTime: currentTimeUTC, // <--- SO SÁNH CHUỖI "HH:mm"
       },
       select: { userID: true }
     });
 
     if (usersToRemind.length === 0) return;
-    this.logger.log(`Found ${usersToRemind.length} users to remind.`);
+    this.logger.log(`Found ${usersToRemind.length} users to remind at ${currentTimeUTC}.`);
 
     for (const user of usersToRemind) {
       try {
@@ -67,7 +84,7 @@ export class RemindersService {
   }
 
   // --- API LOGIC CHO FRONTEND ---
-  
+
   /**
    * Lấy tất cả lời nhắc cho một người dùng.
    */
@@ -96,18 +113,18 @@ export class RemindersService {
   }
 
   async test_createSingleAIReminder(userId: string) {
-        this.logger.log(`Manually generating AI reminder for user ${userId}...`);
-        try {
-            const content = await this.createAIReminderContent();
-            return this.prisma.reminder.create({
-                data: {
-                    userID: userId,
-                    content: content,
-                },
-            });
-        } catch (error) {
-            this.logger.error(`Failed to manually generate reminder for user ${userId}`, error.stack);
-            throw error;
-        }
+    this.logger.log(`Manually generating AI reminder for user ${userId}...`);
+    try {
+      const content = await this.createAIReminderContent();
+      return this.prisma.reminder.create({
+        data: {
+          userID: userId,
+          content: content,
+        },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to manually generate reminder for user ${userId}`, error.stack);
+      throw error;
     }
+  }
 }

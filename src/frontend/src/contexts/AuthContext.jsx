@@ -179,6 +179,7 @@ export const AuthProvider = ({ children }) => {
     // Tạo đối tượng giá trị để cung cấp cho các component con
     const value = {
         user,
+        setUser,
         isLoading,
         login,
         logout,

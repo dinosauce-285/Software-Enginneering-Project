@@ -112,16 +112,16 @@ const EmptyState = () => (
 );
 
 const NoResultsState = ({ onClear }) => (
-    <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-      <h2 className="text-2xl font-semibold text-gray-800">No memories found</h2>
-      <p className="mt-2 text-gray-500">We couldn't find any memories matching your search criteria.</p>
-      <button 
-        onClick={onClear} 
-        className="mt-6 px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition"
-      >
-        Clear Search
-      </button>
-    </div>
+  <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+    <h2 className="text-2xl font-semibold text-gray-800">No memories found</h2>
+    <p className="mt-2 text-gray-500">We couldn't find any memories matching your search criteria.</p>
+    <button
+      onClick={onClear}
+      className="mt-6 px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition"
+    >
+      Clear Search
+    </button>
+  </div>
 );
 
 export default function Dashboard() {
@@ -129,7 +129,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { 
+  const {
     searchText, setSearchText,
     selectedEmotions, setSelectedEmotions,
     fromDate, setFromDate,
@@ -141,29 +141,29 @@ export default function Dashboard() {
     const fetchAndFilterMemories = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         const searchParams = {
-            query: debouncedSearchText,
-            emotions: selectedEmotions.length > 0 ? selectedEmotions.join(',') : null,
-            startDate: fromDate ? fromDate.toISOString().split('T')[0] : null,
-            endDate: toDate ? toDate.toISOString().split('T')[0] : null,
+          query: debouncedSearchText,
+          emotions: selectedEmotions.length > 0 ? selectedEmotions.join(',') : null,
+          startDate: fromDate ? fromDate.toISOString().split('T')[0] : null,
+          endDate: toDate ? toDate.toISOString().split('T')[0] : null,
         };
 
         const filteredParams = Object.fromEntries(
-            Object.entries(searchParams).filter(([_, v]) => v !== null && v !== '')
+          Object.entries(searchParams).filter(([_, v]) => v !== null && v !== '')
         );
 
         const hasSearchParams = Object.keys(filteredParams).length > 0;
-        console.log('[FRONTEND] Sending to API:', filteredParams); 
-        
+        console.log('[FRONTEND] Sending to API:', filteredParams);
+
         let data;
         if (hasSearchParams) {
-          data = await searchMemories(filteredParams); 
+          data = await searchMemories(filteredParams);
         } else {
           data = await getMyMemories();
         }
-        
+
         setMemories(data);
 
       } catch (err) {
@@ -199,7 +199,7 @@ export default function Dashboard() {
       </AppLayout>
     );
   }
-  
+
   const isSearching = searchText || selectedEmotions.length > 0 || fromDate || toDate;
 
   if (memories.length === 0 && isSearching) {
@@ -218,14 +218,40 @@ export default function Dashboard() {
     );
   }
 
+  // return (
+  //   <AppLayout>
+  //     <div className="columns-1 sm:columns-2 md:columns-3 gap-4">
+  //       {memories.map((memory) => (
+  //         <Link
+  //           key={memory.memoryID}
+  //           to={`/memory/${memory.memoryID}`}
+  //           className="block break-inside-avoid mb-4 transition duration-200 hover:shadow-lg hover:-translate-y-1 hover:bg-gray-100 rounded-lg"
+  //         >
+  //           <Thread memory={memory} />
+  //         </Link>
+  //       ))}
+  //     </div>
+  //   </AppLayout>
+  // );
   return (
     <AppLayout>
-      <div className="columns-1 sm:columns-2 md:columns-3 gap-4">
+      {/* THÊM MÀU NỀN CHO DIV NÀY */}
+      <div className="columns-1 sm:columns-2 md:columns-3 gap-4 bg-white dark:bg-gray-900">
         {memories.map((memory) => (
           <Link
             key={memory.memoryID}
             to={`/memory/${memory.memoryID}`}
-            className="block break-inside-avoid mb-4 transition duration-200 hover:shadow-lg hover:-translate-y-1 hover:bg-gray-100 rounded-lg"
+            /* 
+              ĐƯA TOÀN BỘ STYLE CỦA CARD VÀO ĐÂY
+              - Thêm nền mặc định và nền cho dark mode
+              - Thêm hiệu ứng hover cho dark mode
+              - Giữ lại các hiệu ứng khác
+            */
+            className="block break-inside-avoid mb-4 transition duration-200 overflow-hidden
+                     bg-[#F9F9F2] dark:bg-gray-800 
+                     rounded-2xl shadow-sm
+                     hover:shadow-lg hover:-translate-y-1 
+                     dark:hover:bg-gray-700" // <- Hiệu ứng hover cho dark mode
           >
             <Thread memory={memory} />
           </Link>

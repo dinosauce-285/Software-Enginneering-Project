@@ -33,7 +33,7 @@ const Thread = ({ memory }) => {
 
   return (
     // THAY ĐỔI 1: NỀN CARD
-    <div className="flex flex-col gap-3 bg-[#F9F9F2] dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+    <div className="flex flex-col gap-3 p-4 ">
 
       {/* THAY ĐỔI 2: VĂN BẢN HEADER */}
       <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-sm font-medium text-gray-700 dark:text-gray-400">

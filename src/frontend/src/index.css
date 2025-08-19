@@ -38,16 +38,18 @@ body {
 
 
 .tiptap-rendered-content p {
-  margin-bottom: 0.5rem; 
+  margin-bottom: 0.5rem;
 }
 
 .tiptap-rendered-content strong {
-  font-weight: 700; 
+  font-weight: 700;
 }
 
 
 
 .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }

@@ -1,11 +1,145 @@
+// // File: src/pages/ChangeAvatar/index.jsx
+
+// import React, { useState, useRef } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import AppLayout from '../../components/AppLayout'; // <-- Giả sử AppLayout vẫn nằm ở đây và đã được git track
+// import { useAuth } from '../../contexts/AuthContext';
+// import { uploadAvatar } from '../../services/api';
+
+
+// import { FiCheckCircle, FiX } from 'react-icons/fi';
+// import defaultAvatar from '../../assets/defaultAvt.png';
+
+// function SuccessDialog({ isOpen, onClose, title, message }) {
+//   if (!isOpen) return null;
+
+//   return (
+//     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+//       <div className="bg-white rounded-lg shadow-md p-6 w-[320px] relative flex flex-col items-center text-center">
+
+//         <button
+//           className="absolute top-2 right-3 text-gray-500 hover:text-black"
+//           onClick={onClose}
+//         >
+//           <FiX size={20} />
+//         </button>
+
+//         <div className="mb-4 text-green-500">
+//           <FiCheckCircle size={48} />
+//         </div>
+
+//         <h3 className="text-xl font-bold mb-2">{title || 'Success!'}</h3>
+//         <p className="text-base text-gray-700 mb-6">
+//           {message || 'Your action was completed successfully.'}
+//         </p>
+
+//         <div className="w-full">
+//           <button
+//             className="w-full px-4 py-2 rounded bg-[#0050ff] text-white text-base shadow hover:bg-blue-700"
+//             onClick={onClose}
+//           >
+//             OK
+//           </button>
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// }
+
+// // --- BƯỚC 2: COMPONENT CHÍNH CỦA BẠN (KHÔNG CẦN THAY ĐỔI GÌ) ---
+// export default function ChangeAvatarPage() {
+//   const { user, setUser } = useAuth();
+//   const [file, setFile] = useState(null);
+//   const [preview, setPreview] = useState(user?.avatar || null);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [error, setError] = useState('');
+//   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+
+//   const fileInputRef = useRef(null);
+//   const navigate = useNavigate();
+
+//   const handleFileChange = (e) => {
+//     const selectedFile = e.target.files[0];
+//     if (selectedFile) {
+//       setFile(selectedFile);
+//       setPreview(URL.createObjectURL(selectedFile));
+//     }
+//   };
+
+//   const handleUpload = async () => {
+//     if (!file) {
+//       setError('Please select a file to upload.');
+//       return;
+//     }
+//     setIsLoading(true);
+//     setError('');
+//     try {
+//       const updatedUser = await uploadAvatar(file);
+//       setUser(updatedUser);
+//       setIsSuccessDialogOpen(true);
+//     } catch (err) {
+//       setError(err.message || 'Failed to upload avatar.');
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   const handleCloseSuccessDialog = () => {
+//     setIsSuccessDialogOpen(false);
+//     navigate('/dashboard');
+//   };
+
+//   return (
+//     <AppLayout>
+//       <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-lg shadow-md">
+//         <h1 className="text-2xl font-bold text-center mb-6">Change Your Avatar</h1>
+//         <div className="flex flex-col items-center gap-6">
+//           <img
+//             src={preview || defaultAvatar} // Bạn nhớ kiểm tra lại đường dẫn ảnh mặc định này nhé
+//             alt="Avatar Preview"
+//             className="w-40 h-40 rounded-full object-cover border-4 border-gray-200"
+//           />
+//           <input
+//             type="file"
+//             accept="image/*"
+//             ref={fileInputRef}
+//             onChange={handleFileChange}
+//             style={{ display: 'none' }}
+//           />
+//           <button
+//             onClick={() => fileInputRef.current.click()}
+//             className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+//           >
+//             Choose Image
+//           </button>
+//           {error && <p className="text-red-500">{error}</p>}
+//           <button
+//             onClick={handleUpload}
+//             disabled={isLoading || !file}
+//             className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+//           >
+//             {isLoading ? 'Uploading...' : 'Save and Upload'}
+//           </button>
+//         </div>
+//       </div>
+//       <SuccessDialog
+//         isOpen={isSuccessDialogOpen}
+//         onClose={handleCloseSuccessDialog}
+//         title="Avatar Updated!"
+//         message="Your new avatar has been saved successfully."
+//       />
+//     </AppLayout>
+//   );
+// }
+
 // File: src/pages/ChangeAvatar/index.jsx
 
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AppLayout from '../../components/AppLayout'; // <-- Giả sử AppLayout vẫn nằm ở đây và đã được git track
+import AppLayout from '../../components/AppLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { uploadAvatar } from '../../services/api';
-
 
 import { FiCheckCircle, FiX } from 'react-icons/fi';
 import defaultAvatar from '../../assets/defaultAvt.png';
@@ -14,11 +148,13 @@ function SuccessDialog({ isOpen, onClose, title, message }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-md p-6 w-[320px] relative flex flex-col items-center text-center">
-        
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      {/* SỬA: Thêm màu nền và màu chữ cho dark mode */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 w-[320px] relative flex flex-col items-center text-center">
+
+        {/* SỬA: Thêm màu cho nút X ở dark mode */}
         <button
-          className="absolute top-2 right-3 text-gray-500 hover:text-black"
+          className="absolute top-2 right-3 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white"
           onClick={onClose}
         >
           <FiX size={20} />
@@ -28,11 +164,13 @@ function SuccessDialog({ isOpen, onClose, title, message }) {
           <FiCheckCircle size={48} />
         </div>
 
-        <h3 className="text-xl font-bold mb-2">{title || 'Success!'}</h3>
-        <p className="text-base text-gray-700 mb-6">
+        {/* SỬA: Thêm màu chữ cho dark mode */}
+        <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">{title || 'Success!'}</h3>
+        {/* SỬA: Thêm màu chữ cho dark mode */}
+        <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
           {message || 'Your action was completed successfully.'}
         </p>
-        
+
         <div className="w-full">
           <button
             className="w-full px-4 py-2 rounded bg-[#0050ff] text-white text-base shadow hover:bg-blue-700"
@@ -41,13 +179,12 @@ function SuccessDialog({ isOpen, onClose, title, message }) {
             OK
           </button>
         </div>
-        
+
       </div>
     </div>
   );
 }
 
-// --- BƯỚC 2: COMPONENT CHÍNH CỦA BẠN (KHÔNG CẦN THAY ĐỔI GÌ) ---
 export default function ChangeAvatarPage() {
   const { user, setUser } = useAuth();
   const [file, setFile] = useState(null);
@@ -92,13 +229,16 @@ export default function ChangeAvatarPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Change Your Avatar</h1>
+      {/* SỬA: Thêm màu nền và viền cho dark mode, bỏ shadow */}
+      <div className="max-w-md mx-auto mt-10 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-none dark:border dark:border-gray-700">
+        {/* SỬA: Thêm màu chữ cho dark mode */}
+        <h1 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">Change Your Avatar</h1>
         <div className="flex flex-col items-center gap-6">
           <img
-            src={preview || defaultAvatar} // Bạn nhớ kiểm tra lại đường dẫn ảnh mặc định này nhé
+            src={preview || defaultAvatar}
             alt="Avatar Preview"
-            className="w-40 h-40 rounded-full object-cover border-4 border-gray-200"
+            // SỬA: Thay đổi màu viền cho dark mode
+            className="w-40 h-40 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600"
           />
           <input
             type="file"
@@ -107,9 +247,10 @@ export default function ChangeAvatarPage() {
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />
+          {/* SỬA: Thêm màu nền hover, màu viền, màu chữ cho dark mode */}
           <button
             onClick={() => fileInputRef.current.click()}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-800 dark:text-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             Choose Image
           </button>
@@ -117,7 +258,7 @@ export default function ChangeAvatarPage() {
           <button
             onClick={handleUpload}
             disabled={isLoading || !file}
-            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600"
           >
             {isLoading ? 'Uploading...' : 'Save and Upload'}
           </button>

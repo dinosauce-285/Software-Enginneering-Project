@@ -3,22 +3,19 @@ import { useParams, Link as RouterLink } from 'react-router-dom';
 import { getSharedMemoryByToken } from '../../services/api';
 import DOMPurify from 'dompurify';
 
-// Import các component UI cần thiết
-import AppLayout from '../../components/AppLayout'; // Tái sử dụng layout chính
 import {
-  CalendarDaysIcon, MapPinIcon, HashtagIcon, HeartIcon
-} from '../../components/Icons'; // Chỉ import những icon cần thiết
+    CalendarDaysIcon, MapPinIcon, HashtagIcon, HeartIcon
+} from '../../components/Icons';
 
 import defaultAvatar from '../../assets/defaultAvt.png';
 
-// Component hiển thị khi đang tải
+
 const LoadingShare = () => (
     <div className="flex items-center justify-center h-screen">
         <p className="text-xl text-gray-500">Loading shared memory...</p>
     </div>
 );
 
-// Component hiển thị khi link không hợp lệ
 const InvalidLink = () => (
     <div className="flex flex-col items-center justify-center h-screen text-center p-8">
         <h1 className="text-4xl font-bold">Link Invalid or Expired</h1>
@@ -55,15 +52,13 @@ export default function SharedMemoryPage() {
         };
         fetchSharedMemory();
     }, [token]);
-    
-    // Xử lý các trạng thái UI
+
+
     if (isLoading) return <LoadingShare />;
     if (error || !sharedData) return <InvalidLink />;
 
-    // Bóc tách dữ liệu để dễ sử dụng
     const { memory, author } = sharedData;
 
-    // Định dạng dữ liệu
     const displayMedia = Array.isArray(memory.media) ? memory.media.find(item => item.type === 'IMAGE' || item.type === 'VIDEO') : null;
     const date = new Date(memory.memoryDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const time = new Date(memory.memoryDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -73,17 +68,14 @@ export default function SharedMemoryPage() {
     const cleanContent = DOMPurify.sanitize(memory.content);
 
     return (
-        // Không dùng AppLayout vì đây là trang công khai, có thể không có sidebar
         <div className="bg-gray-50 min-h-screen">
             <main className="py-6">
                 <div className="max-w-6xl mx-auto bg-[#F9F9F2] p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200">
-                    
-                    {/* Header: Hiển thị thông tin tác giả */}
                     <div className="flex justify-between items-center mb-6 pb-4 border-b">
                         <div className="flex items-center gap-3">
-                            <img 
-                                src={author.avatar || defaultAvatar} 
-                                alt={author.display_name} 
+                            <img
+                                src={author.avatar || defaultAvatar}
+                                alt={author.display_name}
                                 className="w-10 h-10 rounded-full object-cover"
                             />
                             <div>
@@ -92,19 +84,16 @@ export default function SharedMemoryPage() {
                             </div>
                         </div>
                         <RouterLink to="/" className="text-sm text-gray-500 hover:text-black">
-                           Powered by SoulNote
+                            Powered by SoulNote
                         </RouterLink>
                     </div>
 
-                    {/* Meta Info Section (tương tự MemoryDetail) */}
                     <div className="flex flex-col gap-3 text-lg text-gray-800 mb-8">
                         <div className="flex items-center gap-3 flex-wrap"><CalendarDaysIcon className="w-6 h-6 text-gray-600" /><span>{date}</span><span className="text-gray-400">•</span><span>{time}</span></div>
                         <div className="flex items-center gap-3"><MapPinIcon className="w-6 h-6 text-gray-600" /><span>{memory.location || 'Unknown Location'}</span></div>
                         <div className="flex items-center gap-3"><HeartIcon className="w-6 h-6 text-gray-600" /><span>Emotion: <strong>{emotionName}</strong>{emotionSymbol && <span className="text-2xl ml-1">{emotionSymbol}</span>}</span></div>
                         {tagsString && <div className="flex items-center gap-3"><HashtagIcon className="w-6 h-6 text-gray-600" /><span className="text-blue-600">{tagsString}</span></div>}
                     </div>
-
-                    {/* Main Grid: Media & Title (giữ nguyên) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 items-start">
                         {displayMedia && (
                             <div className="w-full aspect-video rounded-xl overflow-hidden relative bg-gray-200">
@@ -116,12 +105,10 @@ export default function SharedMemoryPage() {
                         </div>
                     </div>
 
-                    {/* Content (giữ nguyên) */}
                     <article className="mt-8 pt-6 border-t border-gray-300">
                         <div className="text-base md:text-lg text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: cleanContent }} />
                     </article>
 
-                    {/* Gallery (giữ nguyên) */}
                     {memory.media && memory.media.length > 0 && (
                         <section className="mt-10 pt-6 border-t border-gray-300">
                             <h3 className="text-2xl font-bold text-gray-800 mb-6">Media Gallery</h3>

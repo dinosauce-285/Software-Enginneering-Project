@@ -144,38 +144,20 @@ export default function UserMenu() {
         </div>
       </div>
 
-      {/* View Avatar Modal */}
-      {/* {isViewingAvatar && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded shadow p-4">
-            <img src={user.avatar || "/src/assets/defaultAvt.png"} className="max-w-full max-h-[80vh]" />
-            <button onClick={() => setIsViewingAvatar(false)} className="mt-2 px-4 py-1 bg-gray-200 rounded">Close</button>
-          </div>
-        </div>
-      )} */}
       {isViewingAvatar && (
-        // Lớp phủ màu đen toàn màn hình
         <div
           className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
           onClick={() => setIsViewingAvatar(false)}
         >
-          {/*
-      Container này dùng Flexbox theo chiều dọc (flex-col).
-      'items-end' sẽ căn chỉnh các item con (ảnh và nút) về phía cuối (bên phải).
-      Vì ảnh là phần tử rộng nhất, nó sẽ quyết định chiều rộng của container,
-      và nút sẽ tự động được căn thẳng hàng với cạnh phải của ảnh.
-    */}
+      
           <div
             className="flex flex-col items-end"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Ảnh vẫn giữ nguyên các lớp để giới hạn kích thước và có hiệu ứng */}
             <img
               src={user.avatar || defaultAvatar}
               className="max-w-full max-h-[80vh] rounded-lg shadow-lg"
             />
-
-            {/* Nút "Close" nằm bên dưới ảnh nhờ flex-col */}
             <button
               onClick={() => setIsViewingAvatar(false)}
               className="mt-2 px-4 py-1 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"

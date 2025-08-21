@@ -1,25 +1,16 @@
 /* src/pages/CreateMemory/CreateMemory.css */
-
-/* --- Placeholder cho Chế độ Sáng --- */
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  /* Màu xám trung bình, dễ nhìn trên nền trắng */
+
   color: #9ca3af;
-  /* Tương đương text-gray-400 */
   pointer-events: none;
   height: 0;
 }
 
-/* --- Placeholder cho Chế độ Tối --- */
 html.dark .tiptap p.is-editor-empty:first-child::before {
-  /* Màu xám sáng hơn, dễ nhìn trên nền tối */
   color: #6b7280;
-  /* Tương đương text-gray-500 */
 }
-
-
-/* --- Các style cũ để reset giao diện input, giữ nguyên --- */
 
 .react-datepicker-wrapper input {
   border: none !important;

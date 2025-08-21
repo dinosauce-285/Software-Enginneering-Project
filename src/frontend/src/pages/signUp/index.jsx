@@ -307,9 +307,6 @@ function SignUp() {
                             <MediaButton onClick={() => handleSocialSignIn('google')} disabled={loading}>
                                 <img src={ggLogo} alt="Google" className="h-5 w-5 mr-3" /> Continue with Google
                             </MediaButton>
-                            <MediaButton onClick={() => handleSocialSignIn('facebook')} disabled={loading}>
-                                <img src={fbLogo} alt="Facebook" className="h-5 w-5 mr-3" /> Continue with Facebook
-                            </MediaButton>
                         </div>
                         
                         <div className="flex items-center gap-4">

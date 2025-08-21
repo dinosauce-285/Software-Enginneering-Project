@@ -124,12 +124,7 @@ function LogIn() {
                             >
                                 <img src={ggLogo} alt="Google" className="h-5 w-5 mr-3" /> Continue with Google
                             </MediaButton>
-                            <MediaButton
-                                onClick={() => handleSocialSignIn('facebook')}
-                                disabled={loading}
-                            >
-                                <img src={fbLogo} alt="Facebook" className="h-5 w-5 mr-3" /> Continue with Facebook
-                            </MediaButton>
+
                         </div>
 
                         {/* Separator */}

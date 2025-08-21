@@ -3,7 +3,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FiCalendar } from "react-icons/fi";
 
-// Component nút bấm tùy chỉnh, sử dụng forwardRef để DatePicker có thể tương tác
 const FilterButton = forwardRef(({ value, onClick, placeholder, isActive }, ref) => (
     <button
         onClick={onClick}
@@ -15,7 +14,6 @@ const FilterButton = forwardRef(({ value, onClick, placeholder, isActive }, ref)
         }`}
     >
         <FiCalendar className="w-4 h-4" />
-        {/* Hiển thị giá trị ngày đã chọn hoặc placeholder */}
         <span>{value || placeholder}</span>
     </button>
 ));
@@ -25,7 +23,6 @@ export default function JoinedFilter({ filters, setFilters }) {
     const fromDate = filters.joinedStartDate;
     const toDate = filters.joinedEndDate;
 
-    // Hàm để xóa ngày đã chọn, quay về "Anytime"
     const handleClearDates = () => {
         setFilters(prev => ({ ...prev, joinedStartDate: null, joinedEndDate: null }));
     };
@@ -36,7 +33,6 @@ export default function JoinedFilter({ filters, setFilters }) {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Joined Date
                 </label>
-                {/* Chỉ hiển thị nút "Clear" khi có ít nhất một ngày được chọn */}
                 {(fromDate || toDate) && (
                     <button 
                         onClick={handleClearDates}
@@ -48,7 +44,6 @@ export default function JoinedFilter({ filters, setFilters }) {
             </div>
 
             <div className="flex items-center gap-3">
-                {/* DatePicker cho ngày bắt đầu (FROM) */}
                 <DatePicker
                     selected={fromDate}
                     onChange={(date) => setFilters(p => ({...p, joinedStartDate: date}))}
@@ -67,7 +62,6 @@ export default function JoinedFilter({ filters, setFilters }) {
                     }
                 />
 
-                {/* DatePicker cho ngày kết thúc (TO) */}
                 <DatePicker
                     selected={toDate}
                     onChange={(date) => setFilters(p => ({...p, joinedEndDate: date}))}

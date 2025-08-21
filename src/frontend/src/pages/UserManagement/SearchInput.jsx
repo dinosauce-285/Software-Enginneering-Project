@@ -27,7 +27,6 @@ export default function SearchInput({ filters, setFilters }) {
                     onChange={handleQueryChange}
                     className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 rounded-lg transition shadow-sm"
                 />
-                {/* Nút "X" chỉ hiển thị khi có nội dung tìm kiếm */}
                 {filters.searchQuery && (
                     <button
                         onClick={clearSearch}
